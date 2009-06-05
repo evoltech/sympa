@@ -1,0 +1,12 @@
+--- /tmp/wwsympa/wwsympa.fcgi	2007-12-08 08:26:23.000000000 -0800
++++ wwsympa/wwsympa.fcgi	2007-12-08 09:32:36.349632404 -0800
+@@ -9633,7 +9633,8 @@
+      }
+      # set list status topending if creation list is moderated
+      if ($r_action =~ /listmaster/) {
+-	 $list->{'admin'}{'status'} = 'pending' ;
++     	 # [XXX] As per request of the riseup sysadmins, DO NOT CHANGE to pending
++	 # $list->{'admin'}{'status'} = 'pending' ;
+ 	 &List::send_notify_to_listmaster('request_list_renaming',$robot, 
+ 					  {'listname' => $list->{'name'},
+ 					   'new_listname' => $in{'new_listname'},

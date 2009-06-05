@@ -1,0 +1,22 @@
++CREATE TABLE list_table (
++  name_list varchar(100) NOT NULL default '',
++  path_list varchar(100) NOT NULL default '',
++  robot_list varchar(100) NOT NULL default '',
++  status_list enum('open','closed','pending','error_config','family_closed') NOT NULL default 'closed',
++  creation_email_list varchar(100) NOT NULL default '',
++  creation_epoch_list datetime default NULL,
++  subject_list varchar(100) NOT NULL default '',
++  web_archive_list tinyint(1) NOT NULL default '0',
++  editors text NOT NULL,
++  owners text NOT NULL,
++  topics text NOT NULL,
++  PRIMARY KEY  (name_list,robot_list),
++  KEY owners (name_list),
++  KEY editors (name_list),
++  KEY topics (name_list),
++  KEY status_list (status_list,name_list),
++  KEY subject_list (subject_list,name_list),
++  KEY editors_2 (editors(255),name_list),
++  KEY owners_2 (owners(255),name_list),
++  KEY topics_2 (topics(100),name_list)
++);

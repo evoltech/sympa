@@ -1,0 +1,406 @@
+--- ../bin/List.pm	2007-07-27 02:23:08.000000000 -0700
++++ ../sympa-trunk/src/List.pm	2007-07-06 18:53:36.000000000 -0700
+@@ -1,5 +1,5 @@
+ # list.pm - This module includes all list processing functions
+-# RCS Identication ; $Revision: 4443 $ ; $Date: 2007-06-12 11:34:38 +0200 (mar, 12 jun 2007) $ 
++# RCS Identication ; $Revision: 4481 $ ; $Date: 2007-06-28 08:20:57 -0700 (Thu, 28 Jun 2007) $ 
+ #
+ # Sympa - SYsteme de Multi-Postage Automatique
+ # Copyright (c) 1997, 1998, 1999, 2000, 2001 Comite Reseau des Universites
+@@ -31,7 +31,7 @@
+ require Exporter;
+ require Encode;
+ require 'tools.pl';
+-require "/home/sympa/bin/tt2.pl";
++require "--LIBDIR--/tt2.pl";
+ 
+ my @ISA = qw(Exporter);
+ my @EXPORT = qw(%list_of_lists);
+@@ -243,7 +243,6 @@
+ use Family;
+ use PlainDigest;
+ 
+-
+ ## Database and SQL statement handlers
+ my ($dbh, $sth, $db_connected, @sth_stack, $use_db);
+ 
+@@ -271,7 +270,7 @@
+ 		      default_user_options msg_topic msg_topic_keywords_apply_on msg_topic_tagging reply_to_header reply_to forced_reply_to * 
+ 		      verp_rate welcome_return_path remind_return_path user_data_source include_file include_remote_file 
+ 		      include_list include_remote_sympa_list include_ldap_query
+-                      include_ldap_2level_query include_sql_query include_admin ttl creation update 
++                      include_ldap_2level_query include_sql_query include_admin ttl distribution_ttl creation update 
+ 		      status serial);
+ 
+ ## List parameters aliases
+@@ -510,6 +509,14 @@
+ 				  'gettext_id' => "Digest maximum number of messages",
+ 				  'group' => 'sending'
+ 		       },	    
++
++	    'distribution_ttl' => {'format' => '\d+',
++		      'length' => 6,
++		      'unit' => 'seconds',
++		      'gettext_id' => "Inclusions timeout for message distribution",
++		      'group' => 'data_source'
++		      },
++
+ 	    'editor' => {'format' => {'email' => {'format' => &tools::get_regexp('email'),
+ 						  'length' => 30,
+ 						  'occurrence' => '1',
+@@ -1266,7 +1273,6 @@
+ my %list_of_topics = ();
+ my %edit_list_conf = ();
+ 
+-
+ ## Last modification times
+ my %mtime;
+ 
+@@ -1693,13 +1699,6 @@
+ 	$lock->unlock();
+ 	return undef;
+     }
+-
+-    if ($List::use_db){
+-        unless (&_update_list_db){
+-	    &do_log('err', "Unable to update list_table");
+-	}
+-    }
+-
+     
+     ## Also update the binary version of the data structure
+     if (&Conf::get_robot_conf($self->{'robot'}, 'cache_list_config') eq 'binary_file') {
+@@ -1953,11 +1952,6 @@
+ #    }
+ 
+     $self->{'mtime'} = [ $m1, $m2, $m3];
+-    #if ($List::use_db){
+-    #    unless (&_update_list_db){
+-#	    &do_log('err', "Unable to update list_table");
+-#	}
+-#    }
+ 
+     $list_of_lists{$self->{'domain'}}{$name} = $self;
+     return $config_reloaded;
+@@ -2505,11 +2499,9 @@
+     }
+ 
+     ## Synchronize list members, required if list uses include sources
+-    ## unless sync_include has been performed withi last 5 minutes
+-    if ($self->has_include_data_sources() &&
+-	($self->{'last_sync'} < time - 60*5)) { 
+-	&do_log('notice', "Synchronizing list members...");
+-	$self->sync_include();
++    ## unless sync_include has been performed recently.
++    if ($self->has_include_data_sources()) {
++	$self->on_the_fly_sync_include('use_ttl' => 1);
+     }
+ 
+     ## Blindly send the message to all users.
+@@ -4110,7 +4102,7 @@
+     my $robot = $self->{'domain'};
+ 
+     unless (@to) {
+-	do_log('warn', 'No owner defined or all of them use nomail option in list %s ; using listmasters as default', $self->{'name'} );
++	do_log('warning', 'No owner defined or all of them use nomail option in list %s ; using listmasters as default', $self->{'name'} );
+ 	@to = split /,/, &Conf::get_robot_conf($robot, 'listmaster');
+     }
+     unless (defined $operation) {
+@@ -7161,7 +7153,6 @@
+     undef %list_cache;
+ }
+ 
+-
+ ## check if email respect some condition
+ sub verify {
+     my ($context, $condition) = @_;
+@@ -8090,7 +8081,7 @@
+ 	    unless (open SCENARI, $scenario_file) {
+ 		
+ 		## Distrib scenario
+-		$scenario_file = "/home/sympa/bin/etc/scenari/$function.$name";
++		$scenario_file = "--ETCBINDIR--/scenari/$function.$name";
+ 		unless (open SCENARI,$scenario_file) {
+ 		    do_log('err',"Unable to open scenario file $function.$name, please report to listmaster") unless ($name =~ /\.header$/) ;
+ 		    return &_load_scenario ($function,$robot,$name,'true() smtp -> reject', $directory) unless ($function eq 'include');
+@@ -8214,7 +8205,7 @@
+     my %list_of_scenario;
+     my %skip_scenario;
+ 
+-    foreach my $dir ("$directory/scenari", "$Conf{'etc'}/$robot/scenari", "$Conf{'etc'}/scenari", "/home/sympa/bin/etc/scenari") {
++    foreach my $dir ("$directory/scenari", "$Conf{'etc'}/$robot/scenari", "$Conf{'etc'}/scenari", "--ETCBINDIR--/scenari") {
+ 
+ 	next unless (-d $dir);
+ 	
+@@ -8261,7 +8252,7 @@
+     my $directory = "$self->{'dir'}";
+     my %list_of_task;
+     
+-    foreach my $dir ("$directory/list_task_models", "$Conf{'etc'}/$robot/list_task_models", "$Conf{'etc'}/list_task_models", "/home/sympa/bin/etc/list_task_models") {
++    foreach my $dir ("$directory/list_task_models", "$Conf{'etc'}/$robot/list_task_models", "$Conf{'etc'}/list_task_models", "--ETCBINDIR--/list_task_models") {
+ 
+ 	next unless (-d $dir);
+ 
+@@ -8323,7 +8314,7 @@
+     my $directory = "$self->{'dir'}";
+     my %list_of_data_sources;
+ 
+-    foreach my $dir ("$directory/data_sources", "$Conf{'etc'}/$robot/data_sources", "$Conf{'etc'}/data_sources", "/home/sympa/bin/etc/data_sources") {
++    foreach my $dir ("$directory/data_sources", "$Conf{'etc'}/$robot/data_sources", "$Conf{'etc'}/data_sources", "--ETCBINDIR--/data_sources") {
+ 
+ 	next unless (-d $dir);
+ 	
+@@ -9783,7 +9774,29 @@
+     return 1;
+ }
+ 
++## The previous function (sync_include) is to be called by the task_manager.
++## This one is to be called from anywhere else. This function deletes the scheduled
++## sync_include task. If this deletion happened in sync_include(), it would disturb
++## the normal task_manager.pl functionning.
++
++sub on_the_fly_sync_include {
++    my $self = shift;
++    my %options = @_;
+ 
++    my $pertinent_ttl = $self->{'admin'}{'distribution_ttl'}||$self->{'admin'}{'ttl'};
++    &do_log('debug2','List::on_the_fly_sync_include(%s)',$pertinent_ttl);
++    if ( $options{'use_ttl'} != 1 || $self->{'last_sync'} < time - $pertinent_ttl) { 
++	&do_log('notice', "Synchronizing list members...");
++	if ($self->sync_include()) {
++	    $self->remove_task('sync_include');
++	    return 1;
++	}
++	else {
++	    return undef;
++	}
++    }
++    return 1;
++}
+ 
+ sub sync_include_admin {
+     my ($self) = shift;
+@@ -10248,9 +10261,7 @@
+ sub get_lists {
+     my $robot_context = shift || '*';
+     my $options = shift;
+-    my $userlists = shift;
+ 
+-    do_log('info', 'List::get_lists(%s)',$robot_context);
+     my(@lists, $l,@robots);
+     do_log('debug2', 'List::get_lists(%s)',$robot_context);
+ 
+@@ -10274,18 +10285,7 @@
+ 	    do_log('err',"Unable to open $robot_dir");
+ 	    return undef;
+ 	}
+-    my (@files, $len);
+-    if ( defined($userlists)){
+-        @files = sort @$userlists;
+-        $len = @files+0;
+-        &do_log('debug2', "we are using $len directories");
+-    }
+-    else {
+-        @files = sort readdir(DIR);
+-        $len = @files+0;
+-        &do_log('debug2', "we are using $len directories");
+-    }
+-	foreach my $l (@files) {
++	foreach my $l (sort readdir(DIR)) {
+ 	    next if (($l =~ /^\./o) || (! -d "$robot_dir/$l") || (! -f "$robot_dir/$l/config"));
+ 
+ 	    my $list = new List ($l, $robot, $options);
+@@ -10297,7 +10297,6 @@
+ 	}
+ 	closedir DIR;
+     }
+-
+     return \@lists;
+ }
+ 
+@@ -10492,23 +10491,12 @@
+ 
+     ## WHICH in Database
+     my $db_which = {};
+-    my $all_lists;
++
+     if (defined $Conf{'db_type'} && $List::use_db) {
+-	    $db_which = &get_which_db($email,  $function);
+-        my @lists;
+-        foreach my $r (keys %{$db_which}){
+-            foreach my $l (keys %{$db_which->{$r}}){
+-                &do_log('debug2', "\$l is $l");  
+-                push @lists, $l;
+-            }
+-        }
+-        $all_lists = &get_lists($robot, undef, \@lists);
+-    }
+-    
+-    unless (defined($all_lists)){
+-        $all_lists = &get_lists($robot); 
++	$db_which = &get_which_db($email,  $function);
+     }
+ 
++    my $all_lists = &get_lists($robot);
+     foreach my $list (@$all_lists){
+  
+ 	my $l = $list->{'name'};
+@@ -10723,6 +10711,9 @@
+ 	}
+     }
+ 
++    ## Used by List subroutines to check that the DB is available
++    $List::use_db = 1;
++
+     return 1;
+ }
+ 
+@@ -12297,7 +12288,7 @@
+     closedir DIR;
+ 
+     foreach my $task_file (@tasks) {
+-	if ($task_file =~ /^(\d+)\.\w*\.$task\.$self->{'name'}$/) {
++	if ($task_file =~ /^(\d+)\.\w*\.$task\.$self->{'name'}\@$self->{'domain'}$/) {
+ 	    unless (unlink("$Conf{'queuetask'}/$task_file")) {
+ 		&do_log('err', 'Unable to remove task file %s : %s', $task_file, $!);
+ 		return undef;
+@@ -12394,7 +12385,7 @@
+ 	unless ($self && ($list_of_lists{$self->{'domain'}}{$self->{'name'}})
+ 		&& ($Conf{'sendmail_aliases'} !~ /^none$/i));
+     
+-    my $alias_manager = '/home/sympa/bin/alias_manager/alias_manager.pl';
++    my $alias_manager = '--SBINDIR--/alias_manager.pl';
+     
+     unless (-x $alias_manager) {
+ 	&do_log('err','Cannot run alias_manager %s', $alias_manager);
+@@ -12535,130 +12526,6 @@
+     return $self->{'name'}.'@'.$self->{'domain'};
+ }
+ 
+-
+-
+-sub get_list_names {
+-    my $robot_context = shift || '*';
+-    my $options = shift;
+-    my $userlists = shift;
+-    my(@lists, $l,@robots);
+-    do_log('debug2', 'List::get_lists(%s)',$robot_context);
+-    if ($robot_context eq '*') {
+-	@robots = &get_robots ;
+-    }else{
+-	push @robots, $robot_context ;
+-    }
+-    foreach my $robot (@robots) {
+-	my $robot_dir =  $Conf{'home'}.'/'.$robot ;
+-	$robot_dir = $Conf{'home'}  unless ((-d $robot_dir) || ($robot ne $Conf{'host'}));
+-	unless (-d $robot_dir) {
+-	    do_log('err',"unknown robot $robot, Unable to open $robot_dir");
+-	    return undef ; }
+-	unless (opendir(DIR, $robot_dir)) {
+-	    do_log('err',"Unable to open $robot_dir");
+-	    return undef;
+-	}
+-    my (@files, $len);
+-    if ( defined($userlists)){
+-        @files = sort @$userlists;
+-        $len = @files+0;
+-        &do_log('debug2', "we are using $len directories");
+-    }
+-    else {
+-        @files = sort readdir(DIR);
+-        $len = @files+0;
+-        &do_log('debug2', "we are using $len directories");
+-    }
+-	foreach my $l (@files) {
+-	    next if (($l =~ /^\./o) || (! -d "$robot_dir/$l") || (! -f "$robot_dir/$l/config"));
+-        push @lists, $l;
+-    }
+-    }
+-    return @lists;
+-}
+-
+-
+-sub get_lists_db {
+-    my $statement = shift;
+-    return undef unless defined($statement);
+-    do_log('info', 'List::get_search_list_db(%s)', $statement);
+-
+-    unless ($List::use_db) {
+-	&do_log('info', 'Sympa not setup to use DBI');
+-	return undef;
+-    }
+-    
+-    my ($l, @lists);
+-
+-    ## Check database connection
+-    unless ($dbh and $dbh->ping) {
+-	return undef unless &db_connect();
+-    }	   
+-    push @sth_stack, $sth; 
+-    &do_log('debug2','SQL: %s', $statement);
+-    unless ($sth = $dbh->prepare($statement)) { 
+-    	do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
+-	return undef;
+-    } 
+-    unless ($sth->execute) {
+-        do_log('err','Unable to execute SQL statement "%s" : %s', $statement, $dbh->errstr); 
+-	return undef;
+-    } 
+-    while ($l = $sth->fetchrow_hashref) {
+-	my $name = $l->{'name_list'};
+-    	push @lists, $name;
+-    }	
+-    $sth->finish();
+-    $sth = pop @sth_stack;
+-
+-    return \@lists;
+-}
+-
+-sub _update_list_db
+-{
+-    my ($self) = shift;
+-    my $statement = sprintf "SELECT COUNT(*) FROM list_table WHERE name_list = %s AND robot_list = %s" , $dbh->quote($self->{'name'}), $dbh->quote($self->{'admin'}{'host'});  
+-    unless ($sth = $dbh->prepare($statement)) {
+-	do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
+-	return undef;
+-    }
+-   my $ret;
+-    unless ($sth->execute) {
+-	    do_log('err',"Unable to execute SQL statement '%s' : %s", $statement, $dbh->errstr);
+-            return undef;
+-	}
+-    
+-    my $op = "UPDATE";
+-    my $set = "";
+-    my $ret = $sth->fetchrow_arrayref;
+-    $sth->finish;
+-    my $count = $ret->[0];
+-    unless ($count > 0)
+-    {
+-    	$op = "INSERT INTO";
+-	$set = "";
+-    }
+-
+-    my $name = $self->{'name'};
+-    my $subject = $self->{'admin'}{'subject'} || '';
+-    my $status = $self->{'admin'}{'status'};
+-    my $robot = $self->{'admin'}{'host'};
+-    my $web_archive  = &is_web_archived($self) || 0; 
+-
+-    my $statement = sprintf "%s `list_table` %s SET status_list= %s, name_list=%s, robot_list=%s, subject_list=%s, web_archive_list=%s ",$op, $set, $dbh->quote($status), $dbh->quote($name), $dbh->quote($robot), $dbh->quote($subject), $dbh->quote($web_archive);    
+-    if ($op eq "UPDATE"){
+-    	$statement .= sprintf " WHERE robot_list = %s AND name_list = %s ", $dbh->quote($robot), $dbh->quote($name); 
+-    }
+-
+-    unless ($sth = $dbh->prepare($statement)) {
+-	do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
+-	return undef;
+-    }
+-    unless ($sth->execute) {
+-	    do_log('err','Unable to execute SQL statement "%s" : %s', $statement, $dbh->errstr);
+-	}
+-   return 1;
+-}
+ #################################################################
+ 
+ ## Packages must return true.

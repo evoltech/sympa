@@ -1,0 +1,22 @@
+--- ../sympa-trunk/src/etc/script/create_db.Sybase	2007-03-19 17:27:56.000000000 -0700
++++ ../etc/script/create_db.Sybase	2007-07-27 02:44:24.000000000 -0700
+@@ -122,3 +122,19 @@
+ 
+ create index id_logs_fk on logs_table (id_logs)
+ go
++
++CREATE TABLE list_table (
++	name_list varchar(100) NOT NULL,
++	path_list varchar(100) NOT NULL,
++	robot_list varchar(100) NOT NULL,
++	status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++	creation_email_list varchar(100) NOT NULL, 
++	creation_epoch_list datetime ,
++	subject_list varchar(100) NOT NULL,
++	web_archive_list tinyint(1) NOT NULL,
++ 	CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++) 
++go
++
++CREATE INDEX id_list_fk ON list_table(name_list, robot_list)
++go

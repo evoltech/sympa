@@ -1,0 +1,26 @@
+wwsympa.fcgi
+unless ($param->{'user'}{'email'}) {
+     &report::reject_report_web('user','no_user',{},$param->{'action'});
+     &wwslog('info','do_add: no user');
+     &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
+              'status' => 'error',
+              'error_type' => 'no_user'});
+     return 'loginrequest';
+     }
+
++     ## [XXX] If a list is not 'open' returns undef - there may be a better
++     #  thing to return
++     unless ($list->{'admin'}{'status'} eq 'open') {
++     &report::reject_report_web('user','list_not_open',{'status' =>  $list->{'admin'}{'status'}},$param->{'action'});
++     &wwslog('info','do_add: list not open');
++     &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
++              'status' => 'error',
++              'error_type' => 'list_not_open'});
++         return undef;
++     }
++
+
+web_tt2/error.tt2
++  [% ELSIF u_err.msg == 'list_not_open' %][%|loc(u_err.status)%]List status is '%1'[%END%]
+  [% ELSIF u_err.msg %][%u_err.msg%]
+  [% END %]

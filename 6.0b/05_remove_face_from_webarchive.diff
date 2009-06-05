@@ -1,0 +1,12 @@
+Index: src/etc/mhonarc-ressources.tt2
+===================================================================
+--- src/etc/mhonarc-ressources.tt2	(revision 51)
++++ src/etc/mhonarc-ressources.tt2	(working copy)
+@@ -528,6 +528,7 @@
+ User-agent
+ Mail-followup-to
+ Dkim-signature
++Face
+ </EXCS>
+ 
+ <!-- Field order in message header -->

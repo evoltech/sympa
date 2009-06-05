@@ -1,0 +1,59 @@
+--- sympa.pl	2007-12-09 21:32:12.000000000 +0000
++++ /tmp/sympa.pl	2008-03-28 17:36:24.909490722 +0000
+@@ -86,6 +86,7 @@
+    --lowercase                           : lowercase email addresses in database
+    --sync_db_list[=listname]             : syncs filesystem list configs to the database cache of list configs,
+                                            optionally sync an individual list if specified.
++   --sync_admin_table                    : syncs the admin_table with data from the config files. 
+    --create_list --robot=robot_name --input_file=/path/to/file.xml 
+                                          : create a list with the xml file under robot_name
+    --instantiate_family=family_name  --robot=robot_name --input_file=/path/to/file.xml [--close_unknown] [--quiet]
+@@ -122,7 +123,7 @@
+ ## Check --dump option
+ my %options;
+ unless (&GetOptions(\%main::options, 'dump=s', 'debug|d', ,'log_level=s','foreground', 'service=s','config|f=s', 
+-		    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase', 'sync_db_list',
++		    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase', 'sync_db_list','sync_admin_table',
+ 		    'close_list=s','purge_list=s','create_list','instantiate_family=s','robot=s','add_list=s','modify_list=s','close_family=s','md5_digest=s',
+ 		    'input_file=s','sync_include=s','upgrade','from=s','to=s','reload_list_config','list=s','quiet','close_unknown')) {
+     &fatal_err("Unknown options.");
+@@ -149,7 +150,8 @@
+ 				$main::options{'sync_include'} ||
+ 				$main::options{'upgrade'} ||
+ 				$main::options{'reload_list_config'}||
+-				$main::options{'sync_db_list'}
++				$main::options{'sync_db_list'}||
++				$main::options{'sync_admin_table'}
+ 				 );
+ 
+ # Some option force foreground mode
+@@ -800,15 +802,28 @@
+     exit 0;
+ }
+ 
+-elsif ($main::options{'sync_db_list'}) {	
++elsif ($main::options{'sync_db_list'}) {
+     my $all_lists;
++#	print STDOUT "loading all lists\n";
+     $all_lists = &List::get_lists('*');
++#	print STDOUT "updating database cache of list configs\n";
+     foreach my $list (@$all_lists) {
+ 	$list->_update_list_db;
+     }
+     exit 0;
+ }
+ 
++elsif ($main::options{'sync_admin_table'}) {
++    my $all_lists;
++    $all_lists = &List::get_lists('*');
++    &List::delete_admin_all();
++    foreach my $list (@$all_lists) {
++	$list->sync_include_admin();
++    }
++    printf "admin_table synced.\n";
++    exit 0;
++}
++
+ 
+ ## Do we have right access in the directory
+ if ($main::options{'keepcopy'}) {
