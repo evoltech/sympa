@@ -1,3 +1,9 @@
+--- patches/create_db.mysql.old	2006-08-02 06:56:22.000000000 -0700
++++ src/etc/script/create_db.mysql	2009-08-14 10:27:33.000000000 -0700
+@@ -78,3 +78,25 @@
+ 	PRIMARY KEY (id_logs)					  
+ );
+ 
 +CREATE TABLE list_table (
 +  name_list varchar(100) NOT NULL default '',
 +  path_list varchar(100) NOT NULL default '',

@@ -1,0 +1,11 @@
+--- /home/kclair/sympa-5.3.4/wwsympa/wwsympa.fcgi	2009-08-14 10:33:29.000000000 -0700
++++ wwsympa/wwsympa.fcgi	2009-08-17 10:38:32.000000000 -0700
+@@ -10148,7 +10148,7 @@
+      my %desc_hash;
+      my $user = $param->{'user'}{'email'} || 'nobody';
+       
+-     while ($current_path ne "") {
++     while ($current_path ne "" && $current_path ne '/') {
+ 	 # no description file found yet
+ 	 my $def_desc_file = 0;
+ 	 my $desc_file;

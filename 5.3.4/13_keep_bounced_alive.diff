@@ -1,0 +1,30 @@
+--- wwsympa/bounced.pl	2007-06-26 06:35:43.000000000 -0700
++++ wwsympa/bounced.pl	2009-08-17 06:52:46.000000000 -0700
+@@ -372,8 +372,9 @@
+ 		$forward = 'listmaster';
+ 		do_log ('err','ignoring Feedback Report %s : unknown format (feedback_type:%s, original_rcpt:%s, listname:%s)',$file, $feedback_type, $original_rcpt, $listname );		
+ 	    }
+-	    $listname ||= 'sympa';
+-	    &DoForward($listname, $forward, $robot, $entity) if (defined $forward);
++	    #$listname ||= 'sympa';
++	    #&DoForward($listname, $forward, $robot, $entity) if (defined $forward);
++            &List::send_notify_to_listmaster('intern_error',$Conf{'domain'},{'error' => "Ignoring Feedback Report %s : unknown format (feedback_type:$feedback_type, original_rcpt:$original_rcpt, listname:$listname)"});
+ 
+ 	    unlink("$queue/$file");
+ 	    next;		
+
+--- mail_tt2/listmaster_notification.tt2	2007-02-23 07:43:22.000000000 -0800
++++ mail_tt2/listmaster_notification.tt2	2009-08-17 06:57:44.000000000 -0700
+@@ -217,6 +217,12 @@
+ 
+ [%|loc%]Managing bouncing subscribers:[%END%] [% conf.wwsympa_url %]/reviewbouncing/[% list.name %]
+ 
++[% ELSIF type == 'intern_error' -%]
++Subject: [% FILTER qencode %][%|loc(list.name)%]Listmaster : internal server error [%END%][%END%]
++[%IF error%][%error%]
++[%END%]
++[%|loc%]See logs for more details.[%END%]
++
+ [%# INTERNAL SERVER ERROR  : MAIL -%]
+ [% ELSIF type == 'mail_intern_error' -%]
+ Subject: [% FILTER qencode %][%|loc(list.name)%]Listmaster : internal server error [%END%][%END%]

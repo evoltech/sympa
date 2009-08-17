@@ -300,7 +300,7 @@ Index: wwsympa/wwsympa.fcgi
  	 my $is_admin;
  	 ## Search filter
 --- bin/admin.pm_unmodified	2008-02-02 13:54:01.000000000 -0800
-+++ bin/admin.pm	2008-02-02 13:54:15.000000000 -0800
++++ src/admin.pm	2008-02-02 13:54:15.000000000 -0800
 @@ -324,6 +324,9 @@
  	$list->create_shared();
      }

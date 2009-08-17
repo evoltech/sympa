@@ -1,5 +1,5 @@
 --- sympa.pl	2007-12-09 21:32:12.000000000 +0000
-+++ /tmp/sympa.pl	2008-03-28 17:36:24.909490722 +0000
++++ src/sympa.pl	2008-03-28 17:36:24.909490722 +0000
 @@ -86,6 +86,7 @@
     --lowercase                           : lowercase email addresses in database
     --sync_db_list[=listname]             : syncs filesystem list configs to the database cache of list configs,

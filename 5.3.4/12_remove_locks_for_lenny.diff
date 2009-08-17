@@ -1,0 +1,14 @@
+--- Lock.pm.old	2009-08-16 12:08:45.000000000 -0700
++++ src/Lock.pm	2009-08-16 12:09:01.000000000 -0700
+@@ -35,11 +35,6 @@
+ use Fcntl qw(LOCK_SH LOCK_EX LOCK_NB);
+ use FileHandle;
+ 
+-sub LOCK_SH {1};
+-sub LOCK_EX {2};
+-sub LOCK_NB {4};
+-sub LOCK_UN {8};
+-
+ my %list_of_locks;
+ my $default_timeout = 60 * 20; ## After this period a lock can be stolen
+ 
