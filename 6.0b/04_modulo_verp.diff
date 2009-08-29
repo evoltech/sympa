@@ -1,7 +1,7 @@
 Index: src/List.pm
 ===================================================================
 --- src/List.pm	(revision 52)
-+++ src/List.pm	(working copy)
++++ src/lib/List.pm	(working copy)
 @@ -1719,7 +1719,7 @@
      }
      
