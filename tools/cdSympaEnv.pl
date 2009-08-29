@@ -211,6 +211,7 @@ sub add_a_random_list {
   $description =~ s/'//g;
   my $topics = lori_ipsum(5);
   $topics =~ s/'//g;
+  $topics =~ s/\s+/,/g;
 
   $parameters->{'listname'} = rand_list_name();
   $parameters->{'subject'} = $subject;
