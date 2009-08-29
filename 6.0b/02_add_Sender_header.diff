@@ -1,7 +1,7 @@
 Index: src/List.pm
 ===================================================================
 --- src/List.pm	(revision 51)
-+++ src/List.pm	(working copy)
++++ src/lib/List.pm	(working copy)
 @@ -2621,6 +2621,9 @@
  	$hdr->add($1, $2) if ($i=~/^([\S\-\:]*)\s(.*)$/);
      }
