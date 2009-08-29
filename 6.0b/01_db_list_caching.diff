@@ -1,7 +1,7 @@
 Index: src/confdef.pm
 ===================================================================
 --- src/confdef.pm	(revision 5739)
-+++ src/confdef.pm	(working copy)
++++ src/lib/confdef.pm	(working copy)
 @@ -463,6 +463,11 @@
          default => 'mailer-daemon|sympa|listserv|majordomo|smartlist|mailman',
  	vhost   => '1',
@@ -17,7 +17,7 @@ Index: src/confdef.pm
 Index: src/List.pm
 ===================================================================
 --- src/List.pm	(revision 5739)
-+++ src/List.pm	(working copy)
++++ src/lib/List.pm	(working copy)
 @@ -1813,6 +1813,14 @@
  
  #    $self->{'mtime'}[0] = (stat("$list->{'dir'}/config"))[9];
@@ -159,7 +159,7 @@ Index: src/List.pm
 Index: src/Upgrade.pm
 ===================================================================
 --- src/Upgrade.pm	(revision 5739)
-+++ src/Upgrade.pm	(working copy)
++++ src/lib/Upgrade.pm	(working copy)
 @@ -753,7 +753,18 @@
  						       'lock_bulkspool' => 'int(1)'},
  				 'conf_table' => {'robot_conf' => 'varchar(80)',
@@ -231,7 +231,7 @@ Index: src/Upgrade.pm
 Index: src/sympa.pl
 ===================================================================
 --- src/sympa.pl	(revision 5739)
-+++ src/sympa.pl	(working copy)
++++ src/lib/sympa.pl	(working copy)
 @@ -85,6 +85,8 @@
     --dump=list\@dom|ALL                  : dumps subscribers 
     --make_alias_file                     : create file in /tmp with all aliases (usefull when aliases.tpl is changed)
@@ -299,7 +299,7 @@ Index: src/sympa.pl
 Index: src/Conf.pm
 ===================================================================
 --- src/Conf.pm	(revision 5739)
-+++ src/Conf.pm	(working copy)
++++ src/lib/Conf.pm	(working copy)
 @@ -192,6 +192,9 @@
      unless (defined $o{'tmpdir'}) {
  	$o{'tmpdir'}[0] = "$spool/tmp";
