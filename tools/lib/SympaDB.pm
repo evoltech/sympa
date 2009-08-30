@@ -62,6 +62,51 @@ sub init {
      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
    $self->{insertSubscriberSTH}= 
     $self->{_dbh}->prepare ($self->{insertSubscriber});
+
+   $self->{selectUserEmailByList} = 
+     'SELECT user_subscriber from subscriber_table '.
+        'where list_subscriber=? and robot_subscriber=?';
+   $self->{selectUserEmailByListSTH}= 
+    $self->{_dbh}->prepare ($self->{selectUserEmailByList});
+
+   $self->{selectUserEmailByDomain} = 
+     'SELECT user_subscriber from subscriber_table '.
+        'where user_subscriber like ?';
+   $self->{selectUserEmailByDomainSTH}= 
+    $self->{_dbh}->prepare ($self->{selectUserEmailByDomain});
+
+   $self->{updateUserEmailInSubscriberTable} = 
+     'UPDATE subscriber_table set user_subscriber = ? '.
+        'where user_subscriber = ?';
+   $self->{updateUserEmailInSubscriberTableSTH}= 
+    $self->{_dbh}->prepare ($self->{updateUserEmailInSubscriberTable});
+
+}
+
+sub getUserEmailsByList {
+  my ($self, $list_name, $domain_name) = @_;
+  init($self);
+
+  eval {
+    $self->{selectUserEmailByListSTH}->execute($list_name, $domain_name); 
+  };
+  if ($@) {
+     warn 'Could not get a user email list for the list '.
+        $list_name .'@'. $domain_name ."$!\n";
+     return -1;
+  }
+ 
+  my $emails;
+  while (my $subscriber = 
+    $self->{selectUserEmailByListSTH}->fetchrow_hashref('NAME_lc')) {
+    push (@$emails, $subscriber->{user_subscriber});
+  }
+
+  return $emails;
+
+  # This should really be an iterator tied to a variable.
+  my $user = $self->{selectUserEmailByListSTH}->fetchrow_hashref('NAME_lc') ;
+
 }
 
 sub subscribe_user {
@@ -100,5 +145,23 @@ sub get_random_user {
   return $self->{selectUserByIdSTH}->fetchrow_hashref('NAME_lc') ;
 }
 
+sub rewriteUserEmailDomains {
+  my ($self, $target, $destination) = @_;
+  init($self);
+
+  eval {$self->{selectUserEmailByDomainSTH}->execute('%'. $target); };
+  if ($@) {
+     warn "Could not get users with domain: $target.$@\n";
+     return -1;
+  }
+  while (my $subscriber = 
+    $self->{selectUserEmailByDomainSTH}->fetchrow_hashref('NAME_lc')) {
+    my $old_email = $subscriber->{user_subscriber};
+    my $new_email = $old_email;
+    $new_email =~ s/$target/$destination/;
+    $self->{updateUserEmailInSubscriberTableSTH}->execute(
+      $new_email, $old_email);
+  }
+}
 
 1;
