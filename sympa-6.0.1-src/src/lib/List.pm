@@ -2623,6 +2623,9 @@ sub distribute_msg {
     foreach my $i (@{$self->{'admin'}{'custom_header'}}) {
 	$hdr->add($1, $2) if ($i=~/^([\S\-\:]*)\s(.*)$/);
     }
+
+    ## Add Sender: Header for DKIM compliance
+    $hdr->add('Sender', $name.&Conf::get_robot_conf($robot, 'return_path_suffix').'@'.$host);
     
     ## Add RFC 2919 header field
     if ($hdr->get('List-Id')) {
