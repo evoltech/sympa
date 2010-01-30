@@ -760,6 +760,18 @@ sub probe_db {
 						  'label_conf' => 'varchar(80)',
 						  'value_conf' => 'varchar(300)'}
 			     },
+                 'lists_table' => {'name_list'=>'varchar(100)',
+                                   'path_list'=>'varchar(100)',
+                                   'robot_list'=>'varchar(100)',
+                                   'status_list'=>"enum('open','closed','pending','error_config','family_closed')",
+                                   'creation_email_list'=>'varchar(100)',
+                                   'creation_epoch_list'=>'datetime',
+                                   'subject_list'=>'varchar(100)',
+                                   'web_archive_list'=>'tinyint(1)',
+                                   'topics_list'=>'varchar(100)',
+                                   'editors_list'=>'varchar(100)',
+                                   'owners_list'=>'varchar(100)'}
+                             },
 		     'SQLite' => {'user_table' => {'email_user' => 'text',
 						   'gecos_user' => 'text',
 						   'password_user' => 'text',
@@ -851,6 +863,19 @@ sub probe_db {
 						   'label_conf' => 'text',
 						   'value_conf' => 'text'}
 			      },
+                  'lists_table' => {'name_list'=>'varchar(100)',
+                           'path_list'=>'varchar(100)',
+                           'robot_list'=>'varchar(100)',
+                           'status_list'=>"enum('open','closed','pending','error_config','family_closed')",
+                           'creation_email_list'=>'varchar(100)',
+                           'creation_epoch_list'=>'datetime',
+                           'subject_list'=>'varchar(100)',
+                           'web_archive_list'=>'tinyint(1)',
+                           'topics_list'=>'varchar(100)',
+                           'editors_list'=>'varchar(100)',
+                           'owners_list'=>'varchar(100)'}
+                              },
+
 		     );
     
     my %not_null = ('email_user' => 1,
@@ -877,6 +902,16 @@ sub probe_db {
 		    'messagekey_bulkmailer' => 1,
 		    'packetid_bulkmailer' => 1,
 		    'messagekey_bulkspool' => 1,
+            'name_list'=>1,
+            'path_list'=>1,
+            'robot_list'=>1,
+            'status_list'=>1,
+            'creation_email_list'=>1,
+            'subject_list'=>1,
+            'web_archive_list'=>1,
+            'topics_list'=>1,
+            'owners_list'=>1,
+            'editors_list'=>1
 		    );
     
     my %primary = ('user_table' => ['email_user'],
@@ -888,7 +923,8 @@ sub probe_db {
 		   'one_time_ticket_table' => ['ticket_one_time_ticket'],
 		   'bulkmailer_table' => ['messagekey_bulkmailer','packetid_bulkmailer'],
 		   'bulkspool_table' => ['messagekey_bulkspool'],
-		   'conf_table' => ['robot_conf','label_conf']
+		   'conf_table' => ['robot_conf','label_conf'],
+           	   'list_table'=> ['name_list','robot_list']
 		   );
 
     ## List the required INDEXES
