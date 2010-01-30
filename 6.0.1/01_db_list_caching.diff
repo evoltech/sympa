@@ -1,0 +1,213 @@
+--- confdef.pm.orig	2009-12-18 12:44:40.000000000 -0800
++++ src/lib/confdef.pm	2009-12-18 12:45:08.000000000 -0800
+@@ -512,6 +512,11 @@
+         default => 'mailer-daemon|sympa|listserv|majordomo|smartlist|mailman',
+ 	vhost   => '1',
+     },
++    {
++        name    => 'db_list_cache',
++        default => '0',
++        advice  => 'Whether or not to cache lists in the database',
++    },
+     { title => 'Internationalization' },
+     {
+         name    => 'lang',
+--- sympa.pl.orig	2009-12-18 13:15:43.000000000 -0800
++++ src/sympa.pl.in	2009-12-18 13:21:12.000000000 -0800
+@@ -84,6 +84,8 @@
+    --dump=list\@dom|ALL                  : dumps subscribers 
+    --make_alias_file                     : create file in /tmp with all aliases (usefull when aliases.tpl is changed)
+    --lowercase                           : lowercase email addresses in database
++   --sync_list_db[=listname]             : syncs filesystem list configs to the database cache of list configs,
++                                           optionally sync an individual list if specified.
+    --md5_encode_password                 : rewrite password in database using md5 fingerprint. YOU CAN'T UNDO unless you save this table first
+    --create_list --robot=robot_name --input_file=/path/to/file.xml 
+                                          : create a list with the xml file under robot_name
+@@ -123,7 +125,7 @@
+ ## Check --dump option
+ my %options;
+ unless (&GetOptions(\%main::options, 'dump=s', 'debug|d', ,'log_level=s','foreground', 'service=s','config|f=s', 
+-		    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase','md5_encode_password',
++		    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase','sync_list_db','md5_encode_password',
+ 		    'close_list=s','purge_list=s','create_list','instantiate_family=s','robot=s','add_list=s','modify_list=s','close_family=s','md5_digest=s',
+ 		    'input_file=s','sync_include=s','upgrade','upgrade_shared','from=s','to=s','reload_list_config','list=s','quiet','close_unknown','test_database_message_buffer')) {
+     &fatal_err("Unknown options.");
+@@ -152,7 +154,8 @@
+ 				$main::options{'upgrade'} ||
+ 				$main::options{'upgrade_shared'} ||
+ 				$main::options{'test_database_message_buffer'} || 
+-				$main::options{'reload_list_config'}
++				$main::options{'reload_list_config'} ||
++		                $main::options{'sync_list_db'}
+ 				 );
+ 
+ # Some option force foreground mode
+@@ -872,6 +875,34 @@
+     print STDOUT $string;
+     exit 0;
+ }
++
++##########################################
++elsif ($main::options{'sync_list_db'}) {       
++    unless ($Conf{'db_list_cache'}) {
++       print STDOUT "\nSympa not configured to use database list caching \n";
++       exit 1;
++    }
++    my $listname = $main::options{'sync_list_db'};
++    if (length($listname) > 1) {
++       my ($listname, $robot) = split /\@/, $listname;
++        my $list = new List ($listname, $robot); 
++       unless (defined $list) {
++           print STDOUT "\nList '$list' does not exist. \n";
++           exit 1;
++       }
++        if (&List::_flush_list_db($listname)) {        
++           $list->update_list_db;
++       }
++    } else {
++        &List::_flush_list_db();
++        my $all_lists = &List::get_lists('*');
++        foreach my $list (@$all_lists) {
++           $list->_update_list_db;
++        }
++    }
++    exit 0;
++}
++
+  
+ 
+ ## Do we have right access in the directory
+--- Conf.pm.orig	2009-12-18 13:22:04.000000000 -0800
++++ src/lib/Conf.pm	2009-12-18 13:23:02.000000000 -0800
+@@ -193,6 +193,10 @@
+     unless (defined $o{'tmpdir'}) {
+ 	$o{'tmpdir'}[0] = "$spool/tmp";
+     }    
++    unless (defined $o{'db_list_cache'}){
++        $o{'db_list_cache'}[0] = 0;
++    }
++
+ 
+     ## Check if we have unknown values.
+     foreach $i (sort keys %o) {
+--- create_db.Sybase.orig	2009-12-18 13:24:36.000000000 -0800
++++ src/etc/script/create_db.Sybase	2009-12-18 13:25:07.000000000 -0800
+@@ -189,3 +189,23 @@
+ 
+ create index messagekey_bulkspool_fk on bulkspool_table (messagekey_bulkspool)
+ go
++
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++)
++go
++
++CREATE INDEX id_list_fk ON list_table(name_list, robot_list)
++go
++
+--- create_db.SQLite.orig	2009-12-18 13:26:23.000000000 -0800
++++ src/etc/script/create_db.SQLite	2009-12-18 13:27:13.000000000 -0800
+@@ -136,3 +136,20 @@
+ 	PRIMARY KEY (robot_conf,label_conf)
+ );
+ CREATE INDEX conf_idx ON conf_table(robot_conf,label_conf);
++
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++);
++CREATE INDEX list_idx ON list_table(name_list, robot_list);
++
+--- create_db.mysql.orig	2009-12-18 13:27:36.000000000 -0800
++++ src/etc/script/create_db.mysql	2009-12-18 13:27:54.000000000 -0800
+@@ -136,3 +136,19 @@
+   value_conf varchar(300) default NULL,
+   PRIMARY KEY (robot_conf,label_conf)
+ );
++
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL default '',
++    path_list varchar(100) NOT NULL default '',
++    robot_list varchar(100) NOT NULL default '',
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL default 'closed',
++    creation_email_list varchar(100) NOT NULL default '',
++    creation_epoch_list datetime default NULL,
++    subject_list varchar(100) NOT NULL default '',
++    web_archive_list tinyint(1) NOT NULL default '0',
++    topics_list varchar(100) NOT NULL default '',
++    editors_list varchar(100) NOT NULL default '',
++    owners_list varchar(100) NOT NULL default '',
++    PRIMARY KEY  (name_list,robot_list)
++);
++
+--- create_db.Oracle.orig	2009-12-18 13:28:47.000000000 -0800
++++ src/etc/script/create_db.Oracle	2009-12-18 13:29:09.000000000 -0800
+@@ -144,4 +144,20 @@
+   CONSTRAINT ind_conf primary key (robot_conf,label_conf)
+ );
+ 
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++);
++
++
+ !
+--- create_db.Pg.orig	2009-12-18 13:30:06.000000000 -0800
++++ src/etc/script/create_db.Pg	2009-12-18 13:30:35.000000000 -0800
+@@ -156,4 +156,22 @@
+   value_conf varchar(300),
+   constraint ind_conf primary key (robot_conf,label_conf)
+ );
+-CREATE INDEX robot_conf_idx ON conf_table(robot_conf,label_conf);
+\ No newline at end of file
++CREATE INDEX robot_conf_idx ON conf_table(robot_conf,label_conf);
++
++DROP TABLE list_table;
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++);
++CREATE INDEX list_idx ON list_table(name_list, robot_list);
++
