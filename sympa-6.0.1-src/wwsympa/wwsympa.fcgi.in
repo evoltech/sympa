@@ -10110,7 +10110,8 @@ sub do_rename_list {
 
      # set list status to pending if creation list is moderated
      if ($r_action =~ /listmaster/) {
-	 $list->{'admin'}{'status'} = 'pending' ;
+	 # do not set status to pending, per riseup sysadmin
+	 #$list->{'admin'}{'status'} = 'pending' ;
 	 &List::send_notify_to_listmaster('request_list_renaming',$robot, 
 					  {'list' => $list,
 					   'new_listname' => $in{'new_listname'},
