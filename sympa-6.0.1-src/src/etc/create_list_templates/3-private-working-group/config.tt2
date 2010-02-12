@@ -1,0 +1,79 @@
+##
+## private working group
+##
+
+subject [% subject %]
+
+custom_subject [% listname %]
+
+status [% status %]
+
+[% IF topics -%]
+topics [% topics %]
+[% END %]
+
+send members_or_moderated
+
+visibility members
+
+web_archive
+  access members
+
+archive
+  period month
+  access owner
+
+reply_to_header
+value sender
+
+clean_delay_queuemod 15
+
+reply_to_header
+value list
+
+subscribe approved_verified
+
+unsubscribe anyone_notify
+
+review members
+
+invite default
+
+digest 5 20:56
+
+[% FOREACH o = owner -%]
+owner
+  email [% o.email %]
+  profile privileged
+  [% IF o.gecos -%] 
+  gecos [% o.gecos %]
+  [% END %]
+
+editor
+  email [% o.email %]
+
+[% END %]
+
+[% IF editor -%]
+[% FOREACH e = editor -%]
+editor
+  email [% e.email %]
+  reception mail
+
+[% END %]
+[% END %]
+
+shared_doc
+d_edit members
+d_read members
+
+pictures_feature on
+
+creation
+  date [% creation.date %]
+  date_epoch [% creation.date_epoch %]
+[% IF creation_email -%]
+  email [% creation_email %]
+[% END %]
+
+serial 0
