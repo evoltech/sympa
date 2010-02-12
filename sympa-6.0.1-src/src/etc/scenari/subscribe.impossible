@@ -1,0 +1,4 @@
+title.gettext Only the owner may add subscribers
+
+true()   smtp,md5,smime -> reject(reason='subscribe_closed')
+

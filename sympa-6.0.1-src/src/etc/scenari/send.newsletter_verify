@@ -1,0 +1,5 @@
+title.gettext Like newsletter, with moderation for added security.
+
+is_editor([listname],[sender])              smime           -> do_it
+is_editor([listname],[sender])              smtp,md5,smime  -> editorkey
+true()                                      smtp,smime,md5  -> reject(reason='send_editor')
