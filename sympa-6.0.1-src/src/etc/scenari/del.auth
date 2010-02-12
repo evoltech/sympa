@@ -1,4 +1,4 @@
-title.gettext deletion can only be performed list owners, authentication needed
+title.gettext deletion performed only by list owners, need authentication
 
 is_owner([listname],[sender])  smtp       -> request_auth
 is_listmaster([sender])        smtp       -> request_auth
