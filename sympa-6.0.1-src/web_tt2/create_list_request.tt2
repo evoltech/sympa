@@ -41,16 +41,18 @@
     
   <img src="[% icons_url %]/unknown.png" alt="[%|loc%]Help[%END%]" title="[%|loc%]The list type is a set of parameters' profile. Parameters will be editable, once the list created[%END%]" />
   <label for="list_type" ><strong>[%|loc%]List type:[%END%]</strong></label>
-    <ul id="list_type">
+    <ul id="list_type" class="plainlist">
   [% FOREACH template = list_list_tpl %]
       [% IF template.value.comment %]
       <li>
-        <input type="radio" name="template" value="[% template.key %]"
+        <dl>
+        <dt><input type="radio" name="template" value="[% template.key %]"
      [% IF template.value.selected %]
        checked="checked"
      [% END %]
-       />
-        [% PROCESS $template.value.comment %]
+        /> <strong>[% template.key %]</strong></dt>
+        <dd>[% PROCESS $template.value.comment %]</dd>
+     </dl>
      </li>
      [% ELSE %]
      <li>
@@ -58,7 +60,8 @@
      [% IF template.value.selected %]
        checked="checked"
      [% END %]
-       /> [% template.key %]
+       /> [% template.key %]</dt>
+     </dl>
      </li>
      [% END %]
   [% END %]

@@ -22,6 +22,9 @@
     <input type="hidden" name="serial" value="[% serial %]" />
         [% FOREACH p = param %]
 
+	[% NEXT IF p.name == 'host' %]
+	[% NEXT IF p.name == 'family_name' %]
+
         [% IF p.may_edit != 'hidden' %]
 
           [% IF p.changed == '1' %]

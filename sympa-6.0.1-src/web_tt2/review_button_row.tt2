@@ -1,0 +1,27 @@
+<!-- button row -->
+<table width="100%"><tr>
+
+[% IF is_owner -%]
+<td align='left'>
+  <input class="MainMenuLinks" type="button" value="[%|loc%]Toggle Selection[%END%]" onclick="toggle_selection(document.myform.email)" />
+  <input class="MainMenuLinks" type="submit" name="action_del" value="[%|loc%]Unsubscribe Selected[%END%]" />
+  <input class="quiet" type="checkbox" name="quiet" /> <label for="quiet">[%|loc%]quiet[%END%]</label>
+</td>
+[% END -%]
+
+[% IF action != 'search' -%]
+<td align='right'>
+   [% IF prev_page -%]
+    <a class='ArcMenuLinks' href="[% path_cgi %]/review/[% list %]/[% prev_page %]/[% size %]/[% sortby %]"><img src="[% icons_url %]/left.png" alt="[%|loc%]Previous page[%END%]" /></a>
+   [% END -%]
+   [% IF page -%]
+     [%|loc%]page[%END%] [% page %] / [% total_page %]
+   [% END -%]
+   [% IF next_page -%]
+     <a class='ArcMenuLinks' href="[% path_cgi %]/review/[% list %]/[% next_page %]/[% size %]/[% sortby %]"><img src="[% icons_url %]/right.png" alt="[%|loc%]Next page[%END%]" /></a>
+   [% END -%]
+</td>
+[% END -%]
+
+</tr></table>
+<!-- end button row -->

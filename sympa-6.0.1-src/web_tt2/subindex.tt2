@@ -5,7 +5,7 @@
 <form class="noborder" action="[% path_cgi %]" method="post"> 
 <fieldset>
 <input type="hidden" name="list" value="[% list %]" />
-    <table summary="[%|loc%]Listing subscription to moderate[%END%]" class="listOfItems">
+    <table summary="[%|loc%]List subscriptions to moderate[%END%]" class="listOfItems">
       <tr>
           <th>X</th>
           <th colspan="2">[%|loc%]Email[%END%]</th>
