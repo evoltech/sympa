@@ -66,9 +66,9 @@ my $version_string =
 
 my $daemon_name = &Log::set_daemon($0);
 my $ip;
-$ip = $ENV{'REMOTE_HOST'};
-$ip = $ENV{'REMOTE_ADDR'} unless ($ip);
-
+#$ip = $ENV{'REMOTE_HOST'};
+#$ip = $ENV{'REMOTE_ADDR'} unless ($ip);
+$ip = '';
 my $usage_string = "Usage:
    $0 [OPTIONS]
 

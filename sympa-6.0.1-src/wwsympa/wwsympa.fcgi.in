@@ -992,9 +992,10 @@ my $birthday = time ;
  
      $param->{'cookie_domain'} = $Conf{'robots'}{$robot}{'cookie_domain'} if $Conf{'robots'}{$robot};
      $param->{'cookie_domain'} ||= $wwsconf->{'cookie_domain'};
-     $ip = $ENV{'REMOTE_HOST'};
-     $ip = $ENV{'REMOTE_ADDR'} unless ($ip);
-     $ip = 'undef' unless ($ip);
+     #$ip = $ENV{'REMOTE_HOST'};
+     #$ip = $ENV{'REMOTE_ADDR'} unless ($ip);
+     #$ip = 'undef' unless ($ip);
+      $ip = '';
       ## In case HTTP_HOST does not match cookie_domain
     my $http_host = &get_header_field('HTTP_HOST');
      $http_host =~ s/:\d+$//; ## suppress port

@@ -97,7 +97,7 @@ my $wwsympa_conf    = Sympa::Constants::WWSCONFIG;
 my $sympa_conf_file = Sympa::Constants::CONFIG;
 
 my $daemon_name = &Log::set_daemon($0);
-my $ip = $ENV{'REMOTE_HOST'};
+my $ip = ''; #$ENV{'REMOTE_HOST'};
 
 my $wwsconf = {};
 

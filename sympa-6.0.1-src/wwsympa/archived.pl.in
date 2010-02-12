@@ -56,7 +56,7 @@ use tools;
 use Sympa::Constants;
 
 my $daemon_name = &Log::set_daemon($0);
-my $ip = $ENV{'REMOTE_HOST'};
+my $ip = ''; #$ENV{'REMOTE_HOST'};
 
 #getopts('dF');
 
