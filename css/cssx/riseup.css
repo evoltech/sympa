@@ -1,0 +1,48 @@
+/** typography **/
+
+body, p, ol, ul, td {
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size:   13px;
+  line-height: 1.5em;
+}
+
+/** body/content **/
+
+body {
+  background: white;
+  color: black;
+  margin: 0; padding: 0;
+}
+#Canvas {
+  background: white url(/css/white-shade-top.png) repeat-x 0px -3px;
+  padding: 0.5em 0.5em 0.5em 0.8em;
+}
+
+
+/** header **/
+
+#masthead {
+    background: #cc9 url(/css/bg-top.png);
+    border-bottom: 3px solid black;
+}
+#riseup {
+	background: url(/css/riseup-8.png) no-repeat;
+	height: 43px;
+	width: 183px;
+}
+#toplinks {
+	float: right;
+	margin-top: -1.3em;
+	margin-bottom: -1em;
+	padding-right: 0.5em;
+}
+#toplinks a {
+	color: white;
+	text-decoration: none;
+	padding: 2px;
+}
+#toplinks a:hover {
+    color: black;
+}
+
+

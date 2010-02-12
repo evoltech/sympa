@@ -1,0 +1,404 @@
+/*** GENERAL LAYOUT ***/
+
+/* hide silly things */
+div#Title, div#top {display: none;}
+fieldset {border: 0; padding: 0;}
+
+/* make menus a left sidebar */
+#Menus {
+  float: left;
+  width: 240px;
+  border: 1px solid white; /* seems to help align with stretcher */
+  border-right: 1px solid #ccc;
+  padding-right: 10px;
+}
+
+/* give space for the sidebar menu */
+#Stretcher {
+  margin-left: 251px; /* 1 px overlap with #Menus */
+  padding-left: 10px;
+  border: 1px solid white; /* seems to help align with stretcher */
+  border-left: 1px solid #ccc;
+}
+
+#Paint {
+  vertical-align: top;
+}
+
+/*** SIDEBAR ***/
+
+
+div.menu-login {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 1em;
+}
+div.menu-login form {
+  margin-bottom: 1em;
+}
+div.menu-login form label {
+  font-weight: bold;
+}
+
+select#lang {
+  margin-top: 2em;
+}
+
+div#Identity {
+  background: #eee;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  padding: 4px;
+  font-weight: bold;
+  clear: right;
+}
+div#Identity span {
+  font-weight: normal;
+}
+
+form#logout {
+  padding: 0; margin: 0;
+  margin-top: -1.5em;
+}
+input.plainlink {
+  border: 0; padding: 0; margin: 0;
+  display: inline;
+  text-decoration: none;
+  color: #551A8B;
+  background: transparent;
+  cursor: pointer;
+  float: right;
+}
+input.plainlink:hover {
+  background: #fff;
+  text-decoration: underline;
+}
+
+div.list_panel {
+  margin-bottom: 1em;
+}
+div.MenuBloc {
+  margin-bottom: 1em;
+}
+
+/*** LIST VIEW ***/
+
+div.listTitle {
+  background: #a5cc7a url(/css/fadey-bg.png) repeat-x 50%;
+  border: 1px solid #999;
+  border-right: 0;
+  border-left: 0;
+  text-align: right;
+  padding: 6px;
+  margin: 0 -8px 1em -10px;
+  color: #fff;
+}
+div.listTitle strong a {
+  float: left;
+  text-decoration: none;
+  font-size: 1.4em;
+  color: #fff;
+}
+
+/* your subscriptions */
+/* structure: 
+div.MenuBlock or div.ContentBlock
+  p.text_center
+    strong
+      "your lists"
+  ul.listenum
+    li
+      a.actionMenuLinks
+        "admin"
+      a.list_menu_links
+        <list name>
+      span
+        <list info>
+*/
+div.MenuBlock p.text_center {
+  margin: 0 0 0.25em 0; 
+}
+ul.listenum {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+ul.listenum li {
+  margin-bottom: 0.5em;
+  clear: right;
+}
+ul.listenum li a.actionMenuLinks {
+  background: #6ad;
+  outline: 1px solid #666;
+  border: 1px solid #9cf;
+  padding: 0px 3px;
+  font-size: 0.8em;
+  color: #fff;
+  text-decoration: none;
+}
+ul.listenum li a.actionMenuLinks:hover {
+  background: #9cf;
+}
+div.MenuBlock ul.listenum li a.actionMenuLinks {
+  float: right;
+}
+
+/* list info */
+/* structure:
+div.MenuBlock
+  div.list_panel
+    <number of subscribers>
+    span
+      "Owner" or "Editor"
+    <list of owners>
+
+/* list menu */
+/* structure:
+div.MenuBlock
+  strong.listaction
+    (possible classes: <link-name>, menuLinksCurrentPage, inactive)
+    ul.menuLinks
+      li
+        a.menuLinks (menuLinksCurrentPage)
+*/
+ul.menuLinks, ul.menuLinks ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+ul.menuLinks li {
+  margin-left: 30px;
+}
+ul.menuLinks ul li {
+  margin-left: 60px;
+}
+strong.listaction {
+  display: block;
+  font-weight: normal;
+  padding-left: 4px;
+  vertical-align: middle;
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+}
+strong.listaction.menuLinksCurrentPage {
+  font-weight: bold;
+  background: #eef;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+strong.listaction:hover {
+  color: black;
+  background-color: #ffd;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+strong.listaction.inactive {
+  padding: 3px 0 3px 30px;
+  opacity: 0.5;
+}
+strong.listaction.inactive:hover {
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+}
+strong.listaction a {
+  text-decoration: none;
+  display: block;
+  padding: 3px 0 3px 26px;
+}
+a.menuLinksCurrentPage {
+  font-weight: bold;
+}
+strong.listaction.suboptions a {background: url(/img/options.png) no-repeat center left;}
+strong.listaction.unsubscribe a {background: url(/img/minus.png) no-repeat center left;} 
+strong.listaction.subscribe a {background: url(/img/plus.png) no-repeat center left;}
+strong.listaction.admin a {background: url(/img/hat.png) no-repeat center left;}
+strong.listaction.info a {background: url(/img/bulb.png) no-repeat center left;}
+strong.listaction.archive a {background: url(/img/calendar.png) no-repeat center left;}
+strong.listaction.post a {background: url(/img/mail.png) no-repeat center left;}
+strong.listaction.docs a {background: url(/img/folder.png) no-repeat center left;}
+strong.listaction.members a {background: url(/img/people.png) no-repeat center left;}
+strong.listaction.contact a {background: url(/img/heart.png) no-repeat center left;}
+strong.listaction.rss a {background: url(/img/rss.png) no-repeat center left;}
+
+strong.listaction.moderate {background: #fff url(/img/scissors.png) no-repeat 4px 50%;}
+strong.listaction.post.inactive {background: #fff url(/img/mail.png) no-repeat 4px 50%;}
+
+/*** HOME PAGE ***/
+
+div.small p {
+  font-size: 0.85em;
+}
+div.homesection {
+  background: #a5cc7a url(/css/fadey-bg.png) repeat-x 50%;
+  color: #fff;
+  border: 1px solid #999;
+  margin-top: 1em;
+  padding: 0 0 2px 4px;;
+  font-weight: bold;
+}div#quicktips {
+  margin-top: 1em;
+}
+div.center {
+  margin: 0 auto;
+}
+
+/*** CREATE FORM ***/
+
+table#create-form td {
+  padding: 4px;
+  vertical-align: top;
+}
+table#create-form td label {
+  display: block;
+  text-align: right;
+}
+table#create-form ul {
+  list-style-type: none;
+  margin: 0; padding: 0;
+}
+
+/*** MAIN MENU LINKS ***/
+
+/* structure:
+div.navBar
+  ul#MainMenuLinks
+    li
+      a.MainMenuLinksCurrentPage or a.MainMenuLinks or form
+*/
+
+div.navBar {
+  height: 22px; /* must equal to a.height + a.vertical-padding + a.border-widths */
+  background: url(/css/grey9.png) repeat-x bottom;
+}
+ul#MainMenuLinks {
+  list-style-type: none;
+  margin: 0; padding: 0;
+}
+ul#MainMenuLinks li {
+  float: right;
+  margin: 0;
+  margin: 0 0.5em;
+}
+ul#MainMenuLinks a, input.link {
+  font-weight: bold;
+  height: 20px;
+  display: block;
+  text-decoration: none;
+  padding: 0 0.5em;
+  background: #eee;
+  border: 1px solid #999;
+  border-bottom: 1px solid #999;
+  color: #551A8B;
+}
+ul#MainMenuLinks a:hover, input.link:hover {
+  background: #f9f9f9;
+  text-decoration: underline;
+}
+ul#MainMenuLinks a.MainMenuLinksCurrentPage {
+  color: #a00;
+  background: #fff;
+  border-bottom: 1px solid white;
+}
+input.link {
+  cursor: pointer;  
+  height: 22px; /* not sure why */
+  font-size: 0.9em;
+}
+
+/*** FORMS ***/
+
+table.form {
+  background: #eee;
+  border: 1px solid #ccc;
+}
+table.form td {
+  padding: 5px;
+}
+table.form td label {
+  display: block;
+  text-align: right;
+  font-weight: bold;
+}
+table.form td.submit {
+  text-align: right;
+}
+
+/*** EDIT LIST CONFIG ***/
+
+div.block, div.ErrorBlock {
+  background: #eee;
+  padding: 8px;
+}
+
+div.block h4 {
+  margin-top: -0.01em;
+}
+span.edit_list_request_help {
+  float: right;
+}
+span.default {
+  float: right;
+  margin-top: -1em;
+}
+
+/*** ERROR and NOTICE ***/
+
+div#notice, div#error {
+  padding: 1em;
+  border: 2px dotted blue;
+  background: #CAEDFF;
+  margin-bottom: 1em;
+  font-weight: bold;
+}
+div#error {
+  border: 2px dotted red;
+  background: #FFE1E1;
+}
+div#notice span, div#error span {
+  display: block;
+}
+
+/*** ARCHIVE ***/
+
+#ArcCalendar {
+  margin: 10px 0;
+}
+#ArcCalendar div {
+  padding-bottom: 6px;
+}
+ul.calendar {
+  margin: 0;
+  padding: 0;
+}
+ul.calendar a {
+  font-size: 1em;
+}
+ul.calendar li {
+  list-style: none;
+  display: inline;
+  margin: -2px;
+  padding: 2px;
+  background: #eee;
+}
+ul li.calendarLinks a {
+  background: #ddd;
+  padding: 2px;
+  margin: -2px;
+}
+ul li.calendarLinks:hover {
+  background: #99ccff; color: #3366CC;
+}
+ul li.calendarLinksCurrentPage a {
+  background: #69f;
+  color: #fff;
+  padding: 2px;
+  margin: -2px;
+
+}
+ul li.calendarLinksCurrentPage:hover {
+  background: #99ccff;
+}
+ul li.calendarLinksInactive {
+}
+
