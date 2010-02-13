@@ -770,7 +770,7 @@ sub probe_db {
                                    'web_archive_list'=>'tinyint(1)',
                                    'topics_list'=>'varchar(100)',
                                    'editors_list'=>'varchar(100)',
-                                   'owners_list'=>'varchar(100)'}
+                                   'owners_list'=>'varchar(100)'
                              },
 		     'SQLite' => {'user_table' => {'email_user' => 'text',
 						   'gecos_user' => 'text',
@@ -873,7 +873,7 @@ sub probe_db {
                            'web_archive_list'=>'tinyint(1)',
                            'topics_list'=>'varchar(100)',
                            'editors_list'=>'varchar(100)',
-                           'owners_list'=>'varchar(100)'}
+                           'owners_list'=>'varchar(100)'
                               },
 
 		     );
