@@ -17,6 +17,11 @@
 <li><a class="[% class %]" href="[% path_cgi %]/lists">[%|loc%]List of lists[%END%]</a></li>
 -->
 
+[% IF auth_method == 'md5' -%]
+  [% IF action == 'pref' %][% SET class = 'MainMenuLinksCurrentPage' %][% ELSE %][% SET class = 'MainMenuLinks' %][% END %]
+<li><a class="[% class %]" href="[% path_cgi %]/pref">[%|loc%]Preferences[%END%]</a></li>
+[% END %]
+
  [% IF action == 'home' %][% SET class = 'MainMenuLinksCurrentPage' %][% ELSE %][% SET class = 'MainMenuLinks' %][% END %]
 <li><a class="[% class %]" href="[% path_cgi %]/home">[%|loc%]Home[%END%]</a></li>
 
