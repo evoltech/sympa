@@ -7735,7 +7735,10 @@ sub do_remove_arc {
      ## Checking families and other virtual hosts.
      &get_server_details();
 
-     my $all_lists = &List::get_lists($robot);
+     #my $all_lists = &List::get_lists($robot);
+     my $statement = "SELECT name_list FROM list_table WHERE status_list = 'pending'";
+     my @lists = &List::get_lists_db($statement);
+     my $all_lists = &List::get_lists($robot, undef, @lists);
      foreach my $list ( @$all_lists ) {
 	 if ($list->{'admin'}{'status'} eq 'pending') {
 	     $param->{'pending'}{$list->{'name'}}{'subject'} = $list->{'admin'}{'subject'};
@@ -7755,7 +7758,10 @@ sub do_remove_arc {
      ## Checking families and other virtual hosts.
      &get_server_details();
 
-     my $all_lists = &List::get_lists($robot);
+     #my $all_lists = &List::get_lists($robot);
+     my $statement = "SELECT name_list FROM list_table WHERE status_list in ('closed' , 'family_closed')";
+     my @lists = &List::get_lists_db($statement);
+     my $all_lists = &List::get_lists($robot, undef, @lists);
      foreach my $list ( @$all_lists ) {
 	 if ($list->{'admin'}{'status'} eq 'closed' ||
 	     $list->{'admin'}{'status'} eq 'family_closed') {
@@ -8661,7 +8667,10 @@ Sends back the list creation edition form.
 
      ## Members list
      my $record = 0;
-     my $all_lists = &List::get_lists($robot);
+     my $regexp = $param->{'regexp'};                                                                                                       
+     my $statement = sprintf "SELECT name_list FROM list_table WHERE name_list RLIKE '%s' OR subject_list RLIKE '%s'", $regexp, $regexp;    
+     my @lists = &List::get_lists_db($statement) || undef;                                                                                  
+     my $all_lists = &List::get_lists($robot,undef, @lists); 
      foreach my $list ( @$all_lists ) {
 	 my $is_admin;
 	 ## Search filter
