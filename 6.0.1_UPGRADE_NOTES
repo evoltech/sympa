@@ -1,0 +1,12 @@
+* configure should include --user and --group:
+  ./configure \
+    --prefix=/home/sympa \
+    --with-confdir=/etc/sympa \
+    --with-initdir=/etc/init.d/ \
+    --enable-secure \ 
+    --user=sympa --group=sympa
+
+* last-resort scenari files go in bin/scenari not bin/etc/scenari
+* mhonarc-resources.tt2 file in default/ messes up archives page
+* bin/queue, bin/bouncequeue, and the wrapper executables were not made suid but need to be
+* serveradmin.tt2 file in etc/web_tt2 too sparse
