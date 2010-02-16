@@ -10,3 +10,5 @@
 * mhonarc-resources.tt2 file in default/ messes up archives page
 * bin/queue, bin/bouncequeue, and the wrapper executables were not made suid but need to be
 * serveradmin.tt2 file in etc/web_tt2 too sparse
+* check task spool for repeat tasks
+* Use of uninitialized value $_[1] in sprintf at /usr/lib/perl5/Sys/Syslog.pm
