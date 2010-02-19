@@ -9157,9 +9157,9 @@ sub get_lists {
 	    if ( defined($requested_lists)){
 	      @files = sort @{$requested_lists};
 	    }else {
-	      #@files = sort readdir(DIR);
-               $files = &get_lists_db('SELECT name_list FROM list_table');
-               @files = @{$files}
+	      @files = sort readdir(DIR);
+              #$files = &get_lists_db('SELECT name_list FROM list_table');
+              #@files = @{$files}
 	    }
 
 	    foreach my $l (@files) {
