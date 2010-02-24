@@ -10124,6 +10124,7 @@ sub do_rename_list {
      }
 
      # set list status to pending if creation list is moderated
+     my $is_a_copy = ($mode eq 'copy') ? 'true' : '';
      if ($r_action =~ /listmaster/) {
 	 # do not set status to pending, per riseup sysadmin
 	 #$list->{'admin'}{'status'} = 'pending' ;
@@ -10132,7 +10133,7 @@ sub do_rename_list {
 					   'new_listname' => $in{'new_listname'},
 					   'old_listname' => $old_listname,
 					   'email' => $param->{'user'}{'email'},
-				           'is_a_copy' => 'true'});
+				           'is_a_copy' => $is_a_copy});
 	 &report::notice_report_web('pending_list',{},$param->{'action'},$list);
      }
      
