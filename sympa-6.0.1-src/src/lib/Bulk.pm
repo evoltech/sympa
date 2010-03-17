@@ -355,7 +355,7 @@ sub remove_bulkspool_message {
 	return undef unless &List::db_connect();
     }
 
-    my $statement = sprintf "DELETE FROM `%s` WHERE `%s` = '%s'",$table,$key,$messagekey;
+    my $statement = sprintf "DELETE FROM '%s' WHERE '%s' = '%s'",$table,$key,$messagekey;
 
     unless ($sth = $dbh->prepare($statement)) {
 	do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
