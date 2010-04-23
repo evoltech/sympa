@@ -1,5 +1,7 @@
 <!-- $Id: create_list_request.tt2 6219 2009-09-18 09:00:22Z david.verdin $ -->
 
+[% PROCESS custom_creation_policy.tt2 -%]
+
 <div class="block">
 
 [% IF get_which_owner.size > 0 %]
