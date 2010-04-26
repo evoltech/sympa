@@ -1,4 +1,3 @@
-
 <p style="font-size:175%"><b>Unfortunately, we will temporarily not be accepting any more lists. We 
 are at the capacity on our current server, and adding new lists would jeopardize our 
 ability to provide reliable service to existing lists. As soon as we get things working
@@ -9,70 +8,34 @@ be in April 2009.
 we recommend our friends at <a href= "https://en.wiki.aktivix.org/Activix:EmailAndLists"> 
 Aktivix</a>.</p>
 
-<p>
-By creating an email list at <b>lists.riseup.net</b> you agree to the following conditions:
+<h3>What we provide</h3>
 <ul>
-
-<li><b>Prior consent</b>: Every email address which you add to your list <b>must</b>
-have given prior consent to be subscribed. Membership in an organization,
-signing up online or at a meeting, or verbal approval all count as prior
-consent. If in doubt, don't subscribe someone! If we receive complaints
-about your list, it may be placed on probation or disabled.
-</li>
-
-<li><b>Political focus</b>: We only host lists which are primarily focused
-on liberatory social change. The list must be progressive, radical, or
-revolutionary in nature.
-</li>
-
-<li><b>Lists we don't host</b>: Here are some examples of list topics we decline
-to host:
-<ul>
-  <li>hobbies: model trains, book groups, religious discussion, etc.</li>
-  <li>university credited classes: please get your university or college to host the list, not us.</li>
-  <li>commerce: no for-profit business related lists of any kind.</li>
-  <li>personal: “me on vacation,” “updates about my life,” etc.</li>
-  <li>capitalists: liberal causes, the Democratic party, etc.</li>
-  <li>vanguard parties: ISO, RCP, SWP, and other authoritarian statist formations.</li>
-  <li>cultural: upcoming performances, venues, etc.</li>
-  <li>indymedia lists: we are trying to keep all indymedia lists on the indymedia server. go to <a href="http://newlist.indymedia.org/">newlist.indymedia.org</a> to request an indymedia list.</li>
-</ul>
-</li>
-
-<li><b>Donations</b>: It takes a lot of time and money to provide this service. It
-is funded entirely by donations from users like you. Unless you have no
-income, or live in the global south, visit
-<a href="http://riseup.net/donate">riseup.net/donate</a> and contribute accordingly.
-</li>
-
-<li><b>Admin responsibilities</b>: You, the list owner, are responsible for
-unsubscribing people, moderating the list, removing bouncing subscribers,
-closing unused lists, and responding to complaints regarding your list.
-</li>
-
-<li><b>Terms of Service</b>: By creating a list, you agree to riseup.net's
-<a href="http://help.riseup.net/tos/">Terms of Service Agreement</a>.
-</li>
-
-<li><b>Please don't use acronyms!</b>: Your list request will get rejected if
-you use only acronyms. There are a bazillion groups out there and you cannot
-assume that we know the acronym for yours.
-</li>
-
-<li><b>Please be patient</b>: We are a volunteer-run collective, and it can take a few days for us to approve requests. If your action is tomorrow, it is probably too late to create a list to publicize it.
-</li>
-
+<li><b>Activist run</b>: Our services are supported entirely by contributions from users, not by tracking your behavior in order to sell your eyeballs to an advertiser.</li>
+<li><b>Secure delivery</b>: We support <a href='https://we.riseup.net/help/starttls'>StartTLS</a> email delivery. If an email sender or recipient uses a secure email provider, then the email delivery will be encrypted.</li>
+<li><b>Secure website</b>: <a href='https://lists.riseup.net/'>lists.riseup.net</a> is accessible only via https, and we do not log IP addresses of visitors.</li>
+<li><b>Encrypted storage</b>: Our list database and list archives are stored on encrypted file systems.</li>
+<li><b>Flexible lists</b>: We support everything from private lists with a few subscribers, to large lists with tens of thousands of subscribers.</li>
 </ul>
 
+<h3>Your responsibilities</h3>
+<ul>
+</li><b>Prior consent</b>: Every email address which you add to your list must have given prior consent to be subscribed. Membership in an organization, signing up online or at a meeting, or verbal approval all count as prior consent. If in doubt, don’t subscribe someone! If we receive complaints about your list, it will be placed on probation or disabled. We are very strict about this policy, because any list abuse can result in the entire list server getting blocked.</li>
+<li><b>Political focus</b>: We only host lists which are primarily focused on liberatory social change. The list must be used for progressive or radical activism.</li>
+<li><b>Admin responsibilities</b>: You, the list owner, are responsible for unsubscribing people, moderating the list, removing bouncing subscribers, closing unused lists, and responding to complaints regarding your list.</li>
+<li><b>Donations</b>: This service runs entirely on your mutual aid. <a href='http://riseup.net/donate'>Please contribute what you can</a>.</li>
+</ul>
 
+<h3>Tips</h3>
+<ul>
+<li><b>Don’t use acronyms!</b>: Your list request will get rejected if you use only acronyms. There are a bazillion groups out there and we can’t keep up with all the acronyms for them.</li>
+<li><b>Please be patient</b>: We are a volunteer-run collective, and it can take a few days for us to approve requests. If your action is tomorrow, it is already too late to create a riseup list to publicize it.</li>
+<li><b>Terms of Service</b>: By creating a list, you agree to riseup.net’s <a href='http://help.riseup.net/tos'>Terms of Service Agreement</a>.</li>
+</ul>
 
-
-
-
-
-
-
-
-
-
-
+<h3>Other activist list providers</h3>
+Please also consider using the mailing list services of our friends:
+<ul>
+<li><a href='https://en.wiki.aktivix.org/Activix:EmailAndLists'>Activix</a> (UK)</li>
+<li><a href='http://www.autistici.org/it/services/discussion/mailinglists.html'>Autistici</a> (Italy)</li>
+<li><a href='http://resist.ca/'>Resist</a> (Canada)</li>
+</ul>
