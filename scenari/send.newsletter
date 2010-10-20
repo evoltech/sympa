@@ -1,4 +1,0 @@
-title.gettext Only editors can post, all other messages are rejected.
-
-is_editor([listname],[sender])              smtp,smime,md5  -> do_it
-true()                                      smtp,smime,md5  -> reject(reason='send_editor')
