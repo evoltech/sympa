@@ -1,0 +1,71 @@
+Instructions to upgrade sympa for riseup:
+
+1. Download and untar new source
+
+2. convert official patches from last version to work with new version
+
+   These are the current patches we use, and how to test they are working (where necessary):
+
+   a. list config caching path
+     To test:
+     * creating a new list request should populate list_table with the pending list
+     * approving the new list should change its status in the db
+     * listing pending and closed lists should work and should only be listing lists that are in the list_table cache
+     * renaming a list should rename it in the db
+
+   b. add Sender: header
+
+   c. do not change renames to pending status
+
+   d. remove IP addresses
+
+   *** patches a-d are more 'core' patches 
+   *** patches e-g are more specific to riseup
+
+   e. fix owner privileges - we give list owners more privileges than the default install
+
+   f. do not allow list creation by copying an existing list 
+      this is disabled in the templates, mainly, but this disables it in the function too in case it gets past the template
+
+   g. do not save invalid paths referring to arcsearch_id - this makes wwsympa unhappy 
+
+3. stop sympa
+
+4. compile and install sympa following sympa upgrade instructions
+
+5. check location of config files - our are in /etc/sympa/*.conf
+
+6. check create list templates
+   the following list types only should be available on the create lists page:
+     1-moderated-discussion-list
+     2-open-discussion-list
+     3-private-working-group
+     4-public-working-group
+     5-newsletter
+
+   to accomplish this, make sure that any directory called 'create_list_templates' in /home/sympa only contains
+   the above templates.
+
+7. check scenari files
+   scenari files describe permissions for subscribing and unsubscribing, among other things. we have some scenaris
+   disabled (for example, the scenari that closes unsubscribing).  
+   the files in scenari/ in the repo should be the only scenaris enabled, like so:
+   scenari/etc/* -> /home/sympa/etc/scenari/
+   scenari/default/* -> /home/smpa/default/scenari/
+
+6. start sympa
+
+*********************************************************************************
+**** the following steps should only be necessary if it is a clean install. *****
+**** the sympa upgrade process should preserve all of these customizations  *****
+*********************************************************************************
+
+5a. docroot and css
+   a. make /home/sympa/docroot if it doesn't already exist
+   b. copy css/* from repo to /home/sympa/docroot if the css files are not already there
+
+5b. web and mail templates
+   copy web_tt2 and mail_tt2 directories to the /home/sympa/etc directory in the sympa tree 
+
+5c. scenari files
+   copy scenari files from scenari/ to /home/sympa/etc/scenari
