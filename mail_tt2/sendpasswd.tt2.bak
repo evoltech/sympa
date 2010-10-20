@@ -1,0 +1,69 @@
+From: SYMPA <[% conf.email %]@[% conf.host %]>
+To: [% newuser.email %]
+[% IF action == 'subrequest' -%]
+Subject: [% FILTER qencode %][%|loc(list)%]Your subscription to %1[%END%][%END%]
+[% ELSIF action == 'sigrequest' -%]
+Subject: [% FILTER qencode %][%|loc(list)%]unsubscribing from %1[%END%][%END%]
+[% ELSE -%]
+Subject: [% FILTER qencode %]your [% conf.host %] subscriber information[%END%]
+[% END -%]
+
+[% IF action == 'subrequest' -%]
+[%|loc%]Hello,[%END%]
+
+[%|loc(list)%]You recently asked to be subscribed to the %1@[% conf.host %] mailing list.[%END%]
+
+[%|loc%]You must confirm your identity before you can be subscribed.[%END%]
+
+[%|loc%]To do so, please visit [% base_url %] and enter your email address 
+and the following password:[%END%]
+
+	[%|loc(newuser.password)%]password: %1[%END%]
+
+[%|loc%]Once you have logged in, you can login and change the password to one you 
+prefer. Additionally, you will be able to change subscription options, check which 
+lists you are subscribed to, unsubscribe from lists, and manage lists you own or 
+moderate.[%END%]
+
+[% ELSIF action == 'sigrequest' -%]
+[%|loc(list)%]You asked to be unsubscribed from %1 mailing list.[%END%]
+
+[%|loc%]To unsubscribe from the list, please visit [% base_url %] where you should enter 
+your email and the following password to unsubscribe:[%END%]
+
+	[%|loc(newuser.password)%]password: %1[%END%]
+
+[% ELSE -%]
+
+Hello,
+
+[%|loc%]This email contains your registration information for [% base_url %].[%END%]
+
+[%|loc%]In order to access your account, you need to login first with your email 
+address and password.[%END%]
+
+[%|loc%]If you have not set a password yet, then a random one was set for you. With this 
+password you can login and change the password to one you prefer.  Additionally, you will 
+be able to change subscription options, check which lists you are subscribed to, unsubscribe 
+from lists, and manage lists you own or moderate.[%END%]
+
+[%|loc%]This is your login information:[%END%]
+
+     [%|loc(newuser.email)%]your email address: %1[%END%]
+     [%|loc(newuser.password)%]your password: %1[%END%]
+
+[%|loc%]You can login at:[%END%] [% base_url %][% path_cgi %] 
+
+[%|loc%]To change your password visit: [%END%] 
+[% base_url %][% path_cgi %]/choosepasswd/[% newuser.escaped_email %]/[% newuser.password %]
+[% END %]
+[%|loc%]Riseup.net provides mail, lists, and hosting for those working on liberatory 
+social change. We are a project to create democratic alternatives and practice 
+self-determination by controlling our own secure means of communications.[%END%]
+
+[%|loc%]If you value radical alternatives to the corporate internet, and you want to 
+see us stay around, then we need your donation! Our list service is paid for entirely 
+by small donations from users like you. Please see our donation page for more 
+information: <http://riseup.net/donate>[%END%]
+
+[%|loc(base_url,path_cgi)%]For help: %1%2[%END%]/help

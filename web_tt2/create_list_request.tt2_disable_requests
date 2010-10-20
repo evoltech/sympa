@@ -1,0 +1,7 @@
+<!-- $Id: create_list_request.tt2 3907 2006-09-25 14:50:16Z serge.aumont $ -->
+
+[% PROCESS custom_creation_policy.tt2 -%]
+
+
+
+

@@ -1,0 +1,17 @@
+<!-- $Id: list_panel.tt2 4114 2006-12-28 15:51:07Z olivier.salaun $ -->
+<!-- begin list_panel.tt2 -->
+
+<div class="list_panel">
+[% IF list_status == 'closed' -%]
+  <div class="bg_color_error">[%|loc%]Closed list[%END%]</div>
+[% ELSIF list_status == 'pending' -%]
+  <div class="bg_color_error">[%|loc%]List not yet activated[%END%]</div>
+[% END -%]
+
+<div>[%|loc%]Subscribers:[%END%] [% total %]</div>
+[% IF is_priv %]<div>([%|loc%]Error rate:[%END%] [% bounce_rate %]%)</div>[% END -%]
+
+[% IF list_as_x509_cert %]<div><a href="[% path_cgi %]/load_cert/[% list %]">[%|loc%]Load certificate[%END%]</a></div>[% END -%]
+</div>
+
+<!-- end list_panel.tt2 -->

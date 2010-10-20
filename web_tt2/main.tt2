@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="[% iso639 = locale.match('^(.)(.)'); iso639.0; iso639.1 %]">
+
+<!-- begin main.tt2 (distrib) -->
+<head>
+<title> [% main_title %] </title>
+<link rel="stylesheet" href="[% css_url %]/riseup.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="[% css_url %]/style.css" type="text/css" media="screen" />
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" /><link rel="icon" href="/favicon.png" type="image/x-icon" />
+<!-- RSS chanel -->
+   [% IF list -%] 
+     <link rel="alternate" type="application/xml" title="[%|loc%]RSS Latest messages[%END%]" href="[% base_url%][% path_cgi %]/rss/latest_arc/[%list%]?count=20"/>
+     <link rel="alternate" type="application/xml" title="[%|loc%]RSS Latest documents[%END%]" href="[% base_url%][% path_cgi %]/rss/latest_d_read/[%list%]?count=20"/>
+   [% ELSE -%]
+     [% IF (action == 'lists') && topic -%]
+       <link rel="alternate" type="application/xml" title="[%|loc%]RSS Latest lists[%END%]" href="[% base_url%][% path_cgi %]/rss/latest_lists/[%topic%]?count=20"/>
+       <link rel="alternate" type="application/xml" title="[%|loc%]RSS Active lists[%END%]" href="[% base_url%][% path_cgi %]/rss/active_lists/[%topic%]?count=20"/>
+     [% ELSE -%]
+     <link rel="alternate" type="application/xml" title="[%|loc%]RSS Latest lists[%END%]" href="[% base_url%][% path_cgi %]/rss/latest_lists?count=20"/>
+     <link rel="alternate" type="application/xml" title="[%|loc%]RSS Active lists[%END%]" href="[% base_url%][% path_cgi %]/rss/active_lists?count=20"/>
+     [% END -%]
+   [% END -%]
+
+<meta name="generator" content="Sympa" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+[% PROCESS javascript.tt2 %]
+
+[% IF base %] <base href="[% base %]" /> [% END %]
+<!--[if IE]>
+<![endif]-->
+</head>
+
+<body onload="[% IF use_htmlarea %] HTMLArea.replaceAll();[% END %][% IF cookie_set %] check_cookie();[% END %][% IF back_to_mom %] setTimeout('refresh_mom_and_die()',1000);[% END %]">
+<noscript><em>[%|loc%]Please activate JavaScript in your web browser[%END%]</em></noscript>
+
+[% PROCESS masthead.tt2 %]
+
+[% IF nomenu %]
+       [% PROCESS error.tt2 IF errors %]
+       [% PROCESS notice.tt2 IF notices %]
+       <div class="ContentBlock"> 
+         [% PROCESS "${action}.tt2" IF action %]
+       </div>
+[% ELSE %]
+<div id="Canvas">
+  <div id="Header">
+    [% PROCESS menu.tt2 %]
+  </div> <!-- end div Header -->
+
+[% IF list -%]
+  <div class="listTitle">
+    <strong><a href="[% path_cgi %]/info/[% list %]">[% list_protected_email %]</a></strong>
+    [% IF list_title %]<span class='listinfo'>[% list_title %]</span>[% END %]
+  </div>
+[% END -%]
+
+  <div id="Menus"><!-- Start Menus -->
+[% PROCESS login_menu.tt2 %]
+[% PROCESS list_menu.tt2 IF list %]
+[% PROCESS your_lists.tt2 IF !list %]
+[% PROCESS setlang.tt2 %]
+  </div><!-- End div Menus -->
+
+  <div id="Stretcher">
+     <!-- <div id="Paint"> -->
+[% PROCESS error.tt2 IF errors %]
+[% PROCESS notice.tt2 IF notices %]
+
+    <div class="ContentBlock"> 
+[% PROCESS "${action}.tt2" IF action %]
+    </div><!-- End div ContentBlock -->
+     <!-- </div> --><!-- End div Paint -->
+  </div><!-- end div Stretcher -->
+
+  <br style="clear:both" />
+  [% PROCESS footer.tt2 %]
+</div> <!-- end div canvas -->
+[% END %]
+
+</body>
+</html>
