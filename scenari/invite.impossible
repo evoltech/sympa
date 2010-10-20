@@ -1,0 +1,3 @@
+title.gettext invite disabled (highly recommended)
+
+true() smtp,md5,smime -> reject(reason='invite_closed')
