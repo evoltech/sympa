@@ -1,0 +1,6 @@
+title.gettext Subscriber address is verified with a confirmation email, and the list owner is sent a notification.
+
+# do not authentify nor notify updates 
+is_subscriber ([listname],[sender])  smtp,smime,md5 -> do_it
+true()                               smtp -> request_auth
+true()                               md5,smime  -> do_it,notify
