@@ -9,11 +9,6 @@
         <a class="actionMenuLinks" href="[% path_cgi %]/get_pending_lists">[%|loc%]Pending lists[%END%]</a>
         <a class="actionMenuLinks" href="[% path_cgi %]/get_closed_lists">[%|loc%]Closed lists[%END%]</a>
     </div>
-    <h3>[%|loc%]Consult lists[%END%]</h3><br/>
-    <div>
-         <a class="actionMenuLinks" href="[% path_cgi %]/get_latest_lists">[%|loc%]Lists sorted by creation date[%END%]</a>
-         <a class="actionMenuLinks" href="[% path_cgi %]/get_inactive_lists">[%|loc%]Lists sorted by last message date[%END%]</a>
-    </div>
 </div>
 [% END %] 
 
@@ -50,7 +45,7 @@
 </div>
   [% END %]
 [% END %] 
-[% IF subaction == 'users' %]
+
 <h2>[%|loc%]Users[%END%]</h2><br />
 <div>
         <form action="[% path_cgi %]" method="post">
@@ -103,9 +98,7 @@
 </fieldset>
 </form>
 </div>
-[% END %] 
 
-[% IF subaction == 'archives' %]
 <h2>[%|loc%]Archives[%END%]</h2><br />
 <div>
 [%|loc%]Rebuild HTML archives using "arctxt" directories as input.[%END%]<br />
@@ -117,7 +110,6 @@
 </form>
 
 </div>
-[% END %] 
 
 [% IF subaction == 'logs' %]
 <h2>[%|loc%]Logs[%END%]</h2><br />
