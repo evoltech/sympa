@@ -577,15 +577,28 @@ index 034f96c..4df9586 100644
       $in{'listname'} = $in{'new_listname'};
       
 diff --git a/sympa-6.0.6/src/lib/List.pm b/sympa-6.0.6/src/lib/List.pm
-index da02f14..5941557 100644
+index 5941557..1ec2f60 100644
 --- a/sympa-6.0.6/src/lib/List.pm
 +++ b/sympa-6.0.6/src/lib/List.pm
 @@ -11660,7 +11660,7 @@ sub _update_list_db
         }
      }
      $ed_txt = join(',',@admins) || '';
--    my $statement = sprintf "%s `list_table` %s SET status_list= %s, name_list=%s, robot_list=%s, subject_list=%s, web_archive_list=%s, topics_list=%s, owners_list=%s, editors_list=%s ",
-+    my $statement = sprintf "%s `list_table` %s SET status_list= %s, name_list=%s, robot_list=%s, subject_list=%s, web_archive_list=%s, owners_list=%s, editors_list=%s ",
+-    my $statement = sprintf "%s `list_table` %s SET status_list= %s, name_list=%s, robot_list=%s, subject_list=%s, web_archive_list=%s, owners_list=%s, editors_list=%s ",
++    my $statement = sprintf "%s `list_table` %s SET status_list= %s, name_list=%s, robot_list=%s, subject_list=%s, web_archive_list=%s, topics=%s, owners=%s, editors=%s ",
         $op, $set, $dbh->quote($status), $dbh->quote($name), 
         $dbh->quote($robot), $dbh->quote($subject), 
         $dbh->quote($web_archive), $dbh->quote($topics),
+diff --git a/sympa-6.0.6/src/sympa.pl.in b/sympa-6.0.6/src/sympa.pl.in
+index f7c971a..ecba29f 100644
+--- a/sympa-6.0.6/src/sympa.pl.in
++++ b/sympa-6.0.6/src/sympa.pl.in
+@@ -890,7 +890,7 @@ elsif ($main::options{'sync_list_db'}) {
+            exit 1;
+        }
+         if (&List::_flush_list_db($listname)) {        
+-           $list->update_list_db;
++           $list->_update_list_db;
+        }
+     } else {
+         &List::_flush_list_db();
