@@ -29,13 +29,21 @@ Instructions to upgrade sympa for riseup:
 
    g. do not save invalid paths referring to arcsearch_id - this makes wwsympa unhappy 
 
-3. stop sympa
+3. run configure: 
+./configure \
+--prefix=/home/sympa \
+--with-confdir=/etc/sympa \
+--with-initdir=/etc/init.d/ \
+--enable-secure
 
-4. compile and install sympa following sympa upgrade instructions
+4. stop sympa
 
-5. check location of config files - our are in /etc/sympa/*.conf
+5. compile and install sympa following sympa upgrade instructions
 
-6. check create list templates
+6. look at sympa.pl --upgrade and see if there's anything we can skip
+6a. run sympa.pl --upgrade
+
+7. check create list templates
    the following list types only should be available on the create lists page:
      1-moderated-discussion-list
      2-open-discussion-list
