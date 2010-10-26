@@ -602,3 +602,16 @@ index f7c971a..ecba29f 100644
         }
      } else {
          &List::_flush_list_db();
+diff --git a/sympa-6.0.6/wwsympa/wwsympa.fcgi.in b/sympa-6.0.6/wwsympa/wwsympa.fcgi.in
+index 6c3bdee..023911b 100644
+--- a/sympa-6.0.6/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.0.6/wwsympa/wwsympa.fcgi.in
+@@ -8691,7 +8691,7 @@ Sends back the list creation edition form.
+      #my $all_lists = &List::get_lists($robot);
+      # use list config db table to get lists
+      my $regexp = $param->{'regexp'};
+-     my $statement = sprintf "SELECT name_list from list_table WHERE list_name RLIKE '%s' OR subject_list RLIKE '%s'", $regexp, $regexp;
++     my $statement = sprintf "SELECT name_list from list_table WHERE name_list RLIKE '%s' OR subject_list RLIKE '%s'", $regexp, $regexp;
+      my @lists = &List::get_lists_db($statement) || undef;
+      my $all_lists = &List::get_lists($robot, undef, @lists);
+ 
