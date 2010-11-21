@@ -1,3 +1,4 @@
 * Add Sender patch is no longer needed!  List.pm now does this:
     $hdr->add('Sender', "$self->{'name'}-request\@$self->{'admin'}{'host'}"); # The Sender: header should be add at least for DKIM compatibility
 
+* skipping patch to remove IP address - this needs to be taken care of in the apache config instead
