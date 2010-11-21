@@ -200,6 +200,10 @@ sub load {
     unless (defined $o{'tmpdir'}) {
 	$o{'tmpdir'}[0] = "$spool/tmp";
     }    
+    unless (defined $o{'db_list_cache'}){
+        $o{'db_list_cache'}[0] = 0;
+    }
+
 
     ## Check if we have unknown values.
     foreach $i (sort keys %o) {

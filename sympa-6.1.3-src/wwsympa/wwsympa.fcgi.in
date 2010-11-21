@@ -7900,7 +7900,11 @@ sub do_remove_arc {
      ## Checking families and other virtual hosts.
      &get_server_details();
 
-     my $all_lists = &List::get_lists($robot);
+     #my $all_lists = &List::get_lists($robot);
+     # use list config db table to get lists
+     my $statement = "SELECT name_list from list_table WHERE status_list = 'pending'";
+     my @lists = &List::get_lists_db($statement);
+     my $all_lists = &List::get_lists($robot, undef, @lists);
      foreach my $list ( @$all_lists ) {
 	 if ($list->{'admin'}{'status'} eq 'pending') {
 	     $param->{'pending'}{$list->{'name'}}{'subject'} = $list->{'admin'}{'subject'};
@@ -7920,7 +7924,11 @@ sub do_remove_arc {
      ## Checking families and other virtual hosts.
      &get_server_details();
 
-     my $all_lists = &List::get_lists($robot);
+     #my $all_lists = &List::get_lists($robot);
+     # use list config db table to get lists
+     my $statement = "SELECT name_list from list_table WHERE status_list = 'closed'";
+     my @lists = &List::get_lists_db($statement);
+     my $all_lists = &List::get_lists($robot, undef, @lists);
      foreach my $list ( @$all_lists ) {
 	 if ($list->{'admin'}{'status'} eq 'closed' ||
 	     $list->{'admin'}{'status'} eq 'family_closed') {
@@ -8826,7 +8834,13 @@ Sends back the list creation edition form.
 
      ## Members list
      my $record = 0;
-     my $all_lists = &List::get_lists($robot);
+     #my $all_lists = &List::get_lists($robot);
+     # use list config db table to get lists
+     my $regexp = $param->{'regexp'};
+     my $statement = sprintf "SELECT name_list from list_table WHERE name_list RLIKE '%s' OR subject_list RLIKE '%s'", $regexp, $regexp;
+     my @lists = &List::get_lists_db($statement) || undef;
+     my $all_lists = &List::get_lists($robot, undef, @lists);
+
      foreach my $list ( @$all_lists ) {
 	 my $is_admin;
 	 ## Search filter
@@ -10223,7 +10237,7 @@ sub do_rename_list {
 		    'error_type' => 'unknown_robot'});
        return undef;
      }
-       
+     $list->save_config();  
      ## Were aliases installed?
      if ($param->{'aliases'} == 1) {
        $param->{'auto_aliases'} = 1;

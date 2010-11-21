@@ -84,6 +84,7 @@ Options:
    --dump=list\@dom|ALL                  : dumps subscribers 
    --make_alias_file                     : create file in /tmp with all aliases (usefull when aliases.tpl is changed)
    --lowercase                           : lowercase email addresses in database
+   --sync_list_db[=listname]             : syncs filesystem list configs to the database cache of list configs, optionally sync an individual list if specified.
    --md5_encode_password                 : rewrite password in database using md5 fingerprint. YOU CAN'T UNDO unless you save this table first
    --create_list --robot=robot_name --input_file=/path/to/file.xml 
                                          : create a list with the xml file under robot_name
@@ -125,7 +126,7 @@ encryption.
 ## Check --dump option
 my %options;
 unless (&GetOptions(\%main::options, 'dump=s', 'debug|d', ,'log_level=s','foreground', 'service=s','config|f=s', 
-		    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase','md5_encode_password',
+                    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase','sync_list_db','md5_encode_password',
 		    'close_list=s','rename_list=s','new_listname=s','new_listrobot=s','purge_list=s','create_list','instantiate_family=s','robot=s','add_list=s','modify_list=s','close_family=s','md5_digest=s',
 		    'input_file=s','sync_include=s','upgrade','upgrade_shared','from=s','to=s','reload_list_config','list=s','quiet','close_unknown','test_database_message_buffer','conf_2_db')) {
     &fatal_err("Unknown options.");
@@ -156,7 +157,8 @@ $main::options{'batch'} = 1 if ($main::options{'dump'} ||
 				$main::options{'upgrade_shared'} ||
 				$main::options{'test_database_message_buffer'} || 
 				$main::options{'conf_2_db'} || 
-				$main::options{'reload_list_config'}
+				$main::options{'reload_list_config'} ||
+                                $main::options{'sync_list_db'}
 				 );
 
 # Some option force foreground mode
@@ -923,6 +925,32 @@ elsif ($main::options{'close_family'}) {
     } 
     
     print STDOUT $string;
+    exit 0;
+}
+##########################################
+elsif ($main::options{'sync_list_db'}) {       
+    unless ($Conf{'db_list_cache'}) {
+       print STDOUT "\nSympa not configured to use database list caching \n";
+       exit 1;
+    }
+    my $listname = $main::options{'sync_list_db'};
+    if (length($listname) > 1) {
+       my ($listname, $robot) = split /\@/, $listname;
+        my $list = new List ($listname, $robot); 
+       unless (defined $list) {
+           print STDOUT "\nList '$list' does not exist. \n";
+           exit 1;
+       }
+        if (&List::_flush_list_db($listname)) {        
+           $list->_update_list_db;
+       }
+    } else {
+        &List::_flush_list_db();
+        my $all_lists = &List::get_lists('*', undef, undef, 1);
+        foreach my $list (@$all_lists) {
+           $list->_update_list_db;
+        }
+    }
     exit 0;
 }
  

@@ -1892,6 +1892,12 @@ sub save_config {
 	return undef;
     }
 
+    if ($List::use_db) {
+        unless (&_update_list_db) {
+            &do_log('err', "Unable to update list_table");
+        }
+    }
+
     return 1;
 }
 
@@ -7137,6 +7143,7 @@ sub rename_list_db {
 
     my $statement_subscriber;
     my $statement_admin;
+    my $statement_list_cache;
     
     ## Check database connection
     unless ($dbh and $dbh->ping) {
@@ -7168,6 +7175,21 @@ sub rename_list_db {
     unless ($dbh->do($statement_admin)) {
 	do_log('err','Unable to execute SQL statement "%s" : %s', $statement_admin, $dbh->errstr);
 	return undef;
+    }
+
+    if ($List::use_db) {
+      $statement_admin =  sprintf "UPDATE list_table SET name_list=%s, robot_list=%s WHERE (name_list=%s AND robot_list=%s)",
+      $dbh->quote($new_listname),
+      $dbh->quote($new_robot),
+      $dbh->quote($self->{'name'}),
+      $dbh->quote($self->{'domain'}) ;
+
+      do_log('debug', 'List::rename_list_db statement : %s',  $statement_admin );
+
+      unless ($dbh->do($statement_admin)) {
+        do_log('err','Unable to execute SQL statement "%s" : %s', $statement_admin, $dbh->errstr);
+        return undef;
+      }
     }
     
     return 1;
@@ -9770,6 +9792,7 @@ sub get_lists {
     my $robot_context = shift || '*';
     my $options = shift;
     my $requested_lists = shift; ## Optional parameter to load only a subset of all lists
+    my $use_files = shift;
 
     my(@lists, $l,@robots);
     do_log('debug2', 'List::get_lists(%s)',$robot_context);
@@ -9805,7 +9828,13 @@ sub get_lists {
 	    if ( defined($requested_lists)){
 	      @files = sort @{$requested_lists};
 	    }else {
-	      @files = sort readdir(DIR);
+              if ($use_files) {
+	        @files = sort readdir(DIR);
+              }else {
+                # get list names from list config table
+                my $files = &get_lists_db('SELECT name_list FROM list_table');
+                @files = @{$files};
+              }
 	    }
 
 	    foreach my $l (@files) {
@@ -12180,6 +12209,139 @@ sub get_list_id {
     my $self = shift;
 
     return $self->{'name'}.'@'.$self->{'domain'};
+}
+
+## Support for list config caching in database
+
+sub get_lists_db {
+    my $statement = shift;
+    return undef unless defined($statement);
+    do_log('info', 'List::get_search_list_db(%s)', $statement);
+
+    unless ($List::use_db) {
+       &do_log('info', 'Sympa not setup to use DBI');
+       return undef;
+    }
+
+    my ($l, @lists);
+
+    ## Check database connection
+    unless ($dbh and $dbh->ping) {
+       return undef unless &db_connect();
+    }
+    push @sth_stack, $sth;
+    &do_log('debug2','SQL: %s', $statement);
+    unless ($sth = $dbh->prepare($statement)) {
+       &do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
+       return undef;
+    } 
+    unless ($sth->execute) {
+       do_log('err','Unable to execute SQL statement "%s" : %s', $statement, $dbh->errstr); 
+       return undef;
+    } 
+    while ($l = $sth->fetchrow_hashref) {
+       my $name = $l->{'name_list'};
+       push @lists, $name;
+    }  
+    $sth->finish();
+    $sth = pop @sth_stack;
+
+    return \@lists;
+}
+
+sub _update_list_db
+{
+    my ($self) = shift;
+    my @admins;
+    my $i;
+    my $adm_txt;
+    my $ed_txt;
+    my $statement = sprintf "SELECT COUNT(*) FROM list_table WHERE name_list = %s AND robot_list = %s" , $dbh->quote($self->{'name'}), $dbh->quote($self->{'admin'}{'host'});  
+    unless ($sth = $dbh->prepare($statement)) {
+       do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
+       return undef;
+    }
+    my $ret;
+    unless ($sth->execute) {
+       do_log('err',"Unable to execute SQL statement '%s' : %s", $statement, $dbh->errstr);
+       return undef;
+    }
+    
+    my $op = "UPDATE";
+    my $set = "";
+    my $ret = $sth->fetchrow_arrayref;
+    $sth->finish;
+    my $count = $ret->[0];
+    unless ($count > 0) {
+       $op = "INSERT INTO";
+       $set = "";
+    }
+    my $name = $self->{'name'};
+    my $subject = $self->{'admin'}{'subject'} || '';
+    my $status = $self->{'admin'}{'status'};
+    my $robot = $self->{'admin'}{'host'};
+    my $web_archive  = &is_web_archived($self) || 0; 
+    my $topics = '';
+    if ($self->{'admin'}{'topics'}) {
+       $topics = join(',',@{$self->{'admin'}{'topics'}});
+    }
+    
+    foreach $i (@{$self->{'admin'}{'owner'}}) {
+       if (ref($i->{'email'})) {
+           push(@admins, @{$i->{'email'}});
+       } elsif ($i->{'email'}) {
+           push(@admins, $i->{'email'});
+       }
+    }
+    $adm_txt = join(',',@admins) || '';
+
+    undef @admins;
+    foreach $i (@{$self->{'admin'}{'editor'}}) {
+       if (ref($i->{'email'})) {
+           push(@admins, @{$i->{'email'}});
+       } elsif ($i->{'email'}) {
+           push(@admins, $i->{'email'});
+       }
+    }
+    $ed_txt = join(',',@admins) || '';
+    my $statement = sprintf "%s `list_table` %s SET status_list= %s, name_list=%s, robot_list=%s, subject_list=%s, web_archive_list=%s, topics_list=%s, owners_list=%s, editors_list=%s ",
+       $op, $set, $dbh->quote($status), $dbh->quote($name), 
+       $dbh->quote($robot), $dbh->quote($subject), 
+       $dbh->quote($web_archive), $dbh->quote($topics),
+       $dbh->quote($adm_txt),$dbh->quote($ed_txt);
+
+    if ($op eq "UPDATE") {
+       $statement .= sprintf " WHERE robot_list = %s AND name_list = %s ", $dbh->quote($robot), $dbh->quote($name); 
+    }
+
+    unless ($sth = $dbh->prepare($statement)) {
+       do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
+       return undef;
+    }
+    unless ($sth->execute) {
+       do_log('err','Unable to execute SQL statement "%s" : %s', $statement, $dbh->errstr);
+    }
+    return 1;
+}
+
+sub _flush_list_db
+{
+    my ($listname) = shift;
+    my $statement;
+    unless ($listname) {
+        $statement =  "TRUNCATE list_table";
+    } else {
+        $statement = sprintf "DELETE FROM list_table WHERE name_list = %s", $dbh->quote($listname);
+    } 
+
+    unless ($sth = $dbh->prepare($statement)) {
+    do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
+    return undef;
+    }
+    unless ($sth->execute) {
+    do_log('err',"Unable to execute SQL statement '%s' : %s", $statement, $dbh->errstr);
+    return undef;
+    }
 }
 
 ###### END of the List package ######
