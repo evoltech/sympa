@@ -1,14 +1,25 @@
-diff --git a/sympa-6.0.6/wwsympa/wwsympa.fcgi.in b/sympa-6.0.6/wwsympa/wwsympa.fcgi.in
-index 4df9586..1f3bc03 100644
---- a/sympa-6.0.6/wwsympa/wwsympa.fcgi.in
-+++ b/sympa-6.0.6/wwsympa/wwsympa.fcgi.in
-@@ -10135,7 +10135,8 @@ sub do_rename_list {
+diff --git a/sympa-6.1.3-src/src/etc/scenari/rename_list.owner b/sympa-6.1.3-src/src/etc/scenari/rename_list.owner
+new file mode 100644
+index 0000000..d155639
+--- /dev/null
++++ b/sympa-6.1.3-src/src/etc/scenari/rename_list.owner
+@@ -0,0 +1,4 @@
++title.gettext restricted to list owner
++
++is_owner([sender])	                 md5,smime -> do_it
++true()                    		smtp,md5,smime -> reject(reason='rename_list_listmaster')
+diff --git a/sympa-6.1.3-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.3-src/wwsympa/wwsympa.fcgi.in
+index 2ca5bab..4c3d066 100644
+--- a/sympa-6.1.3-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.3-src/wwsympa/wwsympa.fcgi.in
+@@ -10134,7 +10134,9 @@ sub _restrict_values {
+  sub do_rename_list_request {
+      &wwslog('info', 'do_rename_list_request()');
  
-      # set list status to pending if creation list is moderated
-      if ($r_action =~ /listmaster/) {
--	 $list->{'admin'}{'status'} = 'pending' ;
-+         # do not set status to pending, per riseup sysadmin
-+	 #$list->{'admin'}{'status'} = 'pending' ;
- 	 &List::send_notify_to_listmaster('request_list_renaming',$robot, 
- 					  {'list' => $list,
- 					   'new_listname' => $in{'new_listname'},
+-     my $result = &Scenario::request_action ('create_list',$param->{'auth_method'},$robot,
++    # riseup allows uses to rename their lists even though our list creation is moderated
++    # the rename_list scenario just requires that the user is the list owner
++    my $result = &Scenario::request_action ('rename_list',$param->{'auth_method'},$robot,
+ 					 {'sender' => $param->{'user'}{'email'},
+ 					  'remote_host' => $param->{'remote_host'},
+ 					  'remote_addr' => $param->{'remote_addr'}});
