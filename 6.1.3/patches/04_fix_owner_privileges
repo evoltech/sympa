@@ -1,0 +1,52 @@
+diff --git a/sympa-6.1.3-src/src/etc/edit_list.conf b/sympa-6.1.3-src/src/etc/edit_list.conf
+index 13061e4..37f9224 100644
+--- a/sympa-6.1.3-src/src/etc/edit_list.conf
++++ b/sympa-6.1.3-src/src/etc/edit_list.conf
+@@ -48,8 +48,7 @@ shared_doc.quota		owner,privileged_owner		read
+ 
+ web_archive.quota		owner,privileged_owner		read
+ 
+-review 				owner 				read
+-review 				privileged_owner 		write
++review 				privileged_owner,owner 		write
+ 
+ add 				owner,privileged_owner 		hidden
+ 
+@@ -65,7 +64,8 @@ priority 			owner,privileged_owner 		hidden
+ 
+ max_size 			owner,privileged_owner 		hidden
+ 
+-footer_type 			owner,privileged_owner 		hidden
++# we might want to rever this one to hidden? changed on user request
++footer_type 			owner,privileged_owner 		write
+ 
+ cookie 				owner,privileged_owner 		hidden
+ 
+@@ -81,20 +81,17 @@ account 			owner,privileged_owner 		hidden
+ 
+ family_name                     listmaster,privileged_owner,owner  read
+ 
+-owner 				owner 				read
+-owner.profile 			owner,privileged_owner 		read
+-owner 				privileged_owner 		write
+-owner.info	 		owner 				hidden
+-
++owner.profile 			owner,privileged_owner 		write	
++owner 				privileged_owner,owner 		write
++owner.info	 		owner,privileged_owner		hidden
++owner.gecos			owner,privileged_owner		hidden
+ owner_include			owner				read
+ 
+-editor 				owner 				read
+-editor 				privileged_owner 		write
+-
++editor 				privileged_owner,owner 		write
++editor.info			privileged_owner,owner		hidden
+ editor_include			owner				read
+ 
+-send 				owner 				read
+-send 				privileged_owner 		write
++send 				privileged_owner,owner 		write
+ 
+ status 				owner 				hidden
+ status 				privileged_owner 		read
