@@ -10134,9 +10134,7 @@ sub _restrict_values {
  sub do_rename_list_request {
      &wwslog('info', 'do_rename_list_request()');
 
-    # riseup allows uses to rename their lists even though our list creation is moderated
-    # the rename_list scenario just requires that the user is the list owner
-    my $result = &Scenario::request_action ('rename_list',$param->{'auth_method'},$robot,
+    my $result = &Scenario::request_action ('create_list',$param->{'auth_method'},$robot,
 					 {'sender' => $param->{'user'}{'email'},
 					  'remote_host' => $param->{'remote_host'},
 					  'remote_addr' => $param->{'remote_addr'}});
@@ -10251,9 +10249,9 @@ sub do_rename_list {
      }
      
      # set list status to pending if creation list is moderated
-     if ($param->{'status'} eq 'pending') {
-	 &report::notice_report_web('pending_list',{},$param->{'action'},$list);
-     }
+#     if ($param->{'status'} eq 'pending') {
+#	 &report::notice_report_web('pending_list',{},$param->{'action'},$list);
+#     }
      
      if ($in{'new_robot'} eq '$robot') {
 	 $param->{'redirect_to'} = "$param->{'base_url'}$param->{'path_cgi'}/admin/$in{'new_listname'}";

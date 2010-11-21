@@ -1,4 +1,0 @@
-title.gettext restricted to list owner
-
-is_owner([sender])	                 md5,smime -> do_it
-true()                    		smtp,md5,smime -> reject(reason='rename_list_listmaster')
