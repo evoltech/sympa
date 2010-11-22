@@ -1,10 +1,4 @@
 <!-- $Id: setlang.tt2 5675 2009-04-28 13:59:12Z david.verdin $ -->
-
-[% IF !list -%]
-[% PROCESS custom_quick_tips.tt2 %]
-[% END -%]
-
-
 <div id="setlang">
 <form action="[% path_cgi %]" method="post">
 <fieldset>

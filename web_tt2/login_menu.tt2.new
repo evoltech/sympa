@@ -22,7 +22,7 @@
 [%END%]
 </div>
 
-<!-- this is moved to the top nav
+<!-- we had this if block commented out before - not sure why -->
 [% IF auth_method == 'md5' %]
 <div class="login">
   <form  action="[% path_cgi %]" method="post">
@@ -42,7 +42,6 @@
 <div class="prefs">
 <a href="[% path_cgi %]/pref" >[%|loc%]Your preferences[%END%]</a>
 </div>
--->
 
 [% ELSE %] 
 [% PROCESS 'loginbanner.tt2' %]
@@ -50,6 +49,9 @@
 [% END %]
 </div><!-- end div=MenuBlock -->
 
-<!-- end login_menu.tt2 -->
+[% IF !list -%]
+[% PROCESS custom_quick_tips.tt2 %]
+[% END -%]
 
+<!-- end login_menu.tt2 -->
 

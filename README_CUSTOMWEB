@@ -1,0 +1,7 @@
+Web interface customizations: (incomplete!)
+
+* whole home.tt2 template
+* logout button is moved from login_menu.tt2 to nav.tt2 
+* add custom quick tips to setlang.tt2 so they end up in left sidebar in non-list view
+* remove list of lists tab from nav
+* move preferences link to top nav

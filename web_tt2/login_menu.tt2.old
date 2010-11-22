@@ -1,0 +1,67 @@
+<!-- RCS Identication ; $Revision: 4016 $ ; $Date: 2006-11-14 16:47:29 +0000 (Tue, 14 Nov 2006) $ -->
+
+<!-- begin login_menu.tt2 -->
+
+[% IF user.email -%]
+
+<div class="MenuBlock">
+<div id="Identity">[% user.email %]<br />
+<span>
+[% IF is_listmaster %][%|loc%]Listmaster[%END%]
+[% ELSIF is_privileged_owner %][%|loc%]Privileged owner[%END%]
+[% ELSIF is_owner %][%|loc%]Owner[%END%]
+[% ELSIF is_editor %][%|loc%]Editor[%END%]
+[% ELSIF is_subscriber %][%|loc%]Subscriber[%END%]
+[% END %]
+</span>
+<!--
+[% IF auth_method == 'md5' -%]
+<form id='logout' action="[% path_cgi %]" method="post">
+  <fieldset>
+  <input type="hidden" name="action" value="logout" />
+  [% IF referer -%]
+    <input type="hidden" name="referer" value="[% referer %]" />
+  [% ELSE -%]
+    <input type="hidden" name="previous_action" value="[% home %]" />
+  [% END -%]
+  <input class="plainlink" type="submit" name="action_logout" value="[%|loc%]Logout[%END%]" />
+  </fieldset>
+</form>
+[% END -%]
+-->
+</div>
+</div>
+
+[% ELSE -%]
+
+<div class="MenuBlock menu-login">
+[% IF use_sso -%]
+  [% PROCESS sso_login.tt2 %]
+[% END -%]
+<form action="[% path_cgi %]" method="post" class="menu-login"> 
+<fieldset>
+  <input type="hidden" name="previous_action" value="[% previous_action %]" />
+  <input type="hidden" name="previous_list" value="[% previous_list %]" />
+	<input type="hidden" name="referer" value="[% referer %]" />
+  <input type="hidden" name="list" value="[% list %]" />
+  <input type="hidden" name="action" value="login" />
+  <label for="email_login">[%|loc%]email address[%END%]:</label><br />
+  <input type="text" name="email" id="email_login" size="18" value="[% init_email %]" /><br />
+  <label for="passwd" >[%|loc%]password[%END%]:</label><br />
+  <input type="password" name="passwd" id="passwd" size="8" /> &nbsp;&nbsp;
+  <input class="MainMenuLinks" type="submit" name="action_login" value="[%|loc%]Login[%END%]" />
+</fieldset>
+</form>
+[% IF use_passwd == '1' -%]
+  <a class="menuLinks" href="[% path_cgi %]/firstpasswd/[% escaped_init_email %]">[%|loc%]First login?[%END%]</a><br />
+  <a class="menuLinks" href="[% path_cgi %]/renewpasswd">[%|loc%]Lost password?[%END%]</a>
+[% END -%]
+</div>
+
+[% IF !list -%]
+[% PROCESS custom_quick_tips.tt2 %]
+[% END -%]
+
+[% END -%]
+<!-- end login_menu.tt2 -->
+

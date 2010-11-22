@@ -4,8 +4,7 @@
 
 <div class="block">
 
-<!--
-[% IF get_which_owner.size > 0 %]
+[% IF 0 && get_which_owner.size > 0 %]
   <h2>[%|loc%]Copy an existing list.[%END%]</h2>
 <br />
 
@@ -24,7 +23,7 @@
   </fieldset>
   </form>
 [% END %]
--->
+
 
 <h2>[%|loc%]Create a list using a template[%END%] <a class="input" href="[% path_cgi %]/nomenu/help/admin#create_list" title="[%|loc%]Open in a new window[%END%]" onclick="window.open('','wws_help','toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,copyhistory=no,width=400,height=200')" target="wws_help">[%|loc%]Help[%END%]</a></h2>
 <br />
