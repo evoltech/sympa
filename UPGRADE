@@ -77,3 +77,6 @@ Instructions to upgrade sympa for riseup:
 
 5c. scenari files
    copy scenari files from scenari/ to /home/sympa/etc/scenari
+
+5d. create_list_templates
+   create_list_templates -> /home/sympa/etc/
