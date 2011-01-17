@@ -1,0 +1,75 @@
+##
+##   Public Working Group
+##
+
+subject [% subject %]
+
+status [% status %]
+
+custom_subject [% listname %]
+
+[% IF topics -%]
+topics [% topics %]
+[% END %]
+
+info anyone
+
+subscribe approved_verified
+
+unsubscribe anyone_notify
+
+send anyone_moderated
+
+[% FOREACH o = owner -%]
+owner
+  email [% o.email %]
+  profile privileged
+  [% IF o.gecos -%] 
+  gecos [% o.gecos %]
+  [% END %]
+
+editor
+  email [% o.email %]
+
+[% END %]
+
+[% IF editor -%]
+[% FOREACH e = editor -%]
+editor
+  email [% e.email %]
+
+[% END %]
+[% END %]
+
+web_archive
+  access anyone
+
+archive
+  period month
+  access owner
+
+review editors
+
+shared_doc
+d_edit editors
+d_read anyone
+
+clean_delay_queuemod 15
+
+reply_to_header
+value sender
+
+invite default
+
+digest 5 20:56
+
+pictures_feature on
+
+creation
+  date [% creation.date %]
+  date_epoch [% creation.date_epoch %]
+[% IF creation_email -%]
+  email [% creation_email %]
+[% END %]
+
+serial 0

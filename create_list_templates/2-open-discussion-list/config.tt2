@@ -1,0 +1,68 @@
+##
+##  Open Discussion List
+##
+##
+
+subject [% subject %]
+
+custom_subject [% listname %]
+
+status [% status %]
+
+visibility noconceal
+
+subscribe verified
+
+unsubscribe verified
+
+send members_or_moderated
+
+web_archive
+access anyone
+
+archive
+access owner
+period month
+
+[% FOREACH o = owner -%]
+owner
+  email [% o.email %]
+  profile privileged
+  [% IF o.gecos -%]
+  gecos [% o.gecos %]
+  [% END -%]
+
+editor
+  email [% o.email %]
+
+[% END -%]
+
+[% IF editor -%]
+[% FOREACH e = editor -%]
+editor
+  email [% e.email %]
+  reception mail
+
+[% END %]
+[% END %]
+
+[% IF topics -%]
+topics [% topics %]
+[% END -%]
+
+digest 1,4 13:26
+
+review owners
+
+shared_doc
+d_edit default
+d_read public
+
+pictures_feature on
+
+creation
+date_epoch [% creation.date_epoch %]
+date       [% creation.date %]
+[% IF creation_email -%]
+email      [% creation_email %]
+[% END -%]

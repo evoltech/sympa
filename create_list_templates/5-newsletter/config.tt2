@@ -1,0 +1,69 @@
+##
+##  News Letter
+##
+
+subject [% subject %]
+
+custom_subject [% listname %]
+
+status [% status %]
+
+[% IF topics -%]
+topics [% topics %]
+[% END %]
+
+send newsletter
+
+visibility anyone
+
+web_archive
+  access anyone
+
+archive
+  period month
+  access owner
+
+reply_to_header
+value sender
+
+[% FOREACH o = owner -%]
+owner
+  email [% o.email %]
+  profile privileged
+  [% IF o.gecos -%] 
+  gecos [% o.gecos %]
+  [% END %]
+
+editor
+  email [% o.email %]
+  
+[% END %]
+
+[% IF editor -%]
+[% FOREACH e = editor -%]
+editor
+  email [% e.email %]
+
+[% END %]
+[% END %]
+
+clean_delay_queuemod 15
+
+review owners
+
+invite default
+
+shared_doc
+d_edit editors
+d_read anyone
+
+creation
+  date [% creation.date %]
+  date_epoch [% creation.date_epoch %]
+[% IF creation_email -%]
+  email [% creation_email %]
+[% END %]
+
+serial 0
+
+
