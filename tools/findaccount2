@@ -1,0 +1,7 @@
+#!/bin/sh
+
+source /home/sympa/tools/common
+
+mysql -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+"select list_subscriber from subscriber_table where user_subscriber like '$1'"
+

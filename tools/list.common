@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+##
+## a common inlude file for 
+## the command line versions of list
+## commands
+##
+
+
+use lib '/home/sympa/bin';
+use Conf; # to load Sympa conf which is needed by List.pm
+use List;
+use Log; # if you want to get logs of List.pm
+
+# Load the Sympa configuration :
+unless (Conf::load('/etc/sympa/sympa.conf')) {
+    print STDERR "Can't load Sympa configuration file";
+    exit 1;
+}
+
+# If you want to get logs of List.pm
+# &do_openlog($Conf{'syslog'}, $Conf{'log_socket_type'}, 'sympa');
+
+# check availabity of Sympa database
+if ($Conf{'db_name'} and $Conf{'db_type'}) {
+    unless ($List::use_db = &List::probe_db()) {
+         print STDERR "Sympa can't connect to database";
+         exit 1;
+    }
+} 
+&List::_apply_defaults(); # else reading of a List configuration won't work 
+

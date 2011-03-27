@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+
+##
+## command line script to close a list
+## usage: 
+##  list.close <listname>
+##
+
+require 'list.common';
+
+my $list = new List($ARGV[0]);
+
+if ($list->{'admin'}{'status'} eq 'closed') {
+	print STDERR "Already closed";
+    return;
+}
+                                                                            
+## Dump subscribers
+$list->_save_users_file("$list->{'dir'}/subscribers.closed.dump");
+                                                                            
+## Delete users
+my @users;
+for ( my $user = $list->get_first_user(); $user; $user = $list->get_next_user() ){
+    push @users, $user->{'email'};
+}
+$list->delete_user(@users);
+                                                                            
+## Change status & save config
+$list->{'admin'}{'status'} = 'closed';
+$list->{'admin'}{'defaults'}{'status'} = 0;
+$list->save_config("root@riseup.net");
+$list->savestats();
+

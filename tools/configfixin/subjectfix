@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Written by micah to fix lists that don't have subjects set
+# sets the subject to whatever the "custom_subject" variable is
+# set to in the config file. If "custom_subject" is not set then
+# it sets the subject to the listname
+# 07/29/03
+# upgrade by pietro to reflect new expl dir - 06/19/2007
+
+listsdir=/crypt/sympa/expl/
+
+for list in `find $listsdir -maxdepth 2 -type f -name config \
+	     | xargs grep -L "^subject"  | cut -d/ -f5`
+do
+    custom_subject=`cat $listsdir/$list/config | grep "^custom_subject" | cut -d ' ' -f 2-`
+        if [ -n "$custom_subject" ]
+        then
+            echo "Correcting $list:$topic"
+                cp $listsdir/$list/config $listsdir/$list/config_bak.subjectfix
+                echo "subject $custom_subject" >> $listsdir/$list/config
+                subject=`cat $listsdir/$list/config |grep "^subject"`
+                echo "Fixed subject: $subject"
+                echo ""
+        else
+            echo "No custom_subject set for $list, setting to listname"
+                cp $listsdir/$list/config $listsdir/$list/config_bak.subjectfix
+                echo "subject $list" >> $listsdir/$list/config
+                subject=`cat $listsdir/$list/config |grep "^subject"`
+                echo "Fixed subject: $subject"
+                echo ""
+        fi
+
+done

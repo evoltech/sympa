@@ -1,0 +1,128 @@
+#!/usr/bin/python
+
+import sys,string,glob,os
+import xreadlines, re
+
+usage = "usage: %s <listdir>" %  os.path.basename(sys.argv[0])
+
+if len(sys.argv) < 2:
+    print usage
+    sys.exit(-1)
+
+listdir = sys.argv[1]
+buf = ""
+needaccess = 0
+hasaccess = 0
+needempty = 0
+hasempty = 0
+not_ok = 0
+private = 0
+
+isempty = re.compile(r"^[\t \n]+$")
+isaccess = re.compile(r".*access .*")
+isprivate = re.compile(r".*Private Working Group *$")
+web_archive_paragraph = re.compile(r"^web_archive *$")
+visibility_paragraph = re.compile(r"^visibility")
+
+for listconfig in glob.glob(listdir + '/*' + '/config'):
+    
+    # Create a file to work with, will be later renamed as the config
+    # if there were changes that were made
+    new_config_name = "%s_tmp" % listconfig
+    new_config = open(new_config_name, 'w')
+    
+	
+    # Start stepping through the config file
+    for line in xreadlines.xreadlines(open(listconfig)):
+	buf = buf + line
+       
+	if isempty.match(line):
+	    if needaccess == 1 and hasaccess == 0:
+		sys.stderr.write("Not ok1: %s \n--------\n%s---------\n" % (listconfig, buf))
+
+		if private == 1:
+		    print >> new_config, "web_archive\naccess members\n"
+	     
+		else:
+		    print >> new_config, "web_archive\naccess anyone\n"
+
+		not_ok = 1
+		needempty = 1
+		hasempty = 1
+	 
+	    elif needempty == 1 and hasempty == 1:
+		pass
+	 
+	    else:
+		new_config.write(buf)
+
+	    # init for next paragraph
+	    needmail = 0
+	    hasmail = 0
+	    needaccess = 0
+	    hasaccess = 0
+	    needempty = 0
+	    hasempty = 0
+	    buf = ""
+    
+	elif isprivate.match(line):
+	    private = 1
+      
+	elif needaccess == 1 and hasaccess == 1 and needempty == 1 and hasempty == 0:
+	    sys.stderr.write("Not ok2: %s \n--------\n%s---------\n" % (listconfig, buf))
+	    not_ok = 1
+	    line = string.split(buf,'\n')
+	    print >> new_config, "%s\n%s\n" % (line[0], line[1])
+	    print >> new_config, "%s\n" % line[2]
+	    hasempty = 1
+	    
+	elif web_archive_paragraph.match(line):
+	    if needempty == 1 and hasempty == 1:
+		sys.stderr.write("Not ok3: %s \n--------\n%s---------\n" % (listconfig, buf))
+		not_ok = 1
+	    else:
+		needaccess = 1 # need to have an access section after web_archive
+		
+	elif visibility_paragraph.match(line):
+	    needempty = 1 # need to have an empty line after visibility
+		
+	elif needaccess == 1 and isaccess.match(line):
+	    hasaccess = 1
+	    needempty = 1 # needs to be empty after this line
+	    
+	elif needempty == 1 and hasempty == 0:
+	    sys.stderr.write("Not ok4: %s \n--------\n%s---------\n" % (listconfig, buf))
+	    not_ok = 1
+	    line = string.split(buf,'\n')
+	    print >> new_config, "%s\n" % line[0]
+	    print >> new_config, "%s\n" % line[1]
+	    needempty = 0
+	    hasempty = 1
+	    buf = ""
+	    # print "needmail: %d hasmail: %d hasaccess: %d needaccess: %d needempty: %d hasempty: %d" % (needmail,hasmail,hasaccess,needaccess,needempty,hasempty)
+	else:
+	    # nothing special
+	    pass
+	
+    if needaccess == 1 and hasaccess == 0:
+	sys.stderr.write("Not ok5: %s \n--------\n%s---------\n" % (listconfig, buf))
+	not_ok = 1
+	    
+    else:
+	new_config.write(buf)
+    
+    new_config.flush()
+    new_config.close()
+    
+    # If there was a problem, so we need to take the corrected config file
+    # and put it in the right place after backing up the existing one
+    if not_ok:
+	# Backup the config file, just in case
+	os.system('cp %s %s_bak.paragraphfix' % (listconfig, listconfig))
+	# Rename the temporary file to the perm config
+	os.rename(new_config_name,listconfig)
+
+    # Everything was fine with the config file, clean up and go home
+    else:
+	os.remove(new_config_name)
+    

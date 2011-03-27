@@ -1,0 +1,10 @@
+
+for i in rawdumps/*; do
+  echo emails/`basename $i`.eml
+  grep 'email' $i | cut -f2 -d\  > emails/`basename $i`.eml
+done
+
+for i in rawdumps/*; do
+  echo emails/`basename $i`.aol
+  grep 'email' $i | grep 'aol.com' | cut -f2 -d\  > emails/`basename $i`.aol;
+done

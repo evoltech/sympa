@@ -1,0 +1,518 @@
+#!/usr/bin/php4 -q
+<?php
+
+/*****************************************************
+ *
+ * finds lists which are 'dead' using these criteria:
+ * - lists which have been closed for more than $closed_age months
+ * - lists with no new archives for the last $dormant_age months
+ *   
+ ****************************************************/
+
+##
+## CONFIGURATION VARIABLES
+## 
+
+$home = "/home/sympa";
+$bin  = "$home/bin";
+$expl = "$home/expl";
+$arc  = "$home/arc";
+$cemetary    = "$home/cemetary";
+$defaultdomain = 'lists.riseup.net';
+$closed_age  = 4;
+$dormant_age = 12;
+
+$closed_datafile  = dirname(__FILE__) . "/data/closedlists";
+$dormant_datafile = dirname(__FILE__) . "/data/dormantlists";
+$max = 30; # how many to lists show at a time
+
+# the from address for the close list notice. 
+$from = "no-reply@riseup.net";
+
+# the close list notice send to list owners
+# do not put single or double quotes in this string!!
+$close_msg = 'Hello,
+
+Your list appears to be dormant:
+
+   $list@$domain
+
+It has not had any traffic for over $dormant_age months, so we have
+disabled it. To save space, it will be removed in four more
+months. 
+
+If you still want the list, visit https://user.riseup.net,
+create a help ticket, and ask for your list to be restored. 
+
+You should still be able to login and download the list
+archives:
+
+- Login at http://$domain
+ - Go to http://$domain/www/admin/$list
+ - Click Manage Archives.
+
+In solidarity,
+the riseup collective';
+
+##
+## CODE BEGINS HERE
+## 
+
+$argv = &$_SERVER['argv'];
+$argc = &$_SERVER['argc'];
+
+$main = array(
+	'updateclosed'  => 'Closed lists: update data.',
+	'autoremove'    => 'Closed lists: remove all.',
+	'rmclosed'      => 'Closed lists: choose which to remove.',
+	'updatedormant' => 'Dormant lists: update data.',
+	'autodormant'   => 'Dormant lists: close all.',
+	'rmdormant'     => 'Dormant lists: choose which to close.',
+	'quit'          => 'Quit'
+);
+
+while (true) {
+	$action = menu($main, 'List Ecology');
+	
+	if ($action == 'updateclosed') {
+		do_update_closed();
+		echo "Finished. Hit return to continue\n";
+		`read`;
+	}
+	elseif ($action == 'updatedormant') {
+		do_update_dormant();
+		echo "Finished. Hit return to continue\n";
+		`read`;
+	}
+	elseif ($action == 'rmclosed') {
+		while(true) {
+			$list = closed_menu($closed_datafile, $max);
+			list($list, $domain) = explode('@', $list);
+			if ($list == 'return')
+				break;
+			else {
+				while(true) {
+					$action = close_list_menu($list, $domain);
+					if ($action == 'return')
+						break;
+					elseif($action == 'config') {
+						#echo `cat $expl/$domain/$list/config`;
+						echo `cat $expl/$list/config`;
+						`read`;
+						continue;
+					}
+					elseif($action == 'info') {
+						#echo `cat $expl/$domain/$list/info`;
+						echo `cat $expl/$list/info`;
+						`read`;
+						continue;
+					}		
+					else {
+						$data = read_array($closed_datafile);
+						unset($data["$list@$domain"]);
+						write_array($data, $closed_datafile);
+
+						if ($action == 'remove') {
+							#`mv $expl/$domain/$list/ $cemetary/$list@$domain`;
+							`mv $expl/$list/ $cemetary/$list@$domain`;
+							`mv $arc/$list@$domain/ $cemetary/$list@$domain/arc`;
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	elseif ($action == 'rmdormant') {
+		while(true) {
+			$list = dormant_menu($dormant_datafile, $max);
+			list($list, $domain) = explode('@', $list);
+			if ($list == 'return')
+				break;
+			else {
+				while(true) {
+					$action = dormant_list_menu($list, $domain);
+					if ($action == 'return')
+						break;
+					elseif($action == 'config') {
+						#echo `cat $expl/$domain/$list/config`;
+						echo `cat $expl/$list/config`;
+						`read`;
+						continue;
+					}
+					elseif($action == 'info') {
+						#echo `cat $expl/$domain/$list/info`;
+						echo `cat $expl/$list/info`;
+						`read`;
+						continue;
+					}		
+					else {
+						close_list("$list@$domain");
+						break;
+					}
+				}
+			}
+		}
+	}
+	elseif ($action == 'autodormant') {
+		$lists = file($dormant_datafile);
+		foreach ($lists as $list) {
+			$list=trim($list);
+			if (empty($list)) continue;
+			echo("$list: \n");
+			echo(trim(`if [ -e $arc/$list ]; then ls -C $arc/$list; else echo none; fi`));
+			echo("\n");
+			close_list($list);
+			sleep(1);
+		}
+	}
+	elseif ($action == 'autoremove') {
+		$lines = file($closed_datafile);
+		foreach ($lines as $line) {
+			list($list, $time) = explode(' ',trim($line));
+			list($list, $domain) = explode('@', $list);
+			echo("\n$list@$domain: ");
+
+			$data = read_array($closed_datafile);
+			unset($data["$list@$domain"]);
+			write_array($data, $closed_datafile);
+
+			#`[ -d $expl/$domain/$list/ ] && mv -v $expl/$domain/$list/ $cemetary/$list@$domain`;
+			`[ -d $expl/$list/ ] && mv -v $expl/$list/ $cemetary/$list@$domain`;
+			`[ -d $arc/$list@$domain/ ] && mv -v $arc/$list@$domain/ $cemetary/$list@$domain/arc`;
+
+			echo("removed.");
+			sleep(1);
+		}
+	}
+	elseif ($action == 'quit') {
+		die("Bye\n");
+	}
+}
+
+return;
+
+#####################################
+## MENU HANDLERS
+
+function closed_menu($path, $max=100) {
+	$data = file($path);
+	$data = array_slice($data, 0, $max);
+	foreach($data as $i) {
+		list($list, $time) = explode(' ',trim($i));
+		$date = date("Y-m-d",$time);
+		$menu[$list] = "$date -- $list";
+	}
+	asort($menu);
+	$menu['return'] = 'Return to main menu';
+	return menu($menu, 'Closed Lists (by date closed)');
+}
+
+function close_list_menu($list,$domain) {
+	global $expl, $arc;
+    #echo ("List closed by: " . get_update_user("$expl/$domain/$list/config") . "\n");
+    echo ("List closed by: " . get_update_user("$expl/$list/config") . "\n");
+	echo "Archives: \n";
+	echo(`if [ -e $arc/$list@$domain ]; then ls $arc/$list@$domain; else echo none; fi`);
+	$menu = array(
+		'remove' => 'Remove list',
+		'ok'     => 'Mark as ok',
+		'config' => 'Show config',
+		'info'   => 'Show description',
+		'return' => 'Return'
+	);
+	return menu($menu, "$list@$domain:", false);
+}
+
+function dormant_menu($path, $max=100) {
+	$data = file($path);
+	$data = array_slice($data, 0, $max);
+	$menu = array();
+	foreach($data as $i) {
+		$list = trim($i);
+		$menu[$list] = $list;
+	}
+	asort($menu);
+	$menu['return'] = 'Return to main menu';
+	return menu($menu, 'Dormant Lists');
+}
+
+function dormant_list_menu($list,$domain) {
+	global $expl, $arc;
+	#$admins = get_admins("$expl/$domain/$list/config");
+	$admins = get_admins("$expl/$list/config");
+    if (count($admins)) {
+    	echo("List admins: " . join(' ', $admins) . "\n");
+    	$config = true;
+    }
+    else {
+    	echo("List admins: no configuration!\n");
+    	$config = false;
+    }
+	echo("Archives: ");
+	echo(`if [ -e $arc/$list@$domain ]; then ls -C $arc/$list@$domain; else echo none; fi`);
+	if ($config) {
+		$menu = array(
+			'close'  => 'Close list',
+			'remove' => 'Remove archives',
+			'ok'     => 'Mark as ok',
+			'config' => 'Show config',
+			'info'   => 'Show description',
+			'return' => 'Return'
+		);
+	}
+	else {
+		$menu = array(
+			'remove' => 'Remove archives',
+			'ok'     => 'Mark as ok',
+			'return' => 'Return'
+		);
+	}
+	return menu($menu, "$list@$domain:", false);
+}
+
+/********
+ *
+ * updates the data files for old, closed, and dormant lists
+ *
+ ********/
+ 
+function do_update_closed() {
+	global $expl, $closed_datafile, $closed_age, $defaultdomain;
+	
+	$old = array();
+	$closed = `find $expl -follow -maxdepth 3 -type f -name config | xargs grep -l "^status closed"`;
+	$closed = split("\n",trim($closed));
+	$threemonthsago = mktime (0,0,0,date("m")-$closed_age,date("d"),date("Y"));
+	foreach($closed as $config) {
+		$domain = basename(dirname(dirname($config)));
+		$list = basename(dirname($config));
+		if ($domain == 'expl') {
+			$domain = $defaultdomain;
+		}
+		echo "$list@$domain\n";
+		$updatetime = get_time($config,'update');
+		if ($updatetime == 0)
+			$updatetime = get_time($config,'creation');
+
+		if ($updatetime < $threemonthsago)
+			$old["$list@$domain"] = $updatetime;
+	}
+	write_array($old, $closed_datafile);
+}
+
+function do_update_dormant() {
+	global $expl, $arc, $dormant_datafile, $dormant_age;
+
+	$dormant = array();
+	# create a list of the last $dormant_age months
+	for($i=0; $i<=$dormant_age; $i++) {
+		$months[] = date("Y-m", mktime (0,0,0,date("m")-$i,date("d"),date("Y")) );
+	}
+	$oldtime = mktime(0,0,0,date("m")-$dormant_age,date("d"),date("Y"));
+	$lists = `find $arc -mindepth 1 -maxdepth 1 -follow -type d -printf "%f\n"`;
+	$lists = split("\n",trim($lists));
+	
+	#$lists = array('mail@lists.riseup.net');
+	foreach($lists as $list) {
+		$found = false;
+		list($list, $domain) = explode('@', $list);
+		foreach($months as $month) {
+			if (is_dir("$arc/$list@$domain/$month")) {
+				$found = true;
+				#echo "found $arc/$list@$domain/$month\n";
+				break;
+			}
+		}
+		if ($found == false) {
+			#$config = "$expl/$domain/$list/config";
+			$config = "$expl/$list/config";
+			if (file_exists($config)) {
+				// skip over lists which have had their configs modified.
+				#echo `ls -l $expl/$domain/$list/config`;
+				$updatetime = get_time($config);
+				if ($updatetime > $oldtime) {
+					echo "$list@$domain: skipping because config changed\n";
+					continue;
+				}
+			}
+			$dormant[] = "$list@$domain\n";
+			echo "$list@$domain: dormant\n";
+		}
+	}
+	write_array($dormant, $dormant_datafile, false);
+}
+
+#####################################
+## HELPER FUNCTION
+
+function menu($menu, $text, $clear=true) {
+	$cmd = '';
+	if ($clear)
+		$cmd .= "clear\n";
+	$cmd .= "echo\necho '$text'\necho\nsleep 0.1\n";
+	$cmd .= "select item in \\\n";
+	foreach($menu as $action => $c) {
+		$cmd .= "'$c' \\\n";
+	}
+	$cmd .= "; do\necho \$item\nbreak\ndone\n";
+	while(true) {
+		$ret = array_search(system($cmd), $menu);
+		if ($ret) return $ret;
+	}
+}
+
+function preg_match_file($pattern, $filename, &$matches) {
+	ob_start();
+    readfile($filename);
+    $data = ob_get_contents();
+    ob_end_clean();
+	$status = preg_match($pattern,$data,$matches);
+	return $status;
+}
+
+function write_array($array, $filename, $writekeys=true) {
+	$out = fopen($filename, 'w');
+	if ($out === false) die("Could not open $filename\n");
+	if ($writekeys) {
+		foreach($array as $key => $value) {
+			fwrite($out, "$key $value\n");
+		}
+	}
+	else {
+		foreach($array as $value) {
+			fwrite($out, "$value\n");
+		}
+	}
+	fclose($out);
+}
+
+function read_array($filename, $writekeys=true) {
+	$data = file($filename);
+	if (!$writekeys) {
+		foreach($data as $i) {
+			$array[] = trim($i);
+		}
+		return $array;
+	}
+	else {
+		$array = array();
+		foreach($data as $i) {
+			list($key, $value) = explode(' ',trim($i));
+			if ($key != '' && $value != '')
+				$array[$key] = $value;
+		}
+		return $array;
+	}
+}
+
+function get_update_user($configfile) {
+	$f = fopen($configfile,'r');
+	while ($f && !feof($f)) {
+		$line = trim(fgets($f,2048));
+		if ($line == 'update') {
+			while (!feof($f)) {
+	   			$line = trim(fgets($f,2048));
+				if ($line == '')
+					break;
+				elseif(preg_match("/^\s*email (.*)$/", $line,$matches)) {
+					return $matches[1];
+					break;
+				}
+			}
+		}
+	}
+	return 'error';
+
+}
+
+/** 
+ *
+ * looking for:
+ *  update
+ *  date_epoch 1070329881
+ *  date 01 Dec 2003 at 17:51:21
+ *  email elijah@riseup.net
+ *
+ **/
+
+function get_time($configfile, $stanza='update') {
+	$f = fopen($configfile,'r');
+	while ($f && !feof($f)) {
+		$line = trim(fgets($f,2048));
+		if ($line == $stanza) {
+			while (!feof($f)) {
+	   			$line = trim(fgets($f,2048));
+				if ($line == '')
+					break;
+				elseif(preg_match("/^\s*date_epoch (.*)$/", $line,$matches))
+					return $matches[1];
+			}
+		}
+	}
+	return '0';
+}
+
+## 
+## returns all owners and editors of a list
+##
+
+function get_admins($file) {
+	if (!file_exists($file)) return;
+
+	$admins = array();	
+	$f = fopen($file,'r');
+	while ($f && !feof($f)) {
+		$line = trim(fgets($f,2048));
+		if ($line == 'owner' || $line == 'editor') {
+			while (!feof($f)) {
+		 	   $line = trim(fgets($f,2048));
+				if ($line == '')
+					break;
+				elseif(preg_match("/^\s*email (.*)$/", $line,$matches)) {
+					$admins[] = $matches[1];
+					break;
+				}
+			}
+		}
+	}
+	$admins = array_unique($admins);
+	return $admins;
+}
+
+function remove_from_datafile($datafile, $text) {
+	$data = read_array($datafile, false);
+	$data = array_flip($data);
+	unset($data[$text]);
+	$data = array_flip($data);
+	write_array($data, $datafile, false);
+}
+
+/* takes list as listname@domain */
+function close_list($list) {
+	global $expl, $close_msg, $dormant_age, $dormant_datafile, $arc, $cemetary, $bin, $from;
+
+	list($list, $domain) = explode('@', trim($list));
+	#$admins = get_admins("$expl/$domain/$list/config");
+	$admins = get_admins("$expl/$list/config");
+
+	if (count($admins) == 0) { 
+		# no config
+		echo ". moving archives to cemetary.";
+		`mv $arc/$list@$domain/ $cemetary/arc-$list@$domain`;
+	}
+	else {
+		$ok = system("$bin/sympa.pl --close_list $list@$domain");
+		echo "\n";
+		if ($ok === FALSE) {
+			die("Could not call sympa.pl --close_list\n");
+		}
+		else {
+			eval("\$str = \"$close_msg\";");
+			mail(join(',',$admins), "List Closed: $list@$domain", $str,"From: $from");
+		}
+	}
+	remove_from_datafile($dormant_datafile, "$list@$domain");
+}
+
+?>

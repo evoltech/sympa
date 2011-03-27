@@ -1,0 +1,58 @@
+#!/bin/sh
+
+
+if [ $# -lt 2 ]; then
+	echo "Usage: remove_user email@address.here list_name"
+	echo "example: remove_user micah@riseup.net test"
+	echo " (special listname 'ALL' can be used to unsubscribe user from all lists) "
+	exit 1
+fi
+
+source /home/sympa/tools/common
+
+
+if [ "$2" == "ALL" ]; then
+	LISTS=`mysql -s -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME \
+	--execute "select list_subscriber from subscriber_table where user_subscriber='$1'";`
+	echo "removing $1 from:"
+	echo "$LISTS"
+	mysql -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute "delete from subscriber_table where user_subscriber='$1'"
+	echo -n "removing account from system completely in 5 seconds "
+	sleep 1
+	echo -n "."
+	sleep 1
+	echo -n "."
+	sleep 1 
+	echo -n "."
+	sleep 1 
+	echo -n "."
+	sleep 1
+	echo "."
+	mysql -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute "delete from user_table where email_user='$1'"
+	echo "done"
+else
+	# First see if the user actually is a member of that list
+	
+	USER=`mysql -s -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME \
+	--execute "select user_subscriber from subscriber_table where \
+	user_subscriber='$1' and list_subscriber='$2'";`
+	
+	LIST=`mysql -s -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME \
+	--execute "select list_subscriber from subscriber_table where \
+	user_subscriber='$1' and list_subscriber='$2'";`
+		
+	if [ "$1" = "$USER" -a $2 = "$LIST" ] 
+	then
+		echo "Found: $USER subscribed to $LIST"
+		echo -n "Removing.... "
+	
+		mysql  -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+		"delete from subscriber_table where user_subscriber='$1' \
+		and list_subscriber='$2'";
+	
+		echo "done."
+	else
+		echo "$1 was not found to be subscribed to $2!"
+		exit 1
+	fi
+fi	

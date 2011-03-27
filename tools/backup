@@ -1,0 +1,61 @@
+#!/bin/sh
+
+#
+# this scripts backs up vital sympa data and copies it to a remote machine.
+#
+# TODO: couldn't get working with mysql user 'sympa'. why? should NOT be root.
+#
+# to get rsync working without specifying a password:
+# (list machine is called 'list' and backup machine is called 'backup')
+# sympa@list> ssh-keygen -t dsa
+# sympa@backup> scp sympa@list:~/.ssh/id_dsa.pub ~
+# sympa@backup> cat ~/id_dsa.pub >> ~/.ssh/authorized_keys 
+#
+
+source ./common
+
+today=`date +%Y%m%d`
+cd /var/backups/sympa
+
+# tar up all config files
+echo "1. tar up all the config files"
+tar --create --file=configs.$today.tar --files-from=/dev/null
+find /home/sympa/expl -maxdepth 3 -type f -name config \
+  -exec tar -P --append --file=configs.$today.tar \{\} \;
+echo
+
+# tar up sympa installation
+echo "2. tar up sympa installation"
+tar -Pcf sympa.$today.tar /home/sympa/etc /home/sympa/bin /home/sympa/tools
+echo
+
+# export data
+echo "3. export mysql databases"
+mysqldump --user=$DB_USER --password=$DB_PASS -T/var/backups/sympa $DB_NAME
+
+# rename for today's date
+echo "4. tag dumps with proper date"
+mv subscriber_table.sql subscriber_table.$today.sql
+mv subscriber_table.txt subscriber_table.$today.txt
+mv user_table.sql user_table.$today.sql
+mv user_table.txt user_table.$today.txt
+echo
+
+# compress files
+echo "5. compress things"
+bzip2 -q -f /var/backups/sympa/*
+echo
+
+# copy to backup server
+echo "6. sync to backup server:"
+rsync -rv --size-only --delete -e ssh \
+	/var/backups/sympa \
+	mail.riseup.net:/var/backups
+echo
+
+# remove old backup files
+echo "7. remove old backup files"
+find . -mtime +14 -exec rm \{\} \;
+echo
+
+echo "done"

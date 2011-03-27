@@ -1,0 +1,24 @@
+#!/bin/sh
+
+listsdir=/home/sympa/expl/lists.riseup.net
+lower='abcdefghijklmnopqrstuvwxyz'
+upper='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+for list in `find /home/sympa/expl -maxdepth 3 -type f -name config \
+             | xargs egrep 'EDITORS|MEMBERS|ANYONE|IMPOSSIBLE|OWNERS|APPROVED\
+		    |VERIFIED|DEFAULT' | cut -d/ -f6`
+do
+  echo "Correcting $list sceneri..."
+  cp $listsdir/$list/config $listsdir/$list/config_bak.scenerifix
+
+  linenumber=`egrep -n 'EDITORS|MEMBERS|ANYONE|IMPOSSIBLE|OWNERS|APPROVED\
+  			|VERIFIED|DEFAULT' \
+			$listsdir/$list/config_bak.scenerifix \
+			|awk -F: '{print $1}'`
+
+  cat $listsdir/$list/config_bak.scenerifix | \
+      sed ''$linenumber'y/'$upper'/'$lower'/' > $listsdir/$list/config
+  diff $listsdir/$list/config_bak.scenerifix $listsdir/$list/config
+  sleep 5
+done

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Written by micah to deal with topics having commas at the end
+# 07/15/03
+# Updated by micah to deal with "Argument list too long" error - 07/27/03
+
+listsdir=/crypt/sympa/expl
+
+for list in `find $listsdir -maxdepth 3 -type f -name config \
+	     | xargs egrep "topics .*,$" | cut -d/ -f6`
+do
+	topic=`cat $listsdir/$list/config |grep topics`
+	echo "Correcting $list:$topic"
+	cp $listsdir/$list/config $listsdir/$list/config_bak.topicfix
+	cat $listsdir/$list/config_bak.topicfix | sed 's/,*$//' > $listsdir/$list/config
+	topic=`cat $listsdir/$list/config |grep topics`
+	echo "Fixed topic: $topic"
+	echo ""
+done

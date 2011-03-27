@@ -1,0 +1,14 @@
+#
+# extracts a list of all the domains which we have established tls connections to or from.
+# this list is dumped in /var/log/tls/YYYY-MM-DD.log
+# this script is to be run once per day.
+#
+
+zgrep "TLS connection established" /var/log/postfix.log.1.gz | \
+cut -d' ' -f10 | \
+sed -r -e 's/:$//' -e 's/\[.*\]//' \
+  -e 's/^.*\.([^\.]*\.[A-Z]{3,4})$/\1/i' \
+  -e 's/\.(.*\.[A-Z]{2,3}\.[A-Z]{2})$/\1/i' \
+  -e 's/.*\.([0-9A-Z_-]{4,40}\.[A-Z]{2})$/\1/i' | \
+sort > /var/log/tls/`date +%Y-%m-%d`.log
+

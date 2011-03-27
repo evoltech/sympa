@@ -1,0 +1,20 @@
+#!/bin/sh
+
+listsdir=/home/sympa/expl/lists.riseup.net
+goodroot="root@riseup.net"
+
+mkdir /tmp/badroot
+
+for list in `find /home/sympa/expl/lists.riseup.net -maxdepth 3 -type f \
+		-name config | xargs egrep 'root.net' | cut -d/ -f6`
+do
+	echo "Correcting bad root in $list..."
+	cp $listsdir/$list/config $listsdir/$list/config_bak.badroot
+	cat $listsdir/$list/config | sed 's/root.net/root@riseup.net/' \
+	> $listsdir/$list/config.tmp
+	diff $listsdir/$list/config_bak.badroot $listsdir/$list/config.tmp
+	sleep 5
+  	mv $listsdir/$list/config.tmp $listsdir/$list/config
+	chown sympa:sympa $listsdir/$list/config
+	mv $listsdir/$list/config_bak.badroot /tmp/badroot/config_$list
+done

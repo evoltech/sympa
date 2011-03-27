@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#
+# ensure that sympa daemons are actually running!
+# this should be run as root
+#
+
+if [[ `pgrep sympa.pl` && `pgrep archived.pl` && `pgrep bounced.pl` && `pgrep task_manager.pl` ]]
+  then true
+  else /etc/init.d/sympa start
+fi

@@ -1,0 +1,22 @@
+#!/bin/sh
+
+mysql -u sympa -e 'SELECT list_subscriber, COUNT(user_subscriber) from subscriber_table GROUP BY list_subscriber INTO OUTFILE '/tmp/whatever.csv' FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n';'
+
+for list in `cat /tmp/whatever.csv | cut -d, -f1` 
+do 
+        listinfo=`grep "^$list," /tmp/whatever.csv` 
+        echo -n "$listinfo," >> /tmp/whatever2.csv 
+
+        msgs=`cat /home/sympa/expl/$list/stats | cut -d\  -f1` 
+        if [ ! -z $msgs ] 
+        then 
+                echo -n "$msgs," >> /tmp/whatever2.csv
+        else 
+                echo -n "0," >> /tmp/whatever2.csv 
+        fi 
+        
+        now=`date +%s`
+        created=`grep -A 3 creation /home/sympa/expl/$list/config |grep date_epoch| awk '{print $2}'` 
+        seconds=$((now-created))
+        echo $seconds >> /tmp/whatever2.csv
+done

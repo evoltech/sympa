@@ -1,0 +1,4 @@
+
+trash="/home/elijah/.mozilla-thunderbird/elijah/Mail/Local Folders/Trash"
+grep '^Subject: \[' "$trash" | sed 's/.*\[\(.*\)\].*/\1/' | sort | uniq -c | sort -rn | head -10
+

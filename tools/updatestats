@@ -1,0 +1,41 @@
+#!/bin/sh
+
+#
+# created by elijah at the dawn of time
+# Modified by micah for new list server - 05/13/03
+# Modified by micah to deal with "Argument list too long" - 07/23/03
+# moved lists to expl/ instead of expl/lists.riseup.net -elijah 09/09/06
+# updated for parrot -elijah 6/6/07
+#
+
+SYMPAROOT=/home/sympa
+OUTPUT_FILE="$SYMPAROOT/etc/web_tt2/custom_list_stats.tt2"
+
+cd $SYMPAROOT/tools
+source ./common
+
+add_commas() {
+   echo $1 | /bin/sed -e "s/\(.*[0-9]\)\([0-9]\{3\}\)/\1,\2/" \
+           | /bin/sed -e "s/\(.*[0-9]\)\([0-9]\{3\}\)/\1,\2/"
+}
+
+
+list_count=`/usr/bin/find -L $SYMPAROOT/expl -maxdepth 3 -type f -name config | /usr/bin/wc -l`
+
+sub_count=`/usr/bin/mysql -s -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME \
+  --execute "select count(user_subscriber) from subscriber_table"`
+
+vis_count=`/usr/bin/find -L $SYMPAROOT/expl -maxdepth 3 -type f -name config \
+  | xargs /bin/grep -l "visibility anyone" |/usr/bin/wc -l | /usr/bin/awk '{print \$1'}`
+	   
+vis_default_count=`/usr/bin/find -L $SYMPAROOT/expl -maxdepth 3 -type f \
+  -name config | xargs /bin/grep -L "visibility" |/usr/bin/wc -l | /usr/bin/awk '{print $1}'`
+				   
+let visible_count=vis_anyone_count+vis_default_count
+
+visible_count=`add_commas $visible_count`
+list_count=`add_commas $list_count`
+sub_count=`add_commas $sub_count`
+
+echo "$list_count lists ($visible_count visible) $sub_count subscribers" \
+  > $OUTPUT_FILE

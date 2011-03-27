@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+
+##
+## command line script to convert an encrypted password to cleartext
+## useful for helping users figure out why they can't login, of then they
+## get their password wrong.
+## usage: 
+##  decrypt <password>
+##
+
+require 'list.common';
+require '../bin/tools.pl';
+
+my %options;
+$main::options{'debug'} = 1;
+$main::options{'log_level'} = 2;
+$main::options{'foreground'} = 1;
+$main::options{'batch'} = 0;
+
+#my $who, $userx;
+#$who="elijah@riseup.net";
+#unless ($userx = &List::get_user_db($who)) {
+#	    print STDOUT "failed\n";
+#}
+#$userx =  &List::get_user_db($who);
+#print STDOUT "email: " . $userx->{'escaped_email'} . "\n";
+#print STDOUT "password: " . $userx->{'password'} . "\n";
+
+my $pw = $ARGV[0];
+print STDOUT $pw . "\n";
+print STDOUT &tools::decrypt_password($pw) . "\n";
+
+

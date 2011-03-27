@@ -1,0 +1,6 @@
+#!/bin/sh
+
+lists="all newsletter mailusers listadmins"
+for l in $lists; do
+	touch /home/sympa/expl/$l/config;
+done

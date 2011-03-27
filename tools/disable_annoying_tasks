@@ -1,0 +1,35 @@
+#!/bin/sh
+
+cd /home/sympa/bin/etc
+
+if [ -d global_task_models ]; then
+  if [ -d global_task_models.disabled ]; then
+    rm -vrf global_task_models.disabled
+  fi
+  mv -v global_task_models global_task_models.disabled
+fi
+
+if [ -d scenari ]; then
+  if [ -d scenari.disabled ]; then
+    rm -vrf scenari.disabled 
+  fi
+  mv -v scenari scenari.disabled
+fi
+
+if [ -d create_list_templates ]; then
+  if [ -d create_list_templates.disabled ]; then
+    rm -vrf create_list_templates.disabled
+  fi
+  mv -v create_list_templates create_list_templates.disabled
+fi
+
+if [ -d list_task_models ]; then
+  if [ -d list_task_models.disabled ]; then
+    rm -vrf list_task_models.disabled
+  fi
+  mv -v list_task_models list_task_models.disabled
+fi
+
+#cd /home/sympa/docroot/css
+#rm -v style.css
+#cp -v style.css.good style.css

@@ -1,0 +1,73 @@
+#!/usr/bin/php4 -q
+<?php
+
+############################################################
+# creates a file of email addresses, one per line, of all
+# list owners and editors. there are no duplicate lines.
+# used to send mail to them all
+############################################################
+
+ini_set('error_log', NULL);
+function prnt($str) {error_log($str);}
+
+$outfile = "/home/sympa/expl/listadmins/addresses";
+$expl = "/home/sympa/expl/";
+
+$configs = `find $expl -maxdepth 3 -type f -name config | xargs egrep -l "^status open"`;
+$configs = split("\n",trim($configs));
+$admins = array();
+foreach($configs as $config) {
+	$list = basename(dirname($config));
+	prnt("$list");
+	get_admins($config, $admins);
+}
+$admins = array_unique($admins);
+write_array($admins, $outfile, false);
+return;
+
+############################################################
+
+function preg_match_file($pattern, $filename, &$matches) {
+	ob_start();
+    readfile($filename);
+    $data = ob_get_contents();
+    ob_end_clean();
+	$status = preg_match_all($pattern,$data,$matches);
+	return $status;
+}
+
+function get_admins($file, &$admins) {
+	$f = fopen($file,'r');
+	while (!feof($f)) {
+		$line = trim(fgets($f,2048));
+		if ($line == 'owner' || $line == 'editor') {
+			while (!feof($f)) {
+		 	   $line = trim(fgets($f,2048));
+				if ($line == '')
+					break;
+				elseif(preg_match("/^\s*email (.*)$/", $line,$matches)) {
+					$admins[] = $matches[1];
+					break;
+				}
+			}
+		}
+	}
+}
+
+function write_array($array, $filename, $writekeys=true) {
+	$out = fopen($filename, 'w');
+	if ($out === false) die("Could not open $filename\n");
+	if ($writekeys) {
+		foreach($array as $key => $value) {
+			fwrite($out, "$key $value\n");
+		}
+	}
+	else {
+		foreach($array as $value) {
+			fwrite($out, "$value\n");
+		}
+	}
+	fclose($out);
+}
+
+?>

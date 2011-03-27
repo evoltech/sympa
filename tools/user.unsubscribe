@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+
+##
+## command line script to remove a list of users
+## usage: 
+##  cat users | user.unsubscribe <listname>
+##
+
+if ($#ARGV != 0) {
+   print "usage:\n  cat <file of emails> | user.unsubscribe <listname>\n\n";
+   exit;
+}
+require 'list.common';
+
+my $list = new List($ARGV[0]);
+
+## dump subscribers backup file
+#$list->_save_users_file("$list->{'dir'}/subscribers.dump");
+                                                                            
+## Delete users
+my @users;
+while (<STDIN>) {
+  print 'unsubscribe ', $_;
+  chop;
+  push @users, $_;
+}
+$list->delete_user(@users);

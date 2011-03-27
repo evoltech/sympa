@@ -1,0 +1,56 @@
+#!/usr/bin/perl -w
+	
+# unsub_instructions.pl
+# send unsubscribe instructions to a user
+# usage: unsub_instructions.pl <email_address>
+
+use strict;
+use Net::SMTP;
+if (length($ARGV[0]) < 5 && @ARGV > 1) { 
+	die "no mailto and/or list specified"; 
+}
+
+my $smtp;
+my ($subject, $mailfrom, $mailto, $mailbcc);
+my ($smtp_server, @lists, $list);
+my ($body_start, $body_end, $body_instructions, $body_unsub_list_text);
+my ($unsub_baseurl, $unsub_address_suffix);
+
+# get parameters
+$mailto = shift @ARGV;
+@lists = @ARGV;
+
+# config
+$smtp_server = 'localhost';
+$mailfrom = 'lists@riseup.net';
+$mailbcc = 'lists@riseup.net';
+
+$subject = "List unsubscribe instructions from riseup.net";
+$body_start = "To unsubscribe from a riseup.net email list, please use the instructions below.\n\n";
+$body_end = "\n\nIn Solidarity,\nriseup.net collective\n";
+# $body_email_lists = "You are subscribed to @lists lists:" . join(@lists, "\@riseup.net\n") . "\@riseup.net\n\n";
+# $body_instructions = "Email the address or visit the webpage for each list you want to unsbscribe from:";
+$unsub_baseurl = 'https://lists.riseup.net/www/sigrequest/';
+$unsub_address_suffix = '-unsubscribe@lists.riseup.net';
+
+foreach $list (@lists) {
+	$body_unsub_list_text .= "To unsubscribe from $list:\n   send email to $list$unsub_address_suffix OR\n   visit: $unsub_baseurl$list\n\n"; 
+}
+
+# prepare the email
+$smtp = Net::SMTP->new($smtp_server);
+
+$smtp->mail($mailfrom);
+$smtp->to($mailto);
+$smtp->bcc($mailbcc);
+
+$smtp->data();
+$smtp->datasend("To: $mailto\n");
+$smtp->datasend("Bcc: $mailbcc\n");
+$smtp->datasend("Subject: $subject\n");
+$smtp->datasend("\n");
+my $temp_body = $body_start . $body_unsub_list_text . $body_end;
+$smtp->datasend($temp_body);
+$smtp->dataend();
+
+$smtp->quit;

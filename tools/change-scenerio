@@ -1,0 +1,94 @@
+#!/usr/bin/php4 -q
+<?php
+
+# 
+# do a search and replace on every config file.
+# edit the $listdir and $replacesments to configure
+#
+
+
+# DANGER DANGER:
+# $listdir and $tmpdir must be on the same partition
+
+$listdir = '/home/sympa/expl/lists.riseup.net';
+$tmpdir  = '/home/sympa/expl/tmp';
+
+$replacements = array (
+#	'access_web_archive.' => 'access_web_archive.default',
+	'access_web_archive MEMBERS' => 'access_web_archive members',
+	'access_web_archive closed' => 'access_web_archive owners',
+	'access_web_archive public' => 'access_web_archive anyone',
+#	'd_edit.' => 'd_edit.default',
+	'd_edit MEMBERS' => 'd_edit members',
+	'd_read ANYONE' => 'd_edit anyone',
+	'd_read MEMBERS' => 'd_edit members',
+	'd_read OWNERS' => 'd_edit owners',
+	'info open' => 'info anyone',
+	'invite closed' => 'invite impossible',
+	'invite private' => 'invite owners',
+	'send MEMBERS_OR_MODERATED' => 'send members_or_moderated',
+	'subscribe anyone_notify' => 'subscribe verified_notify',
+	'subscribe closed' => 'subscribe impossible',
+	'subscribe editor' => 'subscribe approved',
+	'unsubscribe closed' => 'usubscribe verified',
+	'visibility hidden' => 'visibility members',
+	'visibility noconceal' => 'visibility anyone',
+);
+
+chdir($listdir);
+
+$handle = opendir($listdir);
+while($listdir = readdir($handle)) {
+   if ($listdir == '.' || $listdir == '..' || !is_dir($listdir))
+   	  continue;
+	  
+   $configfilename = $listdir . "/config";
+  
+   if (!is_file($configfilename))
+     continue;
+   
+   #echo("processing $configfilename\n");
+   
+   processfile($configfilename);
+}
+
+return;
+
+function processfile($filename) {
+	$tmp = gettmpfile(basename(dirname($filename)));
+	
+	$out = fopen($tmp, "w");
+	$in = fopen($filename, "r");
+	
+	while(!feof($in)) {
+		$line = fgets($in, 4096);		
+		$line = doreplace($line);
+		fputs($out, $line);
+	}
+	
+	fclose($out);
+	fclose($in);
+	
+	#unlink($filename);
+	#rename($tmp, $filename);
+#	`cp '$tmp' '$filename'`;
+#	echo "diff '$tmp' '$filename'\n";
+	echo `diff '$tmp' '$filename'`;
+}
+
+function gettmpfile($name) {
+	global $tmpdir;
+	return "$tmpdir/$name.config"; // . md5(uniqid(rand(),1));
+}
+
+function doreplace($line) {
+	global $replacements;
+ 
+	foreach($replacements as $find => $replace)	{
+		$line = preg_replace("/^".$find."$/", $replace, $line);
+	}
+	return $line;
+}
+
+?>
+

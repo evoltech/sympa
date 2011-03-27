@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export DB_USER=`grep "^db_user" /etc/sympa/sympa.conf | cut -f2`
+export DB_NAME=`grep "^db_name" /etc/sympa/sympa.conf | cut -f2`
+export DB_PASS=`grep "^db_pass" /etc/sympa/sympa.conf | cut -f2`
+

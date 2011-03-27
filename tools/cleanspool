@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#
+# removes messages from the spool for lists which do not exist.
+#
+
+cd /home/sympa/spool/msg
+for i in `tail -100 /var/log/sympa/sympa.log | grep "No such list" | awk '{print $9}' | sort -u`
+do
+  for j in `ls -1 $i@lists* 2> /dev/null`; do
+    mv -v $j ./bad/
+  done
+  for j in `ls -1 $i-subscribe@lists* 2> /dev/null`; do
+    mv -v $j ./bad/
+  done
+  for j in `ls -1 $i-unsubscribe@lists* 2> /dev/null`; do
+    mv -v $j ./bad/
+  done
+done

@@ -1,0 +1,6 @@
+This directory appears to be some scripts elijah wrote to clean up
+AOL spam reports or something. Before importing it from svn to git
+I removed the emails/ and rawdumps/ directories since they listed
+email addresses and this is going to be a public git repo.
+
+-- 20110326 taggart

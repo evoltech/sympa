@@ -1,0 +1,20 @@
+#!/bin/sh
+
+source ./common
+
+echo "### Searching for $1 in user_table ###"
+mysql  -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+"select email_user, password_user from user_table where email_user like '%$1%'"
+
+echo ""
+echo "### Searching for $1 in subscriber_table ###"
+
+mysql -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+"select list_subscriber, user_subscriber from subscriber_table where user_subscriber like '%$1%'"
+
+echo ""
+echo "### Searching for $1 in admin_table ###"
+
+mysql -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+"select list_admin, user_admin, role_admin from admin_table where user_admin like '%$1%'"
+

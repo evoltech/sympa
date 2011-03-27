@@ -1,0 +1,98 @@
+#!/usr/bin/ruby
+
+=begin
+sync from source to dest, one directory at a time
+
+=end
+
+
+#$flags = "-a -v --ignore-existing --size-only"
+
+source = '/crypt/sympa/arc'
+dest = '/crypt2/sympa/arc'
+
+def build_file_hash(glob)
+  files = {}
+  Dir[glob].each do |filepath|
+    filename = File.basename(filepath)
+    files[filename] ||= {}
+    files[filename][:md5] = `md5sum #{filepath}`.split(' ').first
+    files[filename][:filename] = filepath
+  end
+  files
+end
+
+
+#
+# from
+#   files_a = {'1' => {:filename => '/path/to/file', :md5 => '261df124'}, '2' => ...
+#   files_b = {'1' => {:filename => '/path/to/file', :md5 => '261df124'}, '2' => ...
+# produces
+#   ['/path/to/file/1','/path/to/file/2']
+#
+
+def merge(files_a, files_b)
+  result = []
+  files_a.keys.sort_by{|i|i.to_i}.each do |key|
+    if files_b[key].nil? 
+      # not in b
+      result << files_a[key][:filename]
+    elsif files_b[key][:md5] == files_a[key][:md5]
+      # same in b an a
+      result << files_a[key][:filename]
+    else
+      # same filename in each, but different hash, add both
+      puts 'CONFLICT!!!!!!!!!!!!!'
+      puts files_a[key][:filename]
+      puts files_b[key][:filename]      
+      result << files_a[key][:filename]
+      result << files_b[key][:filename]
+    end
+  end
+  # now grab files in b but not in a
+  files_b.keys.sort.each do |key|
+    if files_a[key].nil?
+      result << files_b[key][:filename]
+    end
+  end
+  result
+end
+
+
+def sync_dir(source, dest_parent)
+    cmd("rsync #{$flags} #{$excludes} #{$remote}#{dir_to_grab} #{dir}")
+end
+
+def merge_arctext_to(destbase)
+  Dir['*'].each do |month|
+    next unless File.directory? month
+    Dir.chdir(month) do
+      files_b = nil
+      Dir.chdir([destbase,month].join('/')) do
+        File.rename('arctxt', 'arctxt-old') unless File.exists?('arctxt-old')
+        Dir.mkdir('arctxt') unless File.exists?('arctxt')
+        files_b = build_file_hash( [Dir.pwd, 'arctxt-old','*'].join('/') )
+      end
+      files_a = build_file_hash( [Dir.pwd, 'arctxt','*'].join('/') )
+#      puts files_a.inspect
+#      puts files_b.inspect
+      merged_files = merge(files_a, files_b)
+      Dir.chdir('arctxt') do
+        merged_files.each_with_index do |source_file_path, dest_file|
+          puts "cp -avio #{source_file_path} #{[destbase,month,'arctext',dest_file+1].join('/')}"
+        end
+      end
+    end
+  end
+end
+
+Dir.chdir(source) do
+  Dir['riseup@lists.riseup.net'].each do |listdir|
+    next unless File.directory? listdir
+    Dir.chdir(listdir) do 
+      #sync_dir(listdir, dest)
+      merge_arctext_to( [dest, listdir].join('/') )
+    end
+  end
+end
+
