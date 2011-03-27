@@ -15,9 +15,9 @@
 # Which will remove all lists from a system, and delete all the users with the
 # domain testdomain.com.
 #
-# It should be noted that in it's default configuration sympa stores info for lists
-# on the filesystem, so attempting to create or delete a large number of lists 
-# could take a long time.
+# It should be noted that in it's default configuration sympa stores info for
+# lists on the filesystem, so attempting to create or delete a large number
+# of lists could take a long time.
 $ENV{'PATH'} = '';
 
 ## Load Sympa.conf
