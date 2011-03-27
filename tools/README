@@ -1,10 +1,58 @@
+Riseup sympa tools
+==================
 custom scripts for list maintenance, ecology, manipulation, fixing, and data
 gathering.
 
-** important scripts **
 
+currently used / reviewed and useful
+------------------------------------
+
+historical stuff, might be useful again
+---------------------------------------
+
+unknown, needs to be reviewed
+-----------------------------
+aol
+backup
+badroot
+bounces
+cdSympaEnv.pl
+change-scenerio
+changeUserDomains.pl
+checkdaemons
+cleanspool
+common
+configfixin
+create-admins-file
+createEmail.pl
+cSympaEnvNoAPI.pl
+decrypt
+disable_annoying_tasks
 ecology: lets you manage old and dormant lists.
-
-list.close: closes a list.
-  (no longer needed?)
-
+email-unsub-instruct
+findaccount
+findaccount2
+find_lists_without_owners.rb
+findmissing
+findzero
+fs.php
+lib
+list.close: closes a list.  (no longer needed?)
+list.common
+listmembers
+list_stats
+merge-arctxt
+missingkeyfix.py
+pluckspam.pl
+pluckspam.pl.old
+rebuildarchives.rb
+remindnow
+remove_user
+sympa_pass.pl
+tlsreport
+topdomains
+updatedirectory.php
+updatedirectory.rb
+updatestats
+user.unsubscribe
+withincludes
