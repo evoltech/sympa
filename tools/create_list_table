@@ -1,0 +1,14 @@
+CREATE TABLE `list_table` (
+  `name_list` varchar(100) NOT NULL default '',
+  `path_list` varchar(100) NOT NULL default '',
+  `robot_list` varchar(100) NOT NULL default '',
+  `status_list` enum('open','closed','pending','error_config','family_closed') NOT NULL default 'closed',
+  `creation_email_list` varchar(100) NOT NULL default '',
+  `creation_epoch_list` datetime default NULL,
+  `subject_list` varchar(100) NOT NULL default '',
+  `web_archive_list` tinyint(1) NOT NULL default '0',
+  `editors` text NOT NULL,
+  `owners` text NOT NULL,
+  `topics` text NOT NULL,
+  PRIMARY KEY  (`name_list`,`robot_list`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8

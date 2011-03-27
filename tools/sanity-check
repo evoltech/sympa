@@ -1,0 +1,23 @@
+#!/usr/bin/ruby
+
+source = '/crypt/sympa/arc'
+
+def randomize(array)
+  array.sort{|a,b| rand(3)-1}
+end
+
+completed_count = 0
+Dir.chdir(source) do
+  randomize(Dir['*']).each do |listdir|
+    next unless File.directory? listdir
+    putc '.'; STDOUT.flush
+    Dir.chdir(listdir) do
+      Dir['*'].each do |month|
+        next unless File.directory? month
+        Dir.chdir(month) do
+          puts "TROUBLE!!! #{Dir.pwd}" if Dir['arctxt-old/*'].any? and !Dir['arctxt/*'].any?
+        end
+      end
+    end
+  end
+end

@@ -12,7 +12,7 @@ require 'fileutils'
 
 ########### configuration #######################
 
-$chunksize = 0      # how many to rebuild at a time, if zero, do them all
+$chunksize = 10      # how many to rebuild at a time, if zero, do them all
 $sleeptime = 10     # seconds to sleep
 $arcdir = "/home/sympa/arc"
 $rebuild_spool = "/home/sympa/spool/outgoing"
@@ -32,7 +32,7 @@ end
 def process_chunk(chunk)
   while waiting_for_spool_to_process
     #puts 'waiting for archives to rebuild. sleeping...'
-    puts '.'
+    putc '.'; STDOUT.flush
     sleep $sleeptime
   end
   chunk.each do |arcname|

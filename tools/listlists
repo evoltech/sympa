@@ -1,0 +1,6 @@
+#!/bin/sh
+
+source ./common
+
+mysql  -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+"select name_list from list_table where status_list = 'open'"

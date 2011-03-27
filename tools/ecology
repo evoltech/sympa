@@ -1,4 +1,4 @@
-#!/usr/bin/php4 -q
+#!/usr/bin/php5 -q
 <?php
 
 /*****************************************************
@@ -20,7 +20,7 @@ $arc  = "$home/arc";
 $cemetary    = "$home/cemetary";
 $defaultdomain = 'lists.riseup.net';
 $closed_age  = 4;
-$dormant_age = 12;
+$dormant_age = 28;
 
 $closed_datafile  = dirname(__FILE__) . "/data/closedlists";
 $dormant_datafile = dirname(__FILE__) . "/data/dormantlists";
@@ -53,6 +53,14 @@ archives:
 
 In solidarity,
 the riseup collective';
+
+$close_msg_to_listmaster = 'We are closing the list $list@$domain as
+it appears to be  dormant. 
+
+This message is going to the listmaster as the list does not appear to have an active
+administrator.';
+
+$listmaster =  'listmaster@lists.riseup.net';
 
 ##
 ## CODE BEGINS HERE
@@ -376,7 +384,7 @@ function write_array($array, $filename, $writekeys=true) {
 	if ($out === false) die("Could not open $filename\n");
 	if ($writekeys) {
 		foreach($array as $key => $value) {
-			fwrite($out, "$key $value\n");
+    		        fwrite($out, "$key $value\n");
 		}
 	}
 	else {
@@ -496,23 +504,35 @@ function close_list($list) {
 	#$admins = get_admins("$expl/$domain/$list/config");
 	$admins = get_admins("$expl/$list/config");
 
-	if (count($admins) == 0) { 
+
+	/*
+	* It seems like this moved the archives for dormant lists
+	* w/no admins, and did not move the settings.
+	* At least for now, we will close the dormant-no-admin lists,
+	* and send an email to listmaster.
+	*/
+	/* if (count($admins) == 0) { 
 		# no config
 		echo ". moving archives to cemetary.";
 		`mv $arc/$list@$domain/ $cemetary/arc-$list@$domain`;
 	}
-	else {
-		$ok = system("$bin/sympa.pl --close_list $list@$domain");
-		echo "\n";
-		if ($ok === FALSE) {
-			die("Could not call sympa.pl --close_list\n");
-		}
-		else {
-			eval("\$str = \"$close_msg\";");
-			mail(join(',',$admins), "List Closed: $list@$domain", $str,"From: $from");
-		}
-	}
-	remove_from_datafile($dormant_datafile, "$list@$domain");
+	else { */
+
+        $ok = system("$bin/sympa.pl --close_list $list@$domain");
+	echo "\n";
+	if ($ok === FALSE) {
+	     die("Could not call sympa.pl --close_list\n");
+	}  else {
+	     if  (count($admins) == 0) {
+	     	    eval("\$str = \"$close_msg_to_listmaster\";");	 
+             	    mail($listmaster, "List Closed:$list@$domain", $str,"From: $from");
+	     } else {
+	       	    eval("\$str = \"$close_msg\";");
+	     	    mail(join(',',$admins), "List Closed: $list@$domain", $str,"From: $from");
+	     }
+       }
+	//}
+       remove_from_datafile($dormant_datafile, "$list@$domain");
 }
 
 ?>
