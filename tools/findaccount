@@ -1,20 +1,20 @@
 #!/bin/sh
-
-source ./common
+# findaccount - search the user, subscriber, and admin tables for an address
+# NOTE: this script requires the current user has read access to the db
 
 echo "### Searching for $1 in user_table ###"
-mysql  -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+mysql  --batch --database=sympa --execute \
 "select email_user, password_user from user_table where email_user like '%$1%'"
 
 echo ""
 echo "### Searching for $1 in subscriber_table ###"
 
-mysql -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+mysql --batch --database=sympa --execute \
 "select list_subscriber, user_subscriber from subscriber_table where user_subscriber like '%$1%'"
 
 echo ""
 echo "### Searching for $1 in admin_table ###"
 
-mysql -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME --execute \
+mysql --batch --database=sympa --execute \
 "select list_admin, user_admin, role_admin from admin_table where user_admin like '%$1%'"
 
