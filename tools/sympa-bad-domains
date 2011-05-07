@@ -1,0 +1,79 @@
+#!/usr/bin/perl -w
+# sympa-bad-domains - get a list of email addresses from sympa and determine
+# which domains don't currently resolve
+# Matt Taggart <taggart@riseup.net> 2010-2011
+# depends on EMail::Valid, apt-get install libemail-valid-perl
+# NOTE: this script requires the current user has read access to the db
+
+# we need to use a local copy of Parallel::ForkManager because we need 0.7.6
+use lib '.';
+use Email::Valid;
+use Parallel::ForkManager 0.7.6;
+use POSIX qw(strftime);
+
+# once we get a newer version of Email::Valid we can set the tcp_timeout
+# this works with 0.184 (which is in squeeze). This might help prevent 
+# forked copies getting tied up we'd need to test
+#$Email::Valid::Resolver->tcp_timeout(30);
+
+# the number of parallel copies to run
+$copies=20;
+
+$outdir='/var/log/sympa/bad-domains/';
+$outfile=strftime "%Y-%m", localtime;
+
+if ( ! -d $outdir ) {
+	die "Output directory $outdir does not exist\n";
+}	
+
+$rundump='mysql -N --batch --database=sympa --execute "select email_user from user_table"';
+
+open(LIST,"$rundump|") or die "Cannot get addresses from sympa db\n";
+open(OUT,">$outdir/$outfile") or die "Cannot open output file\n";
+
+$pm = new Parallel::ForkManager($copies);
+
+$pm -> run_on_finish (
+   sub {
+      my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $ref ) = @_;
+
+      # add the returned hash reference to the existing hash
+      @baddomains{ keys %{$ref} } = values %{$ref};
+   }
+);
+
+# first throw out the bogus addresses
+while (<LIST>) {
+	($address, $domain) = m/<?(.+@(.+))>?$/;
+	if ( ! defined $domain ) {
+		die "ERROR: can't detect domain, line is $_, fix the regex!\n";
+	}
+	# if we already have a valid address for this domain, skip it
+	next if ( exists $valid{$domain} );
+
+	if (Email::Valid->address( -address => $address,
+					-fqdn => 1,
+					-local_rules => 1,
+					-tldcheck => 1 )) {
+		# push just the domain into a hash to get rid of dups
+		$valid{$domain}=1;
+	}
+}
+
+
+# then do an mx check on the rest
+foreach $domain (sort keys %valid) {
+	$pm->start and next;
+	unless(Email::Valid->address( -address => "foo\@$domain",
+					-mxcheck => 1 )) {
+		# a temporary hash to return
+		$hash{$domain}=1;
+	}
+	$pm->finish(0, \%hash);
+}
+
+$pm->wait_all_children;
+
+foreach $domain (sort keys %baddomains) {
+	print OUT "$domain\n";
+}
