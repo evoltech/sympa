@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# forces an immediate remind task for a particular list. 
+# must be run as user sympa
+#
+# usage: 
+# remindnow <listname>
+#
+if [ -z $1 ]; then
+  echo "usage: remindnow listname";
+  exit 1
+fi
+
+cp remind.task /home/sympa/spool/task/`date +%s`.INIT.remind.$1

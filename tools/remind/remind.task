@@ -1,0 +1,11 @@
+title.gettext remind message sent to subscribers once
+
+/INIT
+
+/EXEC
+# couldn't get aol specific to work with
+#@selection = select_subs (match([% user.email %], /lackof\.org\$/))
+#@selection = select_subs (match([user.email], /lackof\.org\$/))
+@selection = select_subs (older([user.email]))
+send_msg (@selection, remind)
+stop()
