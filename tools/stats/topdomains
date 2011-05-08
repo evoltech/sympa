@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
-# topdomains - list the top 100 domains by user count
+# topdomains - list the top 25 domains by user count,
+#  also lists the total users and unique domains
 # NOTE: this script requires the current user has read access to the db
 
 use vars qw($rundump %domains %count $key $percent);
@@ -28,7 +29,7 @@ $key,                                                   $domains{$key}, $percent
 .
 $~='Output';
 
-foreach $key ((sort { $domains{$b} <=> $domains{$a} } keys %domains)[0..99]) {
+foreach $key ((sort { $domains{$b} <=> $domains{$a} } keys %domains)[0..24]) {
    $percent=$domains{$key}/$count*100;
    write;
 }
