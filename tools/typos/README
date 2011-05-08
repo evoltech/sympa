@@ -1,0 +1,10 @@
+sympa typo checking scripts
+---------------------------
+lists/ - contains files listing common typos domains
+
+typoaddresses - returns the list of addresses in the db that match one
+                 of the typo domains. These addresses can be cleaned up
+
+typolists - returns a list of the top 25 lists by number of typo addresses.
+             Lists with a lot of typos might be violating our ToS by doing
+             bulk adds of non opt-in addresses.

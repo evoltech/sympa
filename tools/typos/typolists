@@ -1,0 +1,39 @@
+#!/usr/bin/perl -w
+# typolists - find and report lists with lots of addresses with common typos
+# NOTE: this script requires the current user has read access to the db
+
+# currently we have files in the lists/ directory that list the typo domains,
+#  eventually I plan to make these a DNSBL and we can just query it
+@lists= ( "invalid", "rfc-not", "rfc-registered", "MS-owned", "yahoo-owned" );
+
+# put the typo domains in a hash
+foreach $file ( @lists ) {
+  open(FILE,"lists/$file") or die "Cannot open $file\n";
+  while (<FILE>) {
+    chomp;
+    $domains{$_} = 1;
+  } 
+  close FILE;
+}
+
+# get the list and user addresses from sympa (but only for open lists, which is sort of an expensive query, not checking that is way faster)
+$rundump='mysql -N --batch --database=sympa --execute "
+select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+
+open(LIST,"$rundump|") or die "Cannot get addresses from sympa db\n";
+
+while (<LIST>) {
+   # because we have bogus addresses, this regex doesn't always match, use if
+   if ( m/^(.+?)\s+<?.+@(.+)>?$/ ) {
+      ($list, $domain) = ($1,$2);
+      # if the domain is a typo, add the list to a typo hash
+      if ( $domains{$domain} ) {
+         $typos{$list}++;
+      }
+   }
+}
+
+# print out the sorted typo addresses
+foreach $key ((sort { $typos{$b} <=> $typos{$a} } keys %typos)[0..24]) {
+   print "$typos{$key} $key\n";
+}
