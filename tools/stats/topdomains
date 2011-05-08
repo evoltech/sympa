@@ -4,7 +4,7 @@
 
 use vars qw($rundump %domains %count $key $percent);
 
-$rundump='mysql --batch --database=sympa --execute \
+$rundump='mysql --batch --database=sympa --skip-column-names --execute \
   "select email_user from user_table"';
 
 open(LIST,"$rundump|") or die "Cannot get addresses from sympa db\n";
