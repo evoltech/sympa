@@ -1,0 +1,9 @@
+#!/bin/sh
+# listbounces - prints a listing of all the lists with bounces and the
+#   number of bouncing email accounts for the list, ordered by bounce count.
+# NOTE: this script requires the current user has read access to the db
+
+mysql --batch --database=sympa --execute \
+"SELECT count(*) as 'bounce_count', list_subscriber as 'list'  \
+FROM subscriber_table WHERE bounce_subscriber \
+<> 'NULL' GROUP BY list_subscriber ORDER BY bounce_count"
