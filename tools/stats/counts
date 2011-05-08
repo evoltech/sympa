@@ -1,0 +1,15 @@
+#!/bin/sh
+# counts - list, subscription, user counts
+# NOTE: this script requires the current user has read access to the db
+
+echo -n "Lists: "
+mysql --batch --database=sympa --skip-column-names \
+  --execute "select count(name_list) from list_table where status_list = 'open'"
+
+echo -n "Total Subscriptions: "
+mysql --batch --database=$DB_NAME --skip-column-names \
+  --execute "select count(user_subscriber) from subscriber_table"
+
+echo -n "Unique Users: "
+mysql --batch --database=$DB_NAME --skip-column-names \
+  --execute "select count(email_user) from user_table"
