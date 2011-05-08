@@ -1,5 +1,5 @@
 #!/bin/sh
-# listbounces - prints a listing of all the lists with people with a bounce
+# countbounces - prints a listing of all the lists with people with a bounce
 #  score over 75 and the number of people over 75 for the list,
 #  ordered by bounce count.
 # NOTE: this script requires the current user has read access to the db
