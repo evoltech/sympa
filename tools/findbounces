@@ -1,0 +1,7 @@
+#!/bin/sh
+# findbounces - find users in the subscriber table based on a substring and
+# print list, user, and bounce score
+# NOTE: this script requires the current user has read access to the db
+
+mysql --batch --database=sympa --execute \
+"select list_subscriber,user_subscriber,bounce_score_subscriber from subscriber_table where user_subscriber like '%$1%'"

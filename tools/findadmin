@@ -1,0 +1,6 @@
+#!/bin/sh
+# findadmin - find admins based on a substring and print list, name, role
+# NOTE: this script requires the current user has read access to the db
+
+mysql --batch --database=sympa --execute \
+"select list_admin, user_admin, role_admin from admin_table where user_admin like '%$1%'"

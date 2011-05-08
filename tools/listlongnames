@@ -1,0 +1,9 @@
+#!/bin/sh
+# listlongnames - list the 10 longest list names, useful for finding lists
+# that exceed the sympa limit and cause problems
+# NOTE: this script requires the current user has read access to the db
+
+echo "### Top Ten Longest List Names ###"
+mysql  --batch --database=sympa --execute \
+"SELECT LENGTH(name_list) as name_len, name_list FROM list_table \
+ORDER BY name_len DESC LIMIT 10"
