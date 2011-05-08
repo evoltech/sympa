@@ -1,0 +1,9 @@
+#!/bin/sh
+# listbouncesaol - prints a listing of all aol.com users with a bounce
+#   score over 50. prints bounce score, list, user; ordered by bounce score.
+# NOTE: this script requires the current user has read access to the db
+
+mysql --batch --database=sympa --execute \
+"SELECT bounce_score_subscriber,list_subscriber,user_subscriber FROM \
+subscriber_table WHERE bounce_score_subscriber > 50 and user_subscriber \
+like '%aol.com%' ORDER BY bounce_score_subscriber"
