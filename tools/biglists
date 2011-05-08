@@ -1,0 +1,42 @@
+#!/usr/bin/perl -w
+# biglists - find and report lists over a certain size
+# only outputs if there is something to report so you can run it via cron
+# Matt Taggart <taggart@riseup.net>
+# NOTE: this script requires the current user has read access to the db
+
+$size='5000';
+$logdir='/var/log/sympa/biglists';
+
+if ( ! -d $logdir || ! -w $logdir ) {
+   die "biglists: ERROR problem writing to $logdir";
+}
+
+# FIXME: too lazy to use localtime
+$newname=`date +%Y-week%V-day%u`;
+chomp $newname;
+$file="$logdir/$newname";
+
+# we compare with the most recent output
+$oldname=`ls -rt $logdir/|tail -1`;
+chomp $oldname;
+$oldfile="$logdir/$oldname";
+
+$sql="SELECT subscriber_table.list_subscriber AS listname FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY listname HAVING count(subscriber_table.list_subscriber) > $size ORDER BY listname";
+
+# apparently the ORDER BY isn't the same as sort order, so we have to sort too
+`mysql --batch --database=sympa --skip-column-names --execute "$sql" |sort > $file`;
+
+# I considered using List::Compare, but that adds an extra dependency and
+# comm is in coreutils which is on all systems
+$old=`comm -23 $oldfile $file`;
+$new=`comm -13 $oldfile $file`;
+
+if ( $old ) {
+  print "#### The following lists no longer have more than $size members ####\n";
+  print $old;
+}
+
+if ( $new ) {
+  print "#### The following lists now have more than $size members ####\n";
+  print $new;
+}
