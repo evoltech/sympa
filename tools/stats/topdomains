@@ -1,0 +1,34 @@
+#!/usr/bin/perl -w
+# topdomains - list the top 100 domains by user count
+# NOTE: this script requires the current user has read access to the db
+
+use vars qw($rundump %domains %count $key $percent);
+
+$rundump='mysql --batch --database=sympa --execute \
+  "select email_user from user_table"';
+
+open(LIST,"$rundump|") or die "Cannot get addresses from sympa db\n";
+
+while (<LIST>) {
+   # because we have bogus addresses, this regex doesn't always match, so if it
+   if ( m/@(.*)>?$/ ) {
+      $domains{$1}++;
+      $count++;
+   };
+}
+
+$dcount = scalar keys %domains;
+print "Total users: ".$count." Total domains: ". $dcount ."\n";
+
+print "Domain:                                                    users (\% of total)\n";
+
+format Output =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<... @>>>>>>> (@#.##%)
+$key,                                                   $domains{$key}, $percent
+.
+$~='Output';
+
+foreach $key ((sort { $domains{$b} <=> $domains{$a} } keys %domains)[0..99]) {
+   $percent=$domains{$key}/$count*100;
+   write;
+}
