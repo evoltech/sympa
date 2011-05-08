@@ -1,0 +1,11 @@
+#!/bin/bash
+# nukeuser - completely removes a user, use with caution
+# NOTE: this script requires the current user has read access to the db
+
+echo "removing ${BASH_ARGV[*]}:"
+
+# remove all list subscriptions
+mysql --batch --database=sympa --execute "delete from subscriber_table where user_subscriber='${BASH_ARGV[*]}'"
+
+# remove user
+mysql --batch --database=sympa --execute "delete from user_table where email_user='${BASH_ARGV[*]}'"
