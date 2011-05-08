@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 # topdomains - list the top 25 domains by user count,
 #  also lists the total users and unique domains
+# NOTE: this script doesn't check the validity of addresses or domains
+#  so the count might include them if those haven't been cleaned up
 # NOTE: this script requires the current user has read access to the db
 
 use vars qw($rundump %domains %count $key $percent);
