@@ -1,0 +1,32 @@
+#!/usr/bin/perl -w
+# countsendtypes - gives a list of the send types of all lists
+# Matt Taggart <taggart@riseup.net>
+# NOTE: this script requires the current user has read access to the db
+
+# location of your expl dir
+$expl='/home/sympa/expl';
+
+$sql="mysql --batch --database=sympa --skip-column-names --execute \"select name_list from list_table where status_list = 'open'\"";
+
+open(LISTS,"$sql|") or die "mysql command failed";
+
+while (<LISTS>) {
+  chomp;
+  $list=$_;
+  $config="$expl/$list/config";
+  if ( ! -e $config ) {
+     print STDERR "missing config file for $list\n";
+     next;
+  }
+  $type=`grep ^send $config`;
+  $type =~ s/^send //;
+  chomp $type;
+  # default send type is private
+  if ( ! $type ) { $type = 'private' };
+  $results{$type}++;
+}
+
+# sort in reverse numerical order
+foreach $key ( sort { $results{$b} <=> $results{$a} } keys %results) {
+  print "$results{$key} $key\n";
+}
