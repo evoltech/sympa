@@ -1,0 +1,38 @@
+#!/usr/bin/perl -w
+# typoaddresses - find and report addresses with common typos
+# NOTE: this script requires the current user has read access to the db
+
+# currently we have files in the lists/ directory that list the typo domains,
+#  eventually I plan to make these a DNSBL and we can just query it
+@lists= ( "invalid", "rfc-not", "rfc-registered", "MS-owned", "yahoo-owned" );
+
+# put the typo domains in a hash
+foreach $file ( @lists ) {
+  open(FILE,"lists/$file") or die "Cannot open $file\n";
+  while (<FILE>) {
+    chomp;
+    $domains{$_} = 1;
+  } 
+  close FILE;
+}
+
+# get the user addresses from sympa
+$rundump='mysql -N --batch --database=sympa --execute "select email_user from user_table"';
+
+open(LIST,"$rundump|") or die "Cannot get addresses from sympa db\n";
+
+while (<LIST>) {
+   # because we have bogus addresses, this regex doesn't always match, use if
+   if ( m/<?(.+@(.+))>?$/ ) {
+      ($address, $domain) = ($1,$2);
+      # if the domain is a typo, add the address to a typo hash
+      if ( $domains{$domain} ) {
+         $typos{$address} = 1;
+      }
+   };
+}
+
+# print out the sorted typo addresses
+foreach $key (sort keys %typos) {
+   print "$key\n";
+}
