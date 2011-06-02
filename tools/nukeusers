@@ -1,0 +1,15 @@
+#!/bin/bash
+# nukeusers - completely removes a list of user, use with caution
+# NOTE: this script requires the current user has write access to the db
+
+IFS=$'\n'
+for address in `cat $1`;
+do
+  echo "removing $address:"
+
+  # remove all list subscriptions
+  mysql --batch --database=sympa --execute "delete from subscriber_table where user_subscriber='$address'"
+
+  # remove user
+  mysql --batch --database=sympa --execute "delete from user_table where email_user='$address'"
+done
