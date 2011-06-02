@@ -1,0 +1,19 @@
+Bad Domains
+-----------
+These scripts are for dealing with the fact that sympa's bounce management
+processing isn't good at removing bad addresses that only receive a low
+volume of mail.
+
+sympa-bad-domains - get a list of email addresses from sympa and determine
+  which domains don't currently resolve. Intended to be run by cron once
+  a month.
+
+sympa-persistent-bad-domains - using the last 3 results of sympa-bad-domains
+  list all domains that are persistently bad.
+
+find-bad-addresses - using the list of persistent bad domains from
+  sympa-persistent-bad-domains, find all the addresses for those domains
+  and return a list of addresses and a list of address count by domain.
+
+-- 
+Matt Taggart <taggart@riseup.net> 2011

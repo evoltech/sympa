@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+# find-bad-addresses - using a list of bad domains, find all the addresses
+#  for those domains and return a list of addresses and a list of address
+#  count by domain.
+# NOTE: this script requires the current user has read access to the db
+# Matt Taggart <taggart@riseup.net> 2011-06
+
+if (!$ARGV[0]) {
+   print "usage: find-bad-addresses <file>\n";
+   exit;
+}
+
+$file=$ARGV[0];
+
+#$file='20110601';
+$sql='mysql -N --batch --database=sympa --execute "select email_user from user_table"';
+
+open(DOMAINS, "$file") or die "cannot open $file\n";
+open(DUMP, "$sql|") or die "cannot get dump of addresses from database\n";
+open(ADDRESSES, ">addresses") or die "cannot open addresses\n";
+open(COUNT, ">count") or die "cannot open count\n";
+
+# load all the addresses into a hash of arrays
+# this is _way_ faster than doing lost of sql queries and currently (for
+# lists.riseup.net) is about 62mb
+while (<DUMP>) {
+   chomp;
+   m/.*?\@(.*)$/;
+   push @{ $dump{$1} },"$_";
+}
+
+while (<DOMAINS>) {
+   chomp;
+   $domain=$_;
+   foreach (@{ $dump{$domain} }) {
+      print ADDRESSES "$_\n";
+      $bad{$domain}++;
+   }
+}
+
+foreach $domain ( sort { $bad{$b} <=> $bad{$a} } keys %bad) {
+   print COUNT "$bad{$domain} $domain\n";
+}
+
+print "Done. address list in 'addresses', counts by domain in 'count'\n";

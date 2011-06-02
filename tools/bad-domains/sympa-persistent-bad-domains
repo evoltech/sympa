@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+# sympa-persistent-bad-domains - compare the lists of bad domains and report
+#  those that are persistently bad
+# taggart 2011-05-30
+
+$logdir='/var/log/sympa/bad-domains';
+
+# use the last three runs
+$filelist=`ls -rt $logdir/20*|tail -3`;
+
+@files = split /\n/,$filelist;
+
+foreach $file (@files) {
+   open(FILE, "$file") or die "cannot open $file\n";
+
+   while (<FILE>) {
+      chomp;
+      $bad{$_}++;
+   }
+}
+
+foreach $domain (sort { $bad{$b} <=> $bad{$a} } keys %bad) {
+   last if ( $bad{$domain} < 3 );
+   print "$domain\n";
+}
