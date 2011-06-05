@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 # find-bad-addresses - using a list of bad domains, find all the addresses
 #  for those domains and return a list of addresses and lists of address
-#  count by domain and by list.
+#  count by domain, by list count, and by list percent.
 # NOTE: this script requires the current user has read access to the db
 # Matt Taggart <taggart@riseup.net> 2011-06
 
@@ -21,7 +21,8 @@ open(ADDRESSDUMP, "$addresssql|") or die "cannot get dump of addresses from data
 open(LISTDUMP, "$listsql|") or die "cannot get dump of address+list pairs from database\n";
 open(ADDRESSES, ">addresses") or die "cannot open addresses\n";
 open(BYDOMAIN, ">bydomain") or die "cannot open bydomain\n";
-open(BYLIST, ">bylist") or die "cannot open bylist\n";
+open(BYLISTC, ">bylistcount") or die "cannot open bylistcount\n";
+open(BYLISTP, ">bylistpercent") or die "cannot open bylistpercent\n";
 
 # load all the addresses into a hash of arrays
 # this is _way_ faster than doing lost of sql queries and currently (for
@@ -44,6 +45,8 @@ while (<DOMAINS>) {
 while (<LISTDUMP>) {
    chomp;
    m/^(.*)\t.*?\@(.*?)$/;
+   # keep a count of the addresses per list
+   $listcount{$1}++;
    # if the domain had bad addresses, increment the count for that list
    if ( $bad{$2} ) {
       $badlists{$1}++;
@@ -55,8 +58,15 @@ foreach $domain ( sort { $bad{$b} <=> $bad{$a} } keys %bad) {
 }
 
 foreach $list ( sort { $badlists{$b} <=> $badlists{$a} } keys %badlists) {
-   print BYLIST "$badlists{$list} $list\n";
+   $percent{$list} = ( $badlists{$list} / $listcount{$list} ) * 100;
+   printf BYLISTC '%s %s (%.2f%%)', $badlists{$list}, $list, $percent{$list};
+   print BYLISTC "\n";
 }
 
-print "Done. Address list in 'addresses', counts by domain in'bydomain',\n";
-print "  by list in 'bylist'\n";
+foreach $list ( sort { $percent{$b} <=> $percent{$a} } keys %percent) {
+   printf BYLISTP '%.2f%% %s (%s)', $percent{$list}, $list, $badlists{$list};
+   print BYLISTP "\n";
+}
+
+print "Done. Address list in 'addresses', counts by domain in 'bydomain',\n";
+print "  by list count in 'bylistcount', by list percent in 'bylistpercent'\n";
