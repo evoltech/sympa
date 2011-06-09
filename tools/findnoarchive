@@ -1,0 +1,6 @@
+#!/bin/sh
+# findnoarchive - print a list of lists that have archives turned off
+# NOTE: this script requires the current user has read access to the db
+
+mysql -N --batch --database=sympa --execute "select name_list from list_table where web_archive_list ='0';"
+
