@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 # find-bad-addresses - using a list of bad domains, find all the addresses
-#  for those domains and return a list of addresses and a list of address
-#  count by domain.
+#  for those domains and return a list of addresses and lists of address
+#  count by domain, by list count, and by list percent.
 # NOTE: this script requires the current user has read access to the db
 # Matt Taggart <taggart@riseup.net> 2011-06
 
@@ -13,17 +13,21 @@ if (!$ARGV[0]) {
 $file=$ARGV[0];
 
 #$file='20110601';
-$sql='mysql -N --batch --database=sympa --execute "select email_user from user_table"';
+$addresssql='mysql -N --batch --database=sympa --execute "select email_user from user_table"';
+$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
 
 open(DOMAINS, "$file") or die "cannot open $file\n";
-open(DUMP, "$sql|") or die "cannot get dump of addresses from database\n";
+open(ADDRESSDUMP, "$addresssql|") or die "cannot get dump of addresses from database\n";
+open(LISTDUMP, "$listsql|") or die "cannot get dump of address+list pairs from database\n";
 open(ADDRESSES, ">addresses") or die "cannot open addresses\n";
-open(COUNT, ">count") or die "cannot open count\n";
+open(BYDOMAIN, ">bydomain") or die "cannot open bydomain\n";
+open(BYLISTC, ">bylistcount") or die "cannot open bylistcount\n";
+open(BYLISTP, ">bylistpercent") or die "cannot open bylistpercent\n";
 
 # load all the addresses into a hash of arrays
 # this is _way_ faster than doing lost of sql queries and currently (for
 # lists.riseup.net) is about 62mb
-while (<DUMP>) {
+while (<ADDRESSDUMP>) {
    chomp;
    m/.*?\@(.*)$/;
    push @{ $dump{$1} },"$_";
@@ -38,8 +42,31 @@ while (<DOMAINS>) {
    }
 }
 
-foreach $domain ( sort { $bad{$b} <=> $bad{$a} } keys %bad) {
-   print COUNT "$bad{$domain} $domain\n";
+while (<LISTDUMP>) {
+   chomp;
+   m/^(.*)\t.*?\@(.*?)$/;
+   # keep a count of the addresses per list
+   $listcount{$1}++;
+   # if the domain had bad addresses, increment the count for that list
+   if ( $bad{$2} ) {
+      $badlists{$1}++;
+   }
 }
 
-print "Done. address list in 'addresses', counts by domain in 'count'\n";
+foreach $domain ( sort { $bad{$b} <=> $bad{$a} } keys %bad) {
+   print BYDOMAIN "$bad{$domain} $domain\n";
+}
+
+foreach $list ( sort { $badlists{$b} <=> $badlists{$a} } keys %badlists) {
+   $percent{$list} = ( $badlists{$list} / $listcount{$list} ) * 100;
+   printf BYLISTC '%s %s (%.2f%%)', $badlists{$list}, $list, $percent{$list};
+   print BYLISTC "\n";
+}
+
+foreach $list ( sort { $percent{$b} <=> $percent{$a} } keys %percent) {
+   printf BYLISTP '%.2f%% %s (%s)', $percent{$list}, $list, $badlists{$list};
+   print BYLISTP "\n";
+}
+
+print "Done. Address list in 'addresses', counts by domain in 'bydomain',\n";
+print "  by list count in 'bylistcount', by list percent in 'bylistpercent'\n";
