@@ -7,5 +7,8 @@ echo "removing ${BASH_ARGV[*]}:"
 # remove all list subscriptions
 mysql --batch --database=sympa --execute "delete from subscriber_table where user_subscriber='${BASH_ARGV[*]}'"
 
+# remove all adminships
+mysql --batch --database=sympa --execute "delete from admin_table where user_admin='${BASH_ARGV[*]}'"
+
 # remove user
 mysql --batch --database=sympa --execute "delete from user_table where email_user='${BASH_ARGV[*]}'"

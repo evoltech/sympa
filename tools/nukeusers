@@ -10,6 +10,9 @@ do
   # remove all list subscriptions
   mysql --batch --database=sympa --execute "delete from subscriber_table where user_subscriber='$address'"
 
+  # remove all adminships
+  mysql --batch --database=sympa --execute "delete from admin_table where user_admin='$address'"
+
   # remove user
   mysql --batch --database=sympa --execute "delete from user_table where email_user='$address'"
 done
