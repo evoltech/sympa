@@ -1,0 +1,36 @@
+#!/bin/sh
+# mktransport- given a bunch of lists of typo domains, generate a postfix
+# compatible transports file
+# Matt Taggart <taggart@riseup.net>
+
+owned='aol-owned comcast-owned MS-owned tiscali-owned verizon-owned yahoo-owned'
+registered='rfc-registered'
+not='rfc-not'
+# we could probably do invalid domains too
+
+echo "## transport_typos: domains we want to reject right away so they don't"
+echo "## clog up the queue with undeliverable junk (or worse leak private"
+echo "## information to the typo squatter)"
+echo
+echo "# domains that are registered by the owner of the domain they are a typo for"
+for file in $owned; do
+   echo "# ${file%-owned} owned domains"
+   for domain in `cat lists/$file`; do
+      echo "$domain	error: This domain exists, but is probably a typo. Contact http://help.riseup.net/help-desk if this is in error."
+      echo ".$domain	error: This domain exists, but is probably a typo. Contact http://help.riseup.net/help-desk if this is in error."
+   done
+done
+
+echo
+echo "# domains that are registered by a squatter/random"
+for domain in `cat lists/$registered`; do
+      echo "$domain	error: This domain exists, but is probably a typo. Contact http://help.riseup.net/help-desk if this is in error."
+      echo ".$domain	error: This domain exists, but is probably a typo. Contact http://help.riseup.net/help-desk if this is in error."
+done
+
+echo
+echo "# domains that aren't registered"
+for domain in `cat lists/$not`; do
+      echo "$domain	error: This domain isn't resolving, but is probably a typo anyway. Contact http://help.riseup.net/help-desk if this is in error."
+      echo ".$domain	error: This domain isn't resolving, but is probably a typo anyway. Contact http://help.riseup.net/help-desk if this is in error."
+done
