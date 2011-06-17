@@ -1,0 +1,21 @@
+#!/bin/bash
+# nukelist - removes all traces of a list from the db
+# WARNING: it's much better to use 'sympa.pl --close_list=LIST' if you can,
+#  this script is only for cleaning things up when sympa isn't able to close
+# NOTE: this script requires the current user has write access to the db
+
+LIST=${BASH_ARGV[*]}
+echo "removing $LIST:"
+
+echo "removing admins..."
+mysql --batch --database=sympa --execute "delete from admin_table where list_admin='$LIST';"
+echo "removing subscribers..."
+mysql --batch --database=sympa --execute "delete from subscriber_table where list_subscriber='$LIST';"
+echo "removing pending messages..."
+mysql --batch --database=sympa --execute "delete from bulkmailer_table where listname_bulkmailer='$LIST';"
+echo "removing logs..."
+mysql --batch --database=sympa --execute "delete from logs_table where list_logs='$LIST';"
+echo "removing tickets..."
+mysql --batch --database=sympa --execute "delete from one_time_ticket_table where data_one_time_ticket like '%/$LIST';"
+echo "removing list..."
+mysql --batch --database=sympa --execute "delete from list_table where name_list='$LIST';"
