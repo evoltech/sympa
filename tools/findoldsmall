@@ -1,0 +1,50 @@
+#!/usr/bin/perl -w
+# findoldsmall - list lists with only 0 or 1 subscribers and config older than
+#   60 days, also list lists where we couldn't find the config file
+# NOTE: this script requires the current user has read access to the db
+# Matt Taggart <taggart@riseup.net> 2011-06
+
+open(ERROR,">error") or die "cannot open error file\n";
+open(OUTPUT,">oldsmall") or die "cannot open output file\n";
+
+# get a list of address and listname pairs for all open lists
+$subsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+# get a list of all open lists
+$listsql='mysql -N --batch --database=sympa --execute "select name_list from list_table where status_list=\'open\'"';
+
+open(SUBDUMP, "$subsql|") or die "cannot get dump of address+list pairs from database\n";
+open(LISTDUMP, "$listsql|") or die "cannot get dump of lists from database\n";
+
+# init a hash with all lists
+while (<LISTDUMP>) {
+   chomp;
+   $listcount{$_} = 0;
+}
+
+# increment the counts
+while (<SUBDUMP>) {
+   chomp;
+   m/^(.*)\t.*?\@(.*?)$/;
+   # keep a count of the addresses per list
+   $listcount{$1}++;
+}
+
+# print out the listname, count until we get to lists with 2 or more subscribers
+foreach $list ( sort { $listcount{$a} <=> $listcount{$b} } keys %listcount) {
+   last if $listcount{$list} > 1;
+
+   $file="/home/sympa/expl/$list/config";
+
+   if ( ! -f $file || ! -r $file ) {
+     print ERROR "$list\n";
+     next;
+   }
+
+   $mtime=(stat($file))[9];
+   #print "$file $mtime\n";
+   print OUTPUT "$list\n" if (time - $mtime) > 60*60*24*60;
+}
+
+
+
+
