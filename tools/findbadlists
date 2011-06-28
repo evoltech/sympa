@@ -23,7 +23,8 @@ $cemeterydir='/home/sympa/cemetary/';
 $listsql='mysql -N --batch --database=sympa --execute "select name_list from list_table"';
 
 open(LISTDUMP, "$listsql|") or die "cannot get dump of lists from database\n";
-open(EXPLDUMP, "find $expldir -maxdepth 1 -mindepth 1 -type d|") or die "cannot get dump of lists from expl\n";
+# sympa has a special 'X509-user-cert' directory that we ignore
+open(EXPLDUMP, "find $expldir -maxdepth 1 -mindepth 1 -type d|grep -v X509-user-cert|") or die "cannot get dump of lists from expl\n";
 open(CEMDUMP, "find $cemeterydir -maxdepth 1 -mindepth 1 -type d|") or die "cannot get dump of lists from the cemetery\n";
 
 # load everything into hashes
