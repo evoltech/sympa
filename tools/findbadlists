@@ -1,0 +1,72 @@
+#!/usr/bin/perl -w
+# findbadlists - find lists that are in the db but not expl, and vice versa
+# NOTE: this script requires the current user has read access to the db
+# WARNING: this script assumes you are using riseup's list_table patches
+#   and ecology script
+# Matt Taggart <taggart@riseup.net> 2011-06
+
+# lists can be
+# 1. listed as open in the database and have a dir in expl/
+# 2. listed as closed in the database and have a dir in expl/
+# 3. listed as closed in the database and have a dir in cemetary/
+# but shouldn't be
+# 4. in the database (open or closed) and not have a dir in either expl/
+#   or cemetary/
+# 5. not in the database and have a dir in either expl/ or cemetary/
+
+$domain='lists.riseup.net';
+$expldir='/home/sympa/expl/';
+# yes the dir is mispelled
+$cemeterydir='/home/sympa/cemetary/';
+
+# get a list of all lists in the db
+$listsql='mysql -N --batch --database=sympa --execute "select name_list from list_table"';
+
+open(LISTDUMP, "$listsql|") or die "cannot get dump of lists from database\n";
+open(EXPLDUMP, "find $expldir -maxdepth 1 -mindepth 1 -type d|") or die "cannot get dump of lists from expl\n";
+open(CEMDUMP, "find $cemeterydir -maxdepth 1 -mindepth 1 -type d|") or die "cannot get dump of lists from the cemetery\n";
+
+# load everything into hashes
+while (<LISTDUMP>) {
+   chomp;
+   $lists{$_}++;
+}
+while (<EXPLDUMP>) {
+   chomp;
+   m:^$expldir/?(.*)$:;
+   $expl{$1}++;
+}
+while (<CEMDUMP>) {
+   chomp;
+   m:^$cemeterydir/?(.*)\@$domain$:;
+   $cemetery{$1}++;
+}
+
+print "### lists in the database but not in expl or the cemetery ###\n";
+foreach $list ( keys %lists ) {
+   $found=0;
+
+   if ( $expl{$list} ) {
+      delete $expl{$list};
+      $found++;
+   }
+
+   if ( $cemetery{$list} ) {
+      delete $cemetery{$list};
+      $found++;
+   }
+
+   next if $found;
+   print "$list\n";
+}
+
+print "### lists not in the database but in expl ###\n";
+foreach $list ( keys %expl ) {
+   print "$list\n";
+}
+
+print "### lists not in the database but in the cemetery ###\n";
+foreach $list ( keys %cemetery ) {
+   print "$list\n";
+}
+
