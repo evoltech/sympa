@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+# findtypos - find and report addresses with common typos, and list some stats
+# NOTE: this script requires the current user has read access to the db
+
+$listsdir='/home/sympa/tools.new/typos/lists/';
+
+# currently we have files in the lists/ directory that list the typo domains,
+#  eventually I plan to make these a DNSBL and we can just query it
+@lists= ( "invalid", "rfc-not", "rfc-registered", "MS-owned", "yahoo-owned" );
+
+# put the typo domains in a hash
+foreach $file ( @lists ) {
+  open(FILE,"$listsdir/$file") or die "Cannot open $file\n";
+  while (<FILE>) {
+    chomp;
+    $typos{$_} = 1;
+  } 
+  close FILE;
+}
+
+# get the list and user addresses from sympa (but only for open lists, which is sort of an expensive query, not checking that is way faster)
+$subscribersql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+
+open(SUBSCRIBERS, "$subscribersql|") or die "cannot get dump of subscribers from database\n";
+open(ADDRESSES, ">addresses") or die "cannot open addresses\n";
+open(BYDOMAIN, ">bydomain") or die "cannot open bydomain\n";
+open(BYLISTC, ">bylistcount") or die "cannot open bylistcount\n";
+open(BYLISTP, ">bylistpercent") or die "cannot open bylistpercent\n";
+
+while (<SUBSCRIBERS>) {
+   # because we have bogus addresses, this regex doesn't always match, use if
+   if ( m/^(.*?)\t\s*<?(.*\@(.*?))>?\s*$/ ) {
+      ($list, $address, $domain) = ($1,$2,$3);
+      $listcount{$list}++;
+      # if the domain is a typo, add the address to a typo hash
+      if ( $typos{$domain} ) {
+         print ADDRESSES "$address\n";
+         $domains{$domain}++;
+         $lists{$list}++;
+      }
+   }
+}
+
+foreach $domain ( sort { $domains{$b} <=> $domains{$a} } keys %domains) {
+   print BYDOMAIN "$domains{$domain} $domain\n";
+}
+
+foreach $list ( sort { $lists{$b} <=> $lists{$a} } keys %lists) {
+   $percent{$list} = ( $lists{$list} / $listcount{$list} ) * 100;
+   printf BYLISTC '%s %s (%.2f%%)', $lists{$list}, $list, $percent{$list};
+   print BYLISTC "\n";
+}
+
+foreach $list ( sort { $percent{$b} <=> $percent{$a} } keys %percent) {
+   printf BYLISTP '%.2f%% %s (%s)', $percent{$list}, $list, $lists{$list};
+   print BYLISTP "\n";
+}
+
+print "Done. Address list in 'addresses', counts by domain in 'bydomain',\n";
+print "  by list count in 'bylistcount', by list percent in 'bylistpercent'\n";
+
