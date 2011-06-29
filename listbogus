@@ -1,0 +1,62 @@
+#!/usr/bin/perl -w
+# listbogus - list all sympa user email addresses that violate the rfc's for
+#  what constitutes a valid email address. also list counts by domain, by
+#  list count, and by list percentage.
+# NOTE: this script requires the current user has read access to the db
+#   requires Email::Valid, apt-get install libemail-valid-perl
+# Matt Taggart <taggart@riseup.net> 2011-06
+
+use Email::Valid;
+
+$subscriberssql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+
+open(SUBSCRIBERS, "$subscriberssql|") or die "cannot get dump of subscribers from database\n";
+open(ADDRESSES, ">addresses") or die "cannot open addresses\n";
+open(BYDOMAIN, ">bydomain") or die "cannot open bydomain\n";
+open(BYLISTC, ">bylistcount") or die "cannot open bylistcount\n";
+open(BYLISTP, ">bylistpercent") or die "cannot open bylistpercent\n";
+
+while (<SUBSCRIBERS>) {
+   # $1 is the list name
+   # $2 is the subscriber address
+   # for $3 we try to get the domain name, but since the address might not be
+   #   valid we can't assume it will have a user part or an @
+   # also sympa subscriber names might have leading/trailing space and/or <>
+   #   and still mostly work
+   # english version of the regexp:
+   # match the beginning of the line, then non-greedily match everything up to
+   # the first tab as $1, then maybe some space characters, then maybe a <
+   # symbol, then match greedily some characters up to a @ and non-greedily
+   # some more characters up to maybe a > symbol and maybe some spaces and
+   # then the end of line, with all the character@character stuff as $2 but
+   # just the characters after the @ as $3
+   m/^(.*?)\t\s*<?(.*\@(.*?))>?\s*$/;
+   $listcount{$1}++;
+   unless(Email::Valid->address( -address => $2,
+                                 -fqdn => 1,
+                                 #-mxcheck => 1,
+                                 -local_rules => 1,
+                                 -tldcheck => 1 )) {
+      print ADDRESSES "$2: $Email::Valid::Details\n";
+      $badlists{$1}++;
+      $domains{$3}++;
+   }
+}
+
+foreach $domain ( sort { $domains{$b} <=> $domains{$a} } keys %domains) {
+   print BYDOMAIN "$domains{$domain} $domain\n";
+}
+
+foreach $list ( sort { $badlists{$b} <=> $badlists{$a} } keys %badlists) {
+   $percent{$list} = ( $badlists{$list} / $listcount{$list} ) * 100;
+   printf BYLISTC '%s %s (%.2f%%)', $badlists{$list}, $list, $percent{$list};
+   print BYLISTC "\n";
+}
+
+foreach $list ( sort { $percent{$b} <=> $percent{$a} } keys %percent) {
+   printf BYLISTP '%.2f%% %s (%s)', $percent{$list}, $list, $badlists{$list};
+   print BYLISTP "\n";
+}
+
+print "Done. Address list in 'addresses', counts by domain in 'bydomain',\n";
+print "  by list count in 'bylistcount', by list percent in 'bylistpercent'\n";
