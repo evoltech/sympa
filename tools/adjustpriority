@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+# adjustpriority - split the lists into bins based on subscriber count
+#  and then set all lists priorities
+# NOTE: this script requires the current user has read access to the db
+# Matt Taggart <taggart@riseup.net> 2011-07
+
+# 0,1,9 already have special meanings, 5 is the default priority, so use 2-8
+$bins=7;
+$binstart=2;
+
+# get a list of address and listname pairs for all open lists
+$subsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+# get a list of all open lists
+$listsql='mysql -N --batch --database=sympa --execute "select name_list from list_table where status_list=\'open\'"';
+
+open(SUBDUMP, "$subsql|") or die "cannot get dump of address+list pairs from database\n";
+open(LISTDUMP, "$listsql|") or die "cannot get dump of lists from database\n";
+
+# init a hash with all lists
+while (<LISTDUMP>) {
+   chomp;
+   $listcount{$_} = 0;
+}
+
+# increment the counts
+while (<SUBDUMP>) {
+   chomp;
+   m/^(.*)\t.*?\@(.*?)$/;
+   # keep a count of the addresses per list
+   $listcount{$1}++;
+}
+
+$numlists = keys %listcount;
+# we add one to ensure $bins * $binsize > $numlists
+$binsize = int($numlists / $bins) + 1;
+
+print "### Lists: $numlists   Bins: $bins  Lists per Bin: ~$binsize\n";
+
+$i=$binstart;
+$j=0;
+
+print "### bin $binstart ###\n";
+foreach $list ( sort { $listcount{$a} <=> $listcount{$b} } keys %listcount) {
+   if ( $j < $binsize ) {
+      print "list $list set to priority $i\n";
+      # put the thing to set the priority here
+      $j++;
+      next;
+   }
+   # reset the binsize counter
+   $j=0;
+
+   if ( $i > ( $binstart + $bins ) ) {
+      print "ERROR: we ran out of bins\n";
+      exit 1;
+   }
+
+   $i++;
+   print "### bin ".$i." ###\n";
+}
+
