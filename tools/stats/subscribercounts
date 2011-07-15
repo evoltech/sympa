@@ -1,7 +1,32 @@
-#!/bin/sh
+#!/usr/bin/perl
 # subscribercounts - lists and their subscriber count, sorted descending
 #  by count
 # NOTE: this script requires the current user has read access to the db
 
-mysql --batch --database=sympa --skip-column-names --execute \
-"SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber ORDER BY subscribers DESC"
+$sql=qq(mysql --batch --database=sympa --skip-column-names --execute "SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber ORDER BY subscribers DESC LIMIT 25;");
+
+open(COUNTS, "$sql|") or die "cannot get subscriber counts from database\n";
+
+format Wiki =
+|[@*->https://lists.riseup.net/www/info/@*]|@*|
+  $list,                            $list,$counts{$list}
+.
+
+format Plain =
+@* @*
+$list, $counts{$list}
+.
+
+if ( $ARGV[0] eq '-w' ) {
+   $~='Wiki';
+   print "|_.List name|_.Subscriber count|\n";
+} else {
+   $~='Plain';
+}
+
+
+while (<COUNTS>) {
+   ($list, $count) = split /\t/;
+   $counts{$list}=$count;
+   write;
+}
