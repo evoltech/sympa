@@ -1,0 +1,7 @@
+#!/bin/sh
+# subscribercounts - lists and their subscriber count, sorted descending
+#  by count
+# NOTE: this script requires the current user has read access to the db
+
+mysql --batch --database=sympa --skip-column-names --execute \
+"SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber ORDER BY subscribers DESC"
