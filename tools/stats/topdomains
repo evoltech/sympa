@@ -21,17 +21,40 @@ while (<LIST>) {
 }
 
 $dcount = scalar keys %domains;
-print "Total users: ".$count." Total domains: ". $dcount ."\n";
 
-print "Domain:                                                    users (\% of total)\n";
 
-format Output =
+format Plain =
 @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<... @>>>>>>> (@#.##%)
 $key,                                                   $domains{$key}, $percent
 .
-$~='Output';
+
+format Html =
+<tr><td>@*</td><td align=right>@*</td><td align=right>@#.##%</td>
+        $key,      $domains{$key}, $percent
+.
+
+if ( $ARGV[0] eq '-h' ) {
+   $~='Html';
+   print "<style>table{border: 1px solid;border-collapse: collapse;}\ntd,th{border-width: 1px 1px 1px 1px;border-style: solid;}\n</style>\n";
+   print "<h3>Top 25 domains by users</h3>\n";
+   print "Total users: ".$count." Total domains: ". $dcount ."<br>\n";
+   print "(<i>generated ".`date`."</i>)<br>\n";
+   print "<table>\n";
+   print "<tr><th align=center>Domain</th><th align=center>Users</th><th>\% of total</th></tr>\n";
+} else {
+   print "Top 25 domains by users\n";
+   print "Total users: ".$count." Total domains: ". $dcount ."\n";
+   print "(generated ".`date`.")\n";
+   print "Domain:                                                    Users (\% of total)\n";
+   $~='Plain';
+}
 
 foreach $key ((sort { $domains{$b} <=> $domains{$a} } keys %domains)[0..24]) {
    $percent=$domains{$key}/$count*100;
    write;
 }
+
+if ( $ARGV[0] eq '-h' ) {
+   print "</table>\n";
+}
+
