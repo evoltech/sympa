@@ -39,7 +39,7 @@ if ( $ARGV[0] eq '-h' ) {
    print "<h3>Top 25 domains by users</h3>\n";
    print "Total users: ".$count." Total domains: ". $dcount ."<br>\n";
    print "(<i>generated ".`date`."</i>)<br>\n";
-   print "<table class="single\">\n";
+   print "<table class=\"single\">\n";
    print "<tr><th align=center>Domain</th><th align=center>Users</th><th>\% of total</th></tr>\n";
 } else {
    print "Top 25 domains by users\n";
