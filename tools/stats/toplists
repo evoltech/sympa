@@ -29,9 +29,10 @@ if ( $ARGV[0] eq '-w' ) {
    print "|_.List name|_.Subscribers|\n";
 } elsif ($ARGV[0] eq '-h' ) {
    $~='Html';
+   print "<style>table{border: 1px solid;border-collapse: collapse;}\ntd,th{border-width: 1px 1px 1px 1px;border-style: solid;}\n</style>\n";
    print "<h3>Top 100 lists by size</h3>\n";
    print "(<i>generated ".`date`."</i>)\n";
-   print "<table border=1>\n";
+   print "<table>\n";
    print "<tr><th align=center>List name</th><th align=center>Subscribers</th></tr>\n";
 } else {
    print "Top 100 lists by size\n";
