@@ -3,7 +3,7 @@
 #  by count
 # NOTE: this script requires the current user has read access to the db
 
-$sql=qq(mysql --batch --database=sympa --skip-column-names --execute "SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber ORDER BY subscribers DESC LIMIT 25;");
+$sql=qq(mysql --batch --database=sympa --skip-column-names --execute "SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber ORDER BY subscribers DESC LIMIT 100;");
 
 open(COUNTS, "$sql|") or die "cannot get subscriber counts from database\n";
 
@@ -17,11 +17,25 @@ format Plain =
 $list, $counts{$list}
 .
 
+format Html =
+<tr><td><a href="https://lists.riseup.net/www/info/@*">@*</a></td><td align=right>@*</td></tr>
+                                                $list, $list,     $counts{$list}
+.
+
 if ( $ARGV[0] eq '-w' ) {
    $~='Wiki';
-   print "|_.List name|_.Subscriber count|\n";
+   print "h3. Top 100 lists by size\n\n";
+   print "(generated ".`date`.")\n";
+   print "|_.List name|_.Subscribers|\n";
+} elsif ($ARGV[0] eq '-h' ) {
+   $~='Html';
+   print "<h3>Top 100 lists by size</h3>\n";
+   print "(<i>generated ".`date`."</i>)\n";
+   print "<table border=1>\n";
+   print "<tr><th align=center>List name</th><th align=center>Subscribers</th></tr>\n";
 } else {
-   $~='Plain';
+   print "Top 100 lists by size\n";
+   print "(generated ".`date`.")\n";
 }
 
 
@@ -29,4 +43,8 @@ while (<COUNTS>) {
    ($list, $count) = split /\t/;
    $counts{$list}=$count;
    write;
+}
+
+if ($ARGV[0] eq '-h' ) {
+   print "</table>\n";
 }
