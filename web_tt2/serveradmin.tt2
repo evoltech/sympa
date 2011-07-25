@@ -99,6 +99,9 @@
 </form>
 </div>
 
+<h2>List Statistics</h2>
+[% PROCESS toplists.tt2 %]
+
 <h2>[%|loc%]Archives[%END%]</h2><br />
 <div>
 [%|loc%]Rebuild HTML archives using "arctxt" directories as input.[%END%]<br />
