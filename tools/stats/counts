@@ -6,6 +6,14 @@ $lists=`mysql --batch --database=sympa --skip-column-names --execute "select cou
 $sub=`mysql --batch --database=sympa --skip-column-names --execute "select count(user_subscriber) from subscriber_table"`;
 $users=`mysql --batch --database=sympa --skip-column-names --execute "select count(email_user) from user_table"`;
 
-print "Lists: $lists  ";
-print "Total Subscriptions: $sub  ";
-print "Unique Users: $users\n";
+if ( $ARGV[0] eq '-h' ) {
+   print "As of ".`date`:<br>\n";
+   print "Lists: <b>$lists</b>  ";
+   print "Total Subscriptions: <b>$sub</b>  ";
+   print "Unique Users: <b>$users</b>\n";
+} else {
+   print "As of ".`date`:\n";
+   print "Lists: $lists\n";
+   print "Total Subscriptions: $sub\n";
+   print "Unique Users: $users\n";
+}
