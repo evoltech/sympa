@@ -99,8 +99,26 @@
 </form>
 </div>
 
-<h2>List Statistics</h2>
+<h2><a name="status">List Status</a></h2>
+<a href="http://ibis.riseup.net/munin/riseup.net/willet.riseup.net/sympa_queue.html"><img width="40%" src="http://ibis.riseup.net/cgi-bin/munin-cgi-graph/riseup.net/willet.riseup.net/sympa_queue-day.png"></a>
+<a href="http://ibis.riseup.net/munin/riseup.net/willet.riseup.net/postfix_mailqueue.html"><img width="40%" src="http://ibis.riseup.net/cgi-bin/munin-cgi-graph/riseup.net/willet.riseup.net/postfix_mailqueue-day.png"></a>
+<a href="http://ibis.riseup.net/munin/riseup.net/willet.riseup.net/sympa_stats.html"><img width="40%" src="http://ibis.riseup.net/cgi-bin/munin-cgi-graph/riseup.net/willet.riseup.net/sympa_stats-day.png"></a><br>
+
+<h2><a name="stats">List Statistics</a></h2>
+<a href="http://ibis.riseup.net/munin/riseup.net/willet.riseup.net/sympa_lists.html"><img width="40%" src="http://ibis.riseup.net/cgi-bin/munin-cgi-graph/riseup.net/willet.riseup.net/sympa_lists-year.png"></a>
+<a href="http://ibis.riseup.net/munin/riseup.net/willet.riseup.net/mysql_size_all.html"><img width="40%" src="http://ibis.riseup.net/cgi-bin/munin-cgi-graph/riseup.net/willet.riseup.net/mysql_size_all-year.png"></a>
+<a href="http://ibis.riseup.net/munin/riseup.net/willet.riseup.net/sympa_subscribers.html"><img width="40%" src="http://ibis.riseup.net/cgi-bin/munin-cgi-graph/riseup.net/willet.riseup.net/sympa_subscribers-year.png"></a>
+<a href="http://ibis.riseup.net/munin/riseup.net/willet.riseup.net/sympa_users.html"><img width="40%" src="http://ibis.riseup.net/cgi-bin/munin-cgi-graph/riseup.net/willet.riseup.net/sympa_users-year.png"></a><br>
+<br>
+[% PROCESS counts.tt2 %]
+<table><tr valign=top>
+<td>
 [% PROCESS toplists.tt2 %]
+</td>
+<td>
+[% PROCESS topdomains.tt2 %]
+</td>
+</tr></table>
 
 <h2>[%|loc%]Archives[%END%]</h2><br />
 <div>
