@@ -1,9 +1,10 @@
 #!/usr/bin/perl
-# subscribercounts - lists and their subscriber count, sorted descending
-#  by count
+# subscribercounts - top $num lists and their subscriber count, sorted
+#  descending by count
 # NOTE: this script requires the current user has read access to the db
 
-$sql=qq(mysql --batch --database=sympa --skip-column-names --execute "SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber ORDER BY subscribers DESC LIMIT 100;");
+$num=25;
+$sql=qq(mysql --batch --database=sympa --skip-column-names --execute "SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber ORDER BY subscribers DESC LIMIT $num;");
 
 open(COUNTS, "$sql|") or die "cannot get subscriber counts from database\n";
 
@@ -24,18 +25,18 @@ format Html =
 
 if ( $ARGV[0] eq '-w' ) {
    $~='Wiki';
-   print "h3. Top 100 lists by size\n\n";
+   print "h3. Top $num lists by size\n\n";
    print "(generated ".`date`.")\n";
    print "|_.List name|_.Subscribers|\n";
 } elsif ($ARGV[0] eq '-h' ) {
    $~='Html';
    print "<style>table.single{border: 1px solid;border-collapse: collapse;}\n.single td, .single th{border-width: 1px 1px 1px 1px;border-style: solid;}\n</style>\n";
-   print "<h3>Top 100 lists by size</h3>\n";
+   print "<h3>Top $num lists by size</h3>\n";
    print "(<i>generated ".`date`."</i>)\n";
    print "<table class=\"single\">\n";
    print "<tr><th align=center>List name</th><th align=center>Subscribers</th></tr>\n";
 } else {
-   print "Top 100 lists by size\n";
+   print "Top $num lists by size\n";
    print "(generated ".`date`.")\n";
 }
 
