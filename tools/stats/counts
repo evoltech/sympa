@@ -2,7 +2,7 @@
 # counts - list, subscription, user counts
 # NOTE: this script requires the current user has read access to the db
 
-$lists=`mysql --batch --database=sympa --skip-column-names --execute "select count(name_list) from list_table where status_list = 'open'"';
+$lists=`mysql --batch --database=sympa --skip-column-names --execute "select count(name_list) from list_table where status_list = 'open'"`;
 $sub=`mysql --batch --database=sympa --skip-column-names --execute "select count(user_subscriber) from subscriber_table"`;
 $users=`mysql --batch --database=sympa --skip-column-names --execute "select count(email_user) from user_table"`;
 
