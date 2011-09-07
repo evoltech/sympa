@@ -2,6 +2,16 @@
 # checkbanned.pl - script to check sympa database for banned users
 # Matt Taggart <taggart@riseup.net> 2011-09
 
+use strict;
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION="true";
+
+use vars qw($data $VERBOSE $opt_q
+            $userfile $adminfile $listfile
+            @userregex @adminregex @listregex
+            @users @admins @lists
+            $usersql $adminsql $listsql );
+
 $data='/home/sympa/etc/banned';
 $userfile="$data/users";
 $adminfile="$data/admins";
@@ -9,7 +19,16 @@ $listfile="$data/lists";
 # by default we print nice headers for the user
 $VERBOSE='true';
 
-# usage stuff
+getopts('q');
+
+sub HELP_MESSAGE {
+  print "Usage: checkbanned.pl [-q]\n";
+  print "     -q  : quiet mode, don't print headers. useful for cronjobs or nagios\n";
+}
+
+if ($opt_q) {
+   undef $VERBOSE;
+}
 
 if ( -r $userfile ) {
    # load the regexs, removing comment lines
@@ -21,6 +40,7 @@ if ( -r $userfile ) {
 
    print "#### processing users ####\n" if $VERBOSE;
    foreach (@users) {
+      my $regex;
       foreach $regex (@userregex) {
          print "pattern '$regex' matched user '$_'\n" if m/$regex/;
       }
@@ -37,8 +57,9 @@ if ( -r $adminfile ) {
 
    print "#### processing admins ####\n" if $VERBOSE;
    foreach (@admins) {
-      ($address, $list) = split /\t/,$_;
+      my ($address, $list) = split /\t/,$_;
       $_ = $address;
+      my $regex;
       foreach $regex (@adminregex) {
          print "pattern '$regex' matched admin '$address' of list '$list'\n" if m/$regex/;
       }
@@ -54,8 +75,8 @@ if ( -r $listfile ) {
 
    print "#### processing lists ####\n" if $VERBOSE;
    foreach (@lists) {
+      my $regex;
       foreach $regex (@listregex) {
-         #print "foo $_\n";
          print "pattern '$regex' matched list '$_'\n" if m/$regex/;
       }
    }
