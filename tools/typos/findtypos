@@ -6,7 +6,7 @@ $listsdir='/home/sympa/tools.new/typos/lists/';
 
 # currently we have files in the lists/ directory that list the typo domains,
 #  eventually I plan to make these a DNSBL and we can just query it
-@lists= qw(aol-owned bt-owned comcast-owned google-owned MS-owned rfc-not rfc-registered rr tiscali-owned verizon-owned wanadoo-owned yahoo-owned);
+@lists= qw(aol-owned bt-owned comcast-owned google-owned MS-owned rfc-not rfc-registered riseup rr tiscali-owned verizon-owned wanadoo-owned yahoo-owned);
 
 # put the typo domains in a hash
 foreach $file ( @lists ) {
