@@ -3,7 +3,7 @@
 # compatible transports file
 # Matt Taggart <taggart@riseup.net>
 
-owned='aol-owned bt-owned comcast-owned google-owned MS-owned rr tiscali-owned verizon-owned wanadoo-owned yahoo-owned'
+owned='aol-owned bt-owned comcast-owned google-owned MS-owned riseup rr tiscali-owned verizon-owned wanadoo-owned yahoo-owned'
 registered='rfc-registered'
 not='rfc-not'
 # we could probably do invalid domains too
