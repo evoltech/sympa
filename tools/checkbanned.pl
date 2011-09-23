@@ -52,7 +52,7 @@ if ( -r $adminfile ) {
    @adminregex = grep(!/^#/, &loadarray("$adminfile"));
    
    # load the list of admin/list pairs
-   $adminsql='mysql -N --batch --database=sympa --execute "select user_admin, list_admin from admin_table, list_table where list_admin=list_table.name_list and list_table.status_list=\'open\'"';
+   $adminsql=q(mysql -N --batch --database=sympa --execute "select user_admin, list_admin from admin_table, list_table where list_admin=list_table.name_list and list_table.status_list != 'closed'");
    @admins = &loadarray("$adminsql|");
 
    print "#### processing admins ####\n" if $VERBOSE;
@@ -70,7 +70,7 @@ if ( -r $listfile ) {
    @listregex = grep(!/^#/, &loadarray("$listfile"));
 
    # load the list of lists
-   $listsql='mysql -N --batch --database=sympa --execute "select name_list from list_table where status_list=\'open\'"';
+   $listsql=q(mysql -N --batch --database=sympa --execute "select name_list from list_table where status_list != 'closed'");
    @lists = &loadarray("$listsql|");
 
    print "#### processing lists ####\n" if $VERBOSE;
