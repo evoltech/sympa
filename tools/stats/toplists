@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# subscribercounts - top $num lists and their subscriber count, sorted
+# toplists - top $num lists and their subscriber count, sorted
 #  descending by count
 # NOTE: this script requires the current user has read access to the db
 
