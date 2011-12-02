@@ -12,11 +12,16 @@ use vars qw($upstream $new @delete %rename);
    d_edit.private-https
    d_edit.public
    d_read.private-https
-   invite.impossible
    review.public
-   subscribe.impossible
    unsubscribe.closed
+   unsubscribe.owner
    );
+
+# We might start deleting these later
+   #invite.impossible
+   #subscribe.impossible
+   #unsubscribe.auth
+   #unsubscribe.auth_notify
 
 # files to rename
 %rename = (
@@ -53,7 +58,22 @@ use vars qw($upstream $new @delete %rename);
    'send.newsletterkeyonly' => 'send.newsletter_verify'
 );
 
-
+# default symlinks to create
+%default = (
+   'add.default' => 'add.owners',
+   'd_edit.default' => 'd_edit.editors',
+   'del.default' => 'del.owners',
+   'd_read.default' => 'd_read.members',
+   'info.default' => 'info.anyone',
+   'invite.default' => 'invite.closed',
+   'remind.default' => 'remind.owners',
+   'review.default' => 'review.owners',
+   'send.default' => 'send.members_or_moderated',
+   'subscribe.default' => 'subscribe.verified',
+   'topics_visibility.default' => 'topics_visibility.noconceal',
+   'unsubscribe.default' => 'unsubscribe.anyone',
+   'visibility.default' => 'visibility.anyone'
+);
 
 # check for arguments and store them
 if (!$ARGV[1]) {
@@ -87,5 +107,10 @@ foreach $file (@delete) {
 
 # do the renames
 foreach $key (keys %rename) {
-   rename("$new/$key","$new/$rename{$key}") or die "could not rename $key\n";;
+   rename("$new/$key","$new/$rename{$key}") or die "could not rename $key\n";
+}
+
+# setup the default symlinks
+foreach $key (keys %default) {
+   symlink("$default{$key}","$new/$key") or die "could not create symlink $key\n";
 }
