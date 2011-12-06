@@ -1,0 +1,15 @@
+#!/bin/sh
+# countscenari - given a scenari string, give a count of all the different
+#  values that lists are using
+# Matt Taggart <taggart@riseup.net> 2011-12
+
+EXPL='/home/sympa/expl/'
+
+if [ -z $1 ]; then
+   echo "usage: countscenari <string>"
+   exit 1
+fi
+
+SCENARI=$1
+# optional leading whitespace
+egrep -h "^[:space:]*$SCENARI" $EXPL/*/config|sort |uniq -c|sort -n
