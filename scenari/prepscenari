@@ -3,7 +3,9 @@
 #  doing a diff with an existing tree
 # Matt Taggart <taggart@riseup.net> "2011-12
 
-use vars qw($upstream $new @delete %rename);
+use vars qw($upstream $new $old @delete %rename @new);
+
+$old='etc/';
 
 # files to delete
 @delete = qw(
@@ -75,6 +77,19 @@ use vars qw($upstream $new @delete %rename);
    'visibility.default' => 'visibility.anyone'
 );
 
+# new files
+@new = qw(
+   review.editors
+   send.anyone_unmoderated
+   send.members_moderated
+   send.members_or_moderated
+   send.members_or_moderated_quiet
+   send.members_unmoderated
+   subscribe.approved
+   subscribe.approved_verified
+   subscribe.anyone_notify
+);
+
 # check for arguments and store them
 if (!$ARGV[1]) {
    print "usage: prepscenari <upstream dir> <new dir>\n";
@@ -113,4 +128,11 @@ foreach $key (keys %rename) {
 # setup the default symlinks
 foreach $key (keys %default) {
    symlink("$default{$key}","$new/$key") or die "could not create symlink $key\n";
+}
+
+# copy in the additions
+foreach $file (@new) {
+   if (system("cp -f $old/$file $new/")) {
+      die "ERROR: could not copy $old/$file to $new\n";
+   }
 }
