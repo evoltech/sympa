@@ -1,8 +1,0 @@
-title.gettext Same as members-or-moderated except no moderation notice is sent to message authors.
-
-is_subscriber([listname],[sender])          smtp,smime,md5  -> do_it
-is_editor([listname],[sender])              smtp,smime,md5  -> do_it
-true()                                      smtp,smime,md5  -> editorkey,quiet
-
-
-

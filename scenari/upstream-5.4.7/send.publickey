@@ -1,8 +1,0 @@
-title.gettext anyone with previous md5 authentication
-
-true()                               smtp          -> request_auth
-true()                               md5,smime     -> do_it
-
-
-
-

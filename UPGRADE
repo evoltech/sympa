@@ -55,11 +55,11 @@ Instructions to upgrade sympa for riseup:
    the above templates.
 
 7. check scenari files
-   scenari files describe permissions for subscribing and unsubscribing, among other things. we have some scenaris
-   disabled (for example, the scenari that closes unsubscribing).  
-   the files in scenari/ in the repo should be the only scenaris enabled, like so:
-   scenari/etc/* -> /home/sympa/etc/scenari/
-   scenari/default/* -> /home/smpa/default/scenari/
+   scenari files describe permissions for subscribing and unsubscribing,
+   among other things. we have some scenaris disabled (for example, the
+   scenari that closes unsubscribing).
+   The scenari files are deployed by the site-sympa puppet module, follow
+   the instructions there to update them for a new release.
 
 6. start sympa
 
@@ -75,8 +75,5 @@ Instructions to upgrade sympa for riseup:
 5b. web and mail templates
    copy web_tt2 and mail_tt2 directories to the /home/sympa/etc directory in the sympa tree 
 
-5c. scenari files
-   copy scenari files from scenari/ to /home/sympa/etc/scenari
-
-5d. create_list_templates
+5c. create_list_templates
    create_list_templates -> /home/sympa/etc/

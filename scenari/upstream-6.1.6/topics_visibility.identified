@@ -1,4 +1,0 @@
-title.gettext conceal unless user is logged in
-
-!equal([sender],'nobody')      smtp,dkim,smime,md5 -> do_it
-true()                         smtp,dkim,md5,smime -> reject(reason='topic_identified')	

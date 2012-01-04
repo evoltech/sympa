@@ -1,3 +1,0 @@
-title.gettext no one can review
-
-true()   smtp,smime,md5 -> reject(reason='review_closed')
