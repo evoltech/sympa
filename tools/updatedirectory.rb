@@ -36,7 +36,7 @@ def load_config(file)
   open(file).each do |line|
     if line =~ /^(status|visibility|topics|subject|info)\s*(.*)\s*$/u
       option, value = $1.to_sym, $2
-      conf[option] = value
+      conf[option] = value unless option == :visibility and conf[:visibility] # don't reset visibility if it was already set. in some config files, it is first set for the whole list, and then later in the file it includes the visibility of list owners/moderators   
     end
   end
   conf[:topics] = (conf[:topics]||'').split(/[\s,]/).compact.uniq
