@@ -102,7 +102,7 @@ topics.each do |topic|
   
   listsbytopic[topic_name].sort.each do |list|
     listname, listdata = list
-    next if listdata[:visibility] != 'anyone' or listdata[:info] != 'open'
+    next unless listdata[:visibility] == 'anyone' and (listdata[:info] == 'open' or listdata[:info] == 'anyone') # having info set to 'open' or 'anyone' seem to be equivalent, so changing this so it treats them as the same. These options might get redone, but should be a fine fix for now.
     subject = convert_string_to_utf8(listdata[:subject])
     html += "<p><a href='/www/info/#{listname}'>#{listname}</a> #{subject}</p>\n\n"
   end
