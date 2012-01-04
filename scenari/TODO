@@ -1,4 +1,0 @@
-* write a tool that checks all lists for a particular scenari
-* write a tool that changes one scenari for another in all lists that use it
-
-Then for scenari we want to get rid of we can determine how much they are used and then change them to use something else.
