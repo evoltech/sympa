@@ -51,8 +51,9 @@ Instructions to upgrade sympa for riseup:
      4-public-working-group
      5-newsletter
 
-   to accomplish this, make sure that any directory called 'create_list_templates' in /home/sympa only contains
-   the above templates.
+   to accomplish this, make sure that any directory called
+   'create_list_templates' in /home/sympa only contains the above templates.
+   These are installed by the site-sympa puppet module.
 
 7. check scenari files
    scenari files describe permissions for subscribing and unsubscribing,
@@ -73,7 +74,9 @@ Instructions to upgrade sympa for riseup:
    b. copy css/* from repo to /home/sympa/docroot if the css files are not already there
 
 5b. web and mail templates
-   copy web_tt2 and mail_tt2 directories to the /home/sympa/etc directory in the sympa tree 
+   the web_tt2 directory is in the site-sympa puppet module
+   copy mail_tt2 directories to the /home/sympa/etc directory in the sympa tree 
 
 5c. create_list_templates
-   create_list_templates -> /home/sympa/etc/
+   the create_list_templates directory is in the site-sympa puppet module
+
