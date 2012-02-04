@@ -21,13 +21,13 @@ foreach (@lines) {
 
 $langs{'(unspecified)'}=$alllists - $total;
 
-print "   #       %   lang\n";
-print "----------------------------\n";
+print "    #       %   language\n";
+print "-----------------------------\n";
 
 foreach $key ( sort { $langs{$b} <=> $langs{$a} } keys %langs ) {
    $percent=$langs{$key} / $alllists * 100;
    format foo =
-@>>>   @#.##   @<<<<<<<<<<<<
+@>>>>   @#.##   @<<<<<<<<<<<<
 $langs{$key}, $percent, $key
 .
    $~ = 'foo';
