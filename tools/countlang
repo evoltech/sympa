@@ -1,0 +1,38 @@
+#!/usr/bin/perl -w
+# countlang - count the number of lists per specified language type
+# WARNING this is all lists in expl/ which means open AND closed AND pending
+# Matt Taggart <taggart@riseup.net> 2012-02
+
+$expl='/home/sympa/expl';
+
+$output=qx(egrep -h "^lang" $expl/*/config|sort |uniq -c |awk '{print \$1 " " \$3}');
+$alllists=qx(ls $expl/|wc -l);
+chomp($alllists);
+
+@lines = split /\n/, $output;
+
+$total=0;
+
+foreach (@lines) {
+   m/^(.*) (.*)$/;
+   $langs{$2}=$1;
+   $total += $1;
+}
+
+$langs{'(unspecified)'}=$alllists - $total;
+
+print "   #       %   lang\n";
+print "----------------------------\n";
+
+foreach $key ( sort { $langs{$b} <=> $langs{$a} } keys %langs ) {
+   $percent=$langs{$key} / $alllists * 100;
+   format foo =
+@>>>   @#.##   @<<<<<<<<<<<<
+$langs{$key}, $percent, $key
+.
+   $~ = 'foo';
+   write;
+}
+
+print "Total with lang specified: $total\n";
+print "Total: $alllists\n";
