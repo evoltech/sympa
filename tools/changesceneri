@@ -1,94 +1,110 @@
-#!/usr/bin/php4 -q
-<?php
+#!/usr/bin/perl -w
+# changescenari - do a search and replace on every config file.
+# edit the $listdir and $replacements to configure
+# originally by elijah in php4
+# rewritten in perl by taggart 2012-02
 
-# 
-# do a search and replace on every config file.
-# edit the $listdir and $replacesments to configure
-#
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION="true";
 
+use vars qw($opt_d);
 
-# DANGER DANGER:
-# $listdir and $tmpdir must be on the same partition
+getopts('d');
 
-$listdir = '/home/sympa/expl/lists.riseup.net';
-$tmpdir  = '/home/sympa/expl/tmp';
+sub HELP_MESSAGE {
+  print "Usage: changescenari [-d] <user>\n";
+  print "     -d  : actually change things\n";
+  print "BE CAREFUL! Run without -d and review what it will do first!\n";
+}
 
-$replacements = array (
-#	'access_web_archive.' => 'access_web_archive.default',
-	'access_web_archive MEMBERS' => 'access_web_archive members',
-	'access_web_archive closed' => 'access_web_archive owners',
-	'access_web_archive public' => 'access_web_archive anyone',
-#	'd_edit.' => 'd_edit.default',
-	'd_edit MEMBERS' => 'd_edit members',
-	'd_read ANYONE' => 'd_edit anyone',
-	'd_read MEMBERS' => 'd_edit members',
-	'd_read OWNERS' => 'd_edit owners',
-	'info open' => 'info anyone',
-	'invite closed' => 'invite impossible',
-	'invite private' => 'invite owners',
-	'send MEMBERS_OR_MODERATED' => 'send members_or_moderated',
+my $listdir='/home/sympa/expl/*';
+my $tmpdir='/home/sympa/tmp';
+
+# create hash of replacements
+%replacements = (
+	'subscribe open' => 'subscribe verified',
+	'subscribe open_notify' => 'subscribe verified_notify',
+	'subscribe open_quiet' => 'subscribe verified',
+	'subscribe auth' => 'subscribe verified',
+	'subscribe auth_notify' => 'subscribe verified_notify',
+	'subscribe auth_owner' => 'subscribe verified_approved',
+	'subscribe approved' => 'subscribe verified_approved',
+	'subscribe approved_verified' => 'subscribe verified_approved',
+	'subscribe intranet' => 'subscribe verified',
+	'subscribe intranetorowner' => 'subscribe verified_approved',
 	'subscribe anyone_notify' => 'subscribe verified_notify',
-	'subscribe closed' => 'subscribe impossible',
-	'subscribe editor' => 'subscribe approved',
-	'unsubscribe closed' => 'usubscribe verified',
-	'visibility hidden' => 'visibility members',
-	'visibility noconceal' => 'visibility anyone',
+	'subscribe impossible' => 'subscribe closed',
+	'subscribe smime' => 'subscribe verified',
+	'subscribe smimeorowner' => 'subscribe verified_approved',
+	'subscribe owner' => 'subscribe verified_approved',
+#	'unsubscribe open' => 'unsubscribe anyone',
+#	'unsubscribe open_notify' => 'unsubscribe anyone_notify',
+#	'unsubscribe notify' => 'unsubscribe anyone_notify',
+	'unsubscribe auth' => 'unsubscribe verified',
+#	'unsubscribe auth_notify' => 'unsubscribe verified_notify'
 );
 
-chdir($listdir);
+# get list of configs
+$output=qx(find $listdir -name config);
 
-$handle = opendir($listdir);
-while($listdir = readdir($handle)) {
-   if ($listdir == '.' || $listdir == '..' || !is_dir($listdir))
-   	  continue;
-	  
-   $configfilename = $listdir . "/config";
-  
-   if (!is_file($configfilename))
-     continue;
-   
-   #echo("processing $configfilename\n");
-   
-   processfile($configfilename);
+@configs = split /\n/,$output;
+
+foreach $config (@configs) {
+
+  $list=$config;
+  $list =~ s:^.*/(.*?)/config:$1:;
+
+  open(OLD,"$config") || die "ERROR: cannot open $config\n";
+
+  # we're not going to make a new version until we have a reason to
+  $newversion = 0;
+  # reset the array we store the temp file in
+  undef @new;
+
+  while (<OLD>) {
+    # we haven't yet made a substitution
+    $submade = 0;
+
+    foreach $line (keys %replacements) {
+      if ( /^$line$/ ) {
+        print "NOTE: found '$line' in $list\n";
+        print "  replacing with '$replacements{$line}'\n";
+        # we're creating a new config file
+        $newversion = 1;
+        # and we've made a substitution for the current line
+        $submade = 1;
+        push @new,"$replacements{$line}\n";
+        last;
+      }
+    }  
+    # if we didn't do a substitution, save the line as is
+    if (!$submade) {
+        push @new,$_;
+    }
+  }
+  close OLD;
+
+  # only do it if the user specified -d
+  if ($opt_d) {
+    if ($newversion) {
+      # write the new version to a temp file
+      die "ERROR: $config.new exists!\n" if ( -e "$config.new" );
+      open(NEW,">$config.new") || die "ERROR: cannot open $config.new\n";
+      print NEW @new;
+      close NEW;
+      # move it in place
+      rename "$config.new", $config || die "ERROR: cannot move $config.new into place\n";
+      # tell sympa to update the config.bin for the list
+      #qx(/home/sympa/bin/sympa.pl --reload_list_config --list=$list@lists.riseup.net)
+    }
+  }
 }
 
-return;
-
-function processfile($filename) {
-	$tmp = gettmpfile(basename(dirname($filename)));
-	
-	$out = fopen($tmp, "w");
-	$in = fopen($filename, "r");
-	
-	while(!feof($in)) {
-		$line = fgets($in, 4096);		
-		$line = doreplace($line);
-		fputs($out, $line);
-	}
-	
-	fclose($out);
-	fclose($in);
-	
-	#unlink($filename);
-	#rename($tmp, $filename);
-#	`cp '$tmp' '$filename'`;
-#	echo "diff '$tmp' '$filename'\n";
-	echo `diff '$tmp' '$filename'`;
+if (! $opt_d and $newversion) {
+    print "WARNING: didn't actually make any changes. Review the above and when you\n";
+    print "  are ready to run for real add the -d flag\n";
 }
 
-function gettmpfile($name) {
-	global $tmpdir;
-	return "$tmpdir/$name.config"; // . md5(uniqid(rand(),1));
-}
-
-function doreplace($line) {
-	global $replacements;
- 
-	foreach($replacements as $find => $replace)	{
-		$line = preg_replace("/^".$find."$/", $replace, $line);
-	}
-	return $line;
-}
-
-?>
-
+# changing scenari shouldn't update anything in the list table, but if you
+#  need to sync use this
+#/home/sympa/bin/sympa.pl --sync_list_db
