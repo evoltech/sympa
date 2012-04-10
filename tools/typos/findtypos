@@ -2,7 +2,7 @@
 # findtypos - find and report addresses with common typos, and list some stats
 # NOTE: this script requires the current user has read access to the db
 
-$listsdir='/home/sympa/tools.new/typos/lists/';
+$listsdir='/home/sympa/tools/typos/lists/';
 
 # currently we have files in the lists/ directory that list the typo domains,
 #  eventually I plan to make these a DNSBL and we can just query it
