@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+# findnonsubscribed - list all users that do not have any subscriptions
+# NOTE: sympa has the purge_user_table_task that already does this cleanup
+#  this script is just to confirm if it's working.
+# NOTE: this script requires the current user has read access to the db
+# Matt Taggart <taggart@riseup.net> 2012-04
+
+# get subscribers (and we don't care if the lists are open or not)
+$subscriberssql='mysql -N --batch --database=sympa --execute "select user_subscriber from subscriber_table"';
+# get users
+$userssql='mysql -N --batch --database=sympa --execute "select email_user from user_table"';
+
+open(SUBSCRIBERS, "$subscriberssql|") or die "cannot get dump of subscribers from database\n";
+open(USERS, "$userssql|") or die "cannot get dump of users from database\n";
+
+while (<SUBSCRIBERS>) {
+   chomp;
+   $address = $_; 
+   $subscribers{$address}++;
+}
+
+while (<USERS>) {
+   chomp;
+   $user = $_;
+   if ( ! $subscribers{$user} ) {
+      print "$user\n"; 
+   }
+}
