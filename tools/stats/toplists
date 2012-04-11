@@ -26,6 +26,11 @@ format Html =
                                                 $list, $list,     $counts{$list}
 .
 
+format Pcre =
+/@@*@lists\.riseup\.net$/ [10.0.1.44]
+"^", $list, "@"
+.
+
 if ( $ARGV[0] eq '-w' ) {
    $~='Wiki';
    print "h3. Top $num lists by size\n\n";
@@ -38,6 +43,8 @@ if ( $ARGV[0] eq '-w' ) {
    print "(<i>generated ".$date."</i>)\n";
    print "<table class=\"single\">\n";
    print "<tr><th align=center>List name</th><th align=center>Subscribers</th></tr>\n";
+} elsif ($ARGV[0] eq '-r' ) {
+   $~='Pcre';
 } else {
    $~='Plain';
    print "Top $num lists by size\n";
