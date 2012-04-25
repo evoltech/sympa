@@ -72,10 +72,10 @@ Instructions to upgrade sympa for riseup:
 5a. docroot and css
    a. make /home/sympa/docroot if it doesn't already exist
    b. copy css/* from repo to /home/sympa/docroot if the css files are not already there
+   The css files are deployed by the site-sympa puppet module.
 
 5b. web and mail templates
-   the web_tt2 directory is in the site-sympa puppet module
-   copy mail_tt2 directories to the /home/sympa/etc directory in the sympa tree 
+   The web_tt2 and mail_tt2 files are deployed by the site-sympa puppet module.
 
 5c. create_list_templates
    the create_list_templates directory is in the site-sympa puppet module

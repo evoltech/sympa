@@ -1,3 +1,0 @@
-title.gettext closed
-
-true() smtp,md5,smime -> reject(reason='invite_closed')
