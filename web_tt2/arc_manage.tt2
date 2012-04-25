@@ -1,5 +1,6 @@
 <!-- $Id: arc_manage.tt2 5675 2009-04-28 13:59:12Z david.verdin $ -->
 <div class="block">
+[% IF arc_access %]
 
 <h2>[%|loc%]Archive Management[%END%] <a class="input" href="[% path_cgi %]/nomenu/help/admin#manage_archives" title="[%|loc%]Open in a new window[%END%]" onclick="window.open('','wws_help','toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,copyhistory=no,width=400,height=200')" target="wws_help">[%|loc%]Help[%END%]</a></h2>
 <br />
@@ -26,6 +27,6 @@
 </form>
 
 <hr />
-
+[% END %]
 </div>
 <!-- end arc_manage.tt2 -->
