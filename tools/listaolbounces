@@ -1,9 +1,67 @@
-#!/bin/sh
-# listbouncesaol - prints a listing of all aol.com users with a bounce
-#   score over 50. prints bounce score, list, user; ordered by bounce score.
+#!/usr/bin/perl -w
+# listaolbounces - prints a listing of all AOL related users with a bounce
+#   score over 50. prints bounce score, user; ordered by bounce score.
 # NOTE: this script requires the current user has read access to the db
 
-mysql --batch --database=sympa --execute \
-"SELECT bounce_score_subscriber,list_subscriber,user_subscriber FROM \
-subscriber_table WHERE bounce_score_subscriber > 50 and user_subscriber \
-like '%aol.com%' ORDER BY bounce_score_subscriber"
+# score limit
+$limit=50;
+
+# these were all discovered to be using aol for MX at one point, they might
+# not anymore, checking might be good, but the downside for false negatives
+# is low
+%domains= (  'aol.com' => 1, '2die4.com' => 1, 'activist.com' => 1,
+  'africamail.com' => 1, 'aim.com' => 1, 'alumnidirector.com' => 1,
+  'americamail.com' => 1, 'amorous.com' => 1, 'artlover.com' => 1,
+  'asia.com' => 1, 'berlin.com' => 1, 'bikerider.com' => 1,
+  'boardermail.com' => 1, 'californiamail.com' => 1, 'catlover.com' => 1,
+  'cheerful.com' => 1, 'chemist.com' => 1, 'clerk.com' => 1,
+  'cliffhanger.com' => 1, 'columnist.com' => 1, 'comic.com' => 1,
+  'compuserve.com' => 1, 'consultant.com' => 1, 'cs.com' => 1,
+  'csi.com' => 1, 'cutey.com' => 1, 'cyberdude.com' => 1, 'cybergal.com' => 1,
+  'diplomats.com' => 1, 'doctor.com' => 1, 'dr.com' => 1, 'earthling.net' => 1,
+  'email2me.net' => 1, 'email.com' => 1, 'engineer.com' => 1, 'europe.com' => 1,
+  'europemail.com' => 1, 'execs.com' => 1, 'fastermail.com' => 1,
+  'financier.com' => 1, 'goowy.com' => 1, 'graffiti.net' => 1,
+  'hilarious.com' => 1, 'hot-shot.com' => 1, 'iname.com' => 1,
+  'indiya.com' => 1, 'innocent.com' => 1, 'inorbit.com' => 1,
+  'intelligencia.com' => 1, 'japan.com' => 1, 'journalist.com' => 1,
+  'kittymail.com' => 1, 'lawyer.com' => 1, 'lobbyist.com' => 1,
+  'london.com' => 1, 'lords.com' => 1, 'loveable.com' => 1, 'madrid.com' => 1,
+  'mail.com' => 1, 'mail.org' => 1, 'mailpuppy.com' => 1, 'mcom.com' => 1,
+  'mindless.com' => 1, 'minister.com' => 1, 'munich.com' => 1,
+  'musician.org' => 1, 'muslim.com' => 1, 'myself.com' => 1, 'nycmail.com' => 1,
+  'netscape.net' => 1, 'outgun.com' => 1, 'paris.com' => 1, 'petlover.com' => 1,
+  'photographer.com' => 1, 'photographer.net' => 1, 'planetmail.com' => 1,
+  'playful.com' => 1, 'poetic.com' => 1, 'politician.com' => 1,
+  'popstar.com' => 1, 'post.com' => 1, 'presidency.com' => 1, 'priest.com' => 1,
+  'publicist.com' => 1, 'representative.com' => 1, 'rescueteam.com' => 1,
+  'rome.com' => 1, 'royal.net' => 1, 'sailormoon.com' => 1, 'saintly.com' => 1,
+  'samerica.com' => 1, 'sanfranmail.com' => 1, 'scientist.com' => 1,
+  'socialworker.net' => 1, 'sociologist.net' => 1, 'soon.com' => 1,
+  'teacher.com' => 1, 'techie.com' => 1, 'technologist.com' => 1,
+  'tokyo.com' => 1, 'umpire.com' => 1, 'unforgettable.com' => 1, 'usa.com' => 1,
+  'uymail.com'=> 1, 'whoever.com' => 1, 'who.net' => 1, 'wmconnect.net' => 1,
+  'writemail.com'=> 1, 'writeme.com' => 1, 'yours.com' => 1  );
+#%domains = ( 'aol.com'' => 1, ''aim.com' => 1 );
+
+$sql=qq(mysql -N --batch --database=sympa --execute "SELECT bounce_score_subscriber,user_subscriber FROM subscriber_table;");
+open(SQL, "$sql|") or die "cannot get dump of bouncers\n";
+
+while (<SQL>) {
+   chomp;
+   m/^(.*)\t(.*?\@(.*))$/;
+   $score = $1;
+   $address = $2;
+   $domain = $3;
+   if ( $domains{$domain} ) {
+      if ( $score ne 'NULL' && $score >= $limit ) {
+         #print "$score $address $domain\n";
+         $bouncers{$address} = $score;
+      }
+      next;
+   }
+}
+
+foreach $address ( sort { $bouncers{$b} <=> $bouncers{$a} } keys %bouncers) {
+   print "$bouncers{$address} $address\n";
+}
