@@ -13,21 +13,20 @@ Instructions to upgrade sympa for riseup:
      * listing pending and closed lists should work and should only be listing lists that are in the list_table cache
      * renaming a list should rename it in the db
 
-   b. add Sender: header
+   b. do not change renames to pending status
 
-   c. do not change renames to pending status
+   *** this should be tested with each version. maybe upstream fixed it?
+   d. disable_active_and_latest_lists in wwsympa.  these actions consistently fail.
 
-   d. remove IP addresses
+   *** it should be determined with each version if this is still an issue before applying this patch
+   e. do not save invalid paths referring to arcsearch_id - this makes wwsympa unhappy 
 
    *** patches a-d are more 'core' patches 
-   *** patches e-g are more specific to riseup
-
-   e. fix owner privileges - we give list owners more privileges than the default install
+   *** patches g+ are more specific to riseup
 
    f. do not allow list creation by copying an existing list 
       this is disabled in the templates, mainly, but this disables it in the function too in case it gets past the template
 
-   g. do not save invalid paths referring to arcsearch_id - this makes wwsympa unhappy 
 
 3. run configure: 
 ./configure \
