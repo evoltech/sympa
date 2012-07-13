@@ -1,7 +1,0 @@
-title.gettext public list
-
-true()       smtp,dkim,md5,smime    -> do_it
-
-
-
-

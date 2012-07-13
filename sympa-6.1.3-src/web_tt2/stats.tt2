@@ -1,4 +1,0 @@
-<!-- $Id: stats.tt2 6099 2009-08-13 08:31:02Z olivier.salaun $ -->
-<strong>[%|loc%]Shared document directory size:[%END%] [% shared_size %]K</strong><br />
-<strong>[%|loc%]Web archives size:[%END%] [% arc_size %]K</strong><br />
-<!-- end stats.tt2 -->
