@@ -526,6 +526,11 @@ our @params = (
         default => 'mailer-daemon|sympa|listserv|majordomo|smartlist|mailman',
 	vhost   => '1',
     },
+    {
+        name    => 'db_list_cache',
+        default => '0',
+        advice  => 'Whether or not to cache lists in the database',
+    },
     { title => 'Internationalization' },
     {
         name    => 'lang',

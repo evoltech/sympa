@@ -341,6 +341,7 @@ sub create_list_old{
 	&do_log('notice', "Synchronizing list members...");
 	$list->sync_include();
     }   
+    $list->save_config;
 
     return $return;
 }
