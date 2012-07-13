@@ -35,3 +35,9 @@ request to show a proper unauthorized page.
 06 disable active and latest lists
 -----------------------------------
 rss requests to active_lists and latest_lists crash wwsympa. disable for now (should make a real patch one day)
+
+07 fix archives vulnerability
+-------------------------------------
+pull in revision 7423 from upstream (https://sourcesup.renater.fr/scm/viewvc.php?view=revision&root=sympa&revision=7423).
+this addresses CVE-2012-2352 (http://bugs.debian.org/672893).
+this is included in upstream as of version 6.1.11, so we only need it for version 6.1.9.
