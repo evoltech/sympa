@@ -1,0 +1,575 @@
+diff --git a/sympa-6.1.9-src/src/etc/script/create_db.Oracle b/sympa-6.1.9-src/src/etc/script/create_db.Oracle
+index a425718..388fd7d 100644
+--- a/sympa-6.1.9-src/src/etc/script/create_db.Oracle
++++ b/sympa-6.1.9-src/src/etc/script/create_db.Oracle
+@@ -163,4 +163,20 @@ CREATE TABLE conf_table (
+   CONSTRAINT ind_conf primary key (robot_conf,label_conf)
+ );
+ 
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++);
++
++
+ !
+diff --git a/sympa-6.1.9-src/src/etc/script/create_db.Pg b/sympa-6.1.9-src/src/etc/script/create_db.Pg
+index 3893c6e..5c890a2 100644
+--- a/sympa-6.1.9-src/src/etc/script/create_db.Pg
++++ b/sympa-6.1.9-src/src/etc/script/create_db.Pg
+@@ -177,4 +177,22 @@ CREATE TABLE conf_table (
+   value_conf varchar(300),
+   constraint ind_conf primary key (robot_conf,label_conf)
+ );
+-CREATE INDEX robot_conf_idx ON conf_table(robot_conf,label_conf);
+\ No newline at end of file
++CREATE INDEX robot_conf_idx ON conf_table(robot_conf,label_conf);
++
++DROP TABLE list_table;
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++);
++CREATE INDEX list_idx ON list_table(name_list, robot_list);
++
+diff --git a/sympa-6.1.9-src/src/etc/script/create_db.SQLite b/sympa-6.1.9-src/src/etc/script/create_db.SQLite
+index 00ed639..e3c221d 100644
+--- a/sympa-6.1.9-src/src/etc/script/create_db.SQLite
++++ b/sympa-6.1.9-src/src/etc/script/create_db.SQLite
+@@ -156,3 +156,20 @@ CREATE TABLE conf_table (
+ 	PRIMARY KEY (robot_conf,label_conf)
+ );
+ CREATE INDEX conf_idx ON conf_table(robot_conf,label_conf);
++
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++);
++CREATE INDEX list_idx ON list_table(name_list, robot_list);
++
+diff --git a/sympa-6.1.9-src/src/etc/script/create_db.Sybase b/sympa-6.1.9-src/src/etc/script/create_db.Sybase
+index 7b337f6..615e2bc 100644
+--- a/sympa-6.1.9-src/src/etc/script/create_db.Sybase
++++ b/sympa-6.1.9-src/src/etc/script/create_db.Sybase
+@@ -225,3 +225,22 @@ create table conf_table (
+ )
+ go
+ 
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL,
++    path_list varchar(100) NOT NULL,
++    robot_list varchar(100) NOT NULL,
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL,
++    creation_email_list varchar(100) NOT NULL,
++    creation_epoch_list datetime ,
++    subject_list varchar(100) NOT NULL,
++    web_archive_list tinyint(1) NOT NULL,
++    topics_list varchar(100) NOT NULL,
++    editors_list varchar(100) NOT NULL,
++    owners_list varchar(100) NOT NULL,
++    CONSTRAINT ind_list PRIMARY KEY  (name_list,robot_list)
++)
++go
++
++CREATE INDEX id_list_fk ON list_table(name_list, robot_list)
++go
++
+diff --git a/sympa-6.1.9-src/src/etc/script/create_db.mysql b/sympa-6.1.9-src/src/etc/script/create_db.mysql
+index 3a178c2..f998b65 100644
+--- a/sympa-6.1.9-src/src/etc/script/create_db.mysql
++++ b/sympa-6.1.9-src/src/etc/script/create_db.mysql
+@@ -158,3 +158,19 @@ CREATE TABLE conf_table (
+   value_conf varchar(300) default NULL,
+   PRIMARY KEY (robot_conf,label_conf)
+ );
++
++CREATE TABLE list_table (
++    name_list varchar(100) NOT NULL default '',
++    path_list varchar(100) NOT NULL default '',
++    robot_list varchar(100) NOT NULL default '',
++    status_list enum('open','closed','pending','error_config','family_closed') NOT NULL default 'closed',
++    creation_email_list varchar(100) NOT NULL default '',
++    creation_epoch_list datetime default NULL,
++    subject_list varchar(100) NOT NULL default '',
++    web_archive_list tinyint(1) NOT NULL default '0',
++    topics_list varchar(100) NOT NULL default '',
++    editors_list varchar(100) NOT NULL default '',
++    owners_list varchar(100) NOT NULL default '',
++    PRIMARY KEY  (name_list,robot_list)
++);
++
+diff --git a/sympa-6.1.9-src/src/lib/Conf.pm b/sympa-6.1.9-src/src/lib/Conf.pm
+index b8f3c27..22f2b53 100644
+--- a/sympa-6.1.9-src/src/lib/Conf.pm
++++ b/sympa-6.1.9-src/src/lib/Conf.pm
+@@ -200,6 +200,10 @@ sub load {
+     unless (defined $o{'tmpdir'}) {
+ 	$o{'tmpdir'}[0] = "$spool/tmp";
+     }    
++    unless (defined $o{'db_list_cache'}){
++        $o{'db_list_cache'}[0] = 0;
++    }
++
+ 
+     ## Check if we have unknown values.
+     foreach $i (sort keys %o) {
+diff --git a/sympa-6.1.9-src/src/lib/List.pm b/sympa-6.1.9-src/src/lib/List.pm
+index 1b15f9a..397c494 100644
+--- a/sympa-6.1.9-src/src/lib/List.pm
++++ b/sympa-6.1.9-src/src/lib/List.pm
+@@ -1915,6 +1915,12 @@ sub save_config {
+ 	return undef;
+     }
+ 
++    if ($List::use_db) {
++        unless (&_update_list_db) {
++            &do_log('err', "Unable to update list_table");
++        }
++    }
++
+     return 1;
+ }
+ 
+@@ -7166,6 +7172,7 @@ sub rename_list_db {
+ 
+     my $statement_subscriber;
+     my $statement_admin;
++    my $statement_list_cache;
+     
+     ## Check database connection
+     unless ($dbh and $dbh->ping) {
+@@ -7198,6 +7205,21 @@ sub rename_list_db {
+ 	do_log('err','Unable to execute SQL statement "%s" : %s', $statement_admin, $dbh->errstr);
+ 	return undef;
+     }
++
++    if ($List::use_db) {
++      $statement_admin =  sprintf "UPDATE list_table SET name_list=%s, robot_list=%s WHERE (name_list=%s AND robot_list=%s)",
++      $dbh->quote($new_listname),
++      $dbh->quote($new_robot),
++      $dbh->quote($self->{'name'}),
++      $dbh->quote($self->{'domain'}) ;
++
++      do_log('debug', 'List::rename_list_db statement : %s',  $statement_admin );
++
++      unless ($dbh->do($statement_admin)) {
++        do_log('err','Unable to execute SQL statement "%s" : %s', $statement_admin, $dbh->errstr);
++        return undef;
++      }
++    }
+     
+     return 1;
+ }
+@@ -9799,6 +9821,7 @@ sub get_lists {
+     my $robot_context = shift || '*';
+     my $options = shift;
+     my $requested_lists = shift; ## Optional parameter to load only a subset of all lists
++    my $use_files = shift;
+ 
+     my(@lists, $l,@robots);
+     do_log('debug2', 'List::get_lists(%s)',$robot_context);
+@@ -9834,7 +9857,13 @@ sub get_lists {
+ 	    if ( defined($requested_lists)){
+ 	      @files = sort @{$requested_lists};
+ 	    }else {
+-	      @files = sort readdir(DIR);
++              if ($use_files) {
++	        @files = sort readdir(DIR);
++              }else {
++                # get list names from list config table
++                my $files = &get_lists_db('SELECT name_list FROM list_table');
++                @files = @{$files};
++              }
+ 	    }
+ 
+ 	    foreach my $l (@files) {
+@@ -12250,6 +12279,139 @@ sub get_list_id {
+     return $self->{'name'}.'@'.$self->{'domain'};
+ }
+ 
++## Support for list config caching in database
++
++sub get_lists_db {
++    my $statement = shift;
++    return undef unless defined($statement);
++    do_log('info', 'List::get_search_list_db(%s)', $statement);
++
++    unless ($List::use_db) {
++       &do_log('info', 'Sympa not setup to use DBI');
++       return undef;
++    }
++
++    my ($l, @lists);
++
++    ## Check database connection
++    unless ($dbh and $dbh->ping) {
++       return undef unless &db_connect();
++    }
++    push @sth_stack, $sth;
++    &do_log('debug2','SQL: %s', $statement);
++    unless ($sth = $dbh->prepare($statement)) {
++       &do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
++       return undef;
++    } 
++    unless ($sth->execute) {
++       do_log('err','Unable to execute SQL statement "%s" : %s', $statement, $dbh->errstr); 
++       return undef;
++    } 
++    while ($l = $sth->fetchrow_hashref) {
++       my $name = $l->{'name_list'};
++       push @lists, $name;
++    }  
++    $sth->finish();
++    $sth = pop @sth_stack;
++
++    return \@lists;
++}
++
++sub _update_list_db
++{
++    my ($self) = shift;
++    my @admins;
++    my $i;
++    my $adm_txt;
++    my $ed_txt;
++    my $statement = sprintf "SELECT COUNT(*) FROM list_table WHERE name_list = %s AND robot_list = %s" , $dbh->quote($self->{'name'}), $dbh->quote($self->{'admin'}{'host'});  
++    unless ($sth = $dbh->prepare($statement)) {
++       do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
++       return undef;
++    }
++    my $ret;
++    unless ($sth->execute) {
++       do_log('err',"Unable to execute SQL statement '%s' : %s", $statement, $dbh->errstr);
++       return undef;
++    }
++    
++    my $op = "UPDATE";
++    my $set = "";
++    my $ret = $sth->fetchrow_arrayref;
++    $sth->finish;
++    my $count = $ret->[0];
++    unless ($count > 0) {
++       $op = "INSERT INTO";
++       $set = "";
++    }
++    my $name = $self->{'name'};
++    my $subject = $self->{'admin'}{'subject'} || '';
++    my $status = $self->{'admin'}{'status'};
++    my $robot = $self->{'admin'}{'host'};
++    my $web_archive  = &is_web_archived($self) || 0; 
++    my $topics = '';
++    if ($self->{'admin'}{'topics'}) {
++       $topics = join(',',@{$self->{'admin'}{'topics'}});
++    }
++    
++    foreach $i (@{$self->{'admin'}{'owner'}}) {
++       if (ref($i->{'email'})) {
++           push(@admins, @{$i->{'email'}});
++       } elsif ($i->{'email'}) {
++           push(@admins, $i->{'email'});
++       }
++    }
++    $adm_txt = join(',',@admins) || '';
++
++    undef @admins;
++    foreach $i (@{$self->{'admin'}{'editor'}}) {
++       if (ref($i->{'email'})) {
++           push(@admins, @{$i->{'email'}});
++       } elsif ($i->{'email'}) {
++           push(@admins, $i->{'email'});
++       }
++    }
++    $ed_txt = join(',',@admins) || '';
++    my $statement = sprintf "%s `list_table` %s SET status_list= %s, name_list=%s, robot_list=%s, subject_list=%s, web_archive_list=%s, topics_list=%s, owners_list=%s, editors_list=%s ",
++       $op, $set, $dbh->quote($status), $dbh->quote($name), 
++       $dbh->quote($robot), $dbh->quote($subject), 
++       $dbh->quote($web_archive), $dbh->quote($topics),
++       $dbh->quote($adm_txt),$dbh->quote($ed_txt);
++
++    if ($op eq "UPDATE") {
++       $statement .= sprintf " WHERE robot_list = %s AND name_list = %s ", $dbh->quote($robot), $dbh->quote($name); 
++    }
++
++    unless ($sth = $dbh->prepare($statement)) {
++       do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
++       return undef;
++    }
++    unless ($sth->execute) {
++       do_log('err','Unable to execute SQL statement "%s" : %s', $statement, $dbh->errstr);
++    }
++    return 1;
++}
++
++sub _flush_list_db
++{
++    my ($listname) = shift;
++    my $statement;
++    unless ($listname) {
++        $statement =  "TRUNCATE list_table";
++    } else {
++        $statement = sprintf "DELETE FROM list_table WHERE name_list = %s", $dbh->quote($listname);
++    } 
++
++    unless ($sth = $dbh->prepare($statement)) {
++    do_log('err','Unable to prepare SQL statement : %s', $dbh->errstr);
++    return undef;
++    }
++    unless ($sth->execute) {
++    do_log('err',"Unable to execute SQL statement '%s' : %s", $statement, $dbh->errstr);
++    return undef;
++    }
++}
++
+ ###### END of the List package ######
+ 
+ 1;
+diff --git a/sympa-6.1.9-src/src/lib/Upgrade.pm b/sympa-6.1.9-src/src/lib/Upgrade.pm
+index ea7d958..ffac2de 100644
+--- a/sympa-6.1.9-src/src/lib/Upgrade.pm
++++ b/sympa-6.1.9-src/src/lib/Upgrade.pm
+@@ -856,8 +856,19 @@ sub probe_db {
+ 						   },
+ 				 'conf_table' => {'robot_conf' => 'varchar(80)',
+ 						  'label_conf' => 'varchar(80)',
+-						  'value_conf' => 'varchar(300)'}
+-			     },
++						  'value_conf' => 'varchar(300)'},
++                  'lists_table' => {'name_list'=>'varchar(100)',
++                                    'path_list'=>'varchar(100)',
++                                    'robot_list'=>'varchar(100)',
++                                    'status_list'=>"enum('open','closed','pending','error_config','family_closed')",
++                                    'creation_email_list'=>'varchar(100)',
++                                    'creation_epoch_list'=>'datetime',
++                                    'subject_list'=>'varchar(100)',
++                                    'web_archive_list'=>'tinyint(1)',
++                                    'topics_list'=>'varchar(100)',
++                                    'editors_list'=>'varchar(100)',
++                                    'owners_list'=>'varchar(100)'}
++                              },
+ 		     'SQLite' => {'user_table' => {'email_user' => 'text',
+ 						   'gecos_user' => 'text',
+ 						   'password_user' => 'text',
+@@ -963,7 +974,19 @@ sub probe_db {
+ 							'dkim_header_list_bulkspool' => 'varchar(500)'},
+ 				  'conf_table' => {'robot_conf' => 'text',
+ 						   'label_conf' => 'text',
+-						   'value_conf' => 'text'}});
++                                                   'value_conf' => 'text'},
++                   'lists_table' => {'name_list'=>'varchar(100)',
++                            'path_list'=>'varchar(100)',
++                            'robot_list'=>'varchar(100)',
++                            'status_list'=>"enum('open','closed','pending','error_config','family_closed')",
++                            'creation_email_list'=>'varchar(100)',
++                            'creation_epoch_list'=>'datetime',
++                            'subject_list'=>'varchar(100)',
++                            'web_archive_list'=>'tinyint(1)',
++                            'topics_list'=>'varchar(100)',
++                            'editors_list'=>'varchar(100)',
++                            'owners_list'=>'varchar(100)'}
++                    } );
+ 
+     my %not_null = ('email_user' => 1,
+ 		    'list_subscriber' => 1,
+@@ -992,6 +1015,16 @@ sub probe_db {
+ 		    'messagekey_bulkmailer' => 1,
+ 		    'packetid_bulkmailer' => 1,
+ 		    'messagekey_bulkspool' => 1,
++             'name_list'=>1,
++             'path_list'=>1,
++             'robot_list'=>1,
++             'status_list'=>1,
++             'creation_email_list'=>1,
++             'subject_list'=>1,
++             'web_archive_list'=>1,
++             'topics_list'=>1,
++             'owners_list'=>1,
++             'editors_list'=>1
+ 		    );
+     
+     my %primary = ('user_table' => ['email_user'],
+@@ -1004,7 +1037,8 @@ sub probe_db {
+ 		   'one_time_ticket_table' => ['ticket_one_time_ticket'],
+ 		   'bulkmailer_table' => ['messagekey_bulkmailer','packetid_bulkmailer'],
+ 		   'bulkspool_table' => ['messagekey_bulkspool'],
+-		   'conf_table' => ['robot_conf','label_conf']
++		   'conf_table' => ['robot_conf','label_conf'],
++                   'list_table'=> ['name_list','robot_list']
+ 		   );
+ 
+     ## List the required INDEXES
+diff --git a/sympa-6.1.9-src/src/lib/admin.pm b/sympa-6.1.9-src/src/lib/admin.pm
+index 5683598..1397fa3 100644
+--- a/sympa-6.1.9-src/src/lib/admin.pm
++++ b/sympa-6.1.9-src/src/lib/admin.pm
+@@ -341,6 +341,7 @@ sub create_list_old{
+ 	&do_log('notice', "Synchronizing list members...");
+ 	$list->sync_include();
+     }   
++    $list->save_config;
+ 
+     return $return;
+ }
+diff --git a/sympa-6.1.9-src/src/lib/confdef.pm b/sympa-6.1.9-src/src/lib/confdef.pm
+index ed37441..51f96f8 100644
+--- a/sympa-6.1.9-src/src/lib/confdef.pm
++++ b/sympa-6.1.9-src/src/lib/confdef.pm
+@@ -526,6 +526,11 @@ our @params = (
+         default => 'mailer-daemon|sympa|listserv|majordomo|smartlist|mailman',
+ 	vhost   => '1',
+     },
++    {
++        name    => 'db_list_cache',
++        default => '0',
++        advice  => 'Whether or not to cache lists in the database',
++    },
+     { title => 'Internationalization' },
+     {
+         name    => 'lang',
+diff --git a/sympa-6.1.9-src/src/sympa.pl.in b/sympa-6.1.9-src/src/sympa.pl.in
+index 1142b50..130f7df 100644
+--- a/sympa-6.1.9-src/src/sympa.pl.in
++++ b/sympa-6.1.9-src/src/sympa.pl.in
+@@ -84,6 +84,7 @@ Options:
+    --dump=list\@dom|ALL                  : dumps subscribers 
+    --make_alias_file                     : create file in /tmp with all aliases (usefull when aliases.tpl is changed)
+    --lowercase                           : lowercase email addresses in database
++   --sync_list_db[=listname]             : syncs filesystem list configs to the database cache of list configs, optionally sync an individual list if specified.
+    --md5_encode_password                 : rewrite password in database using md5 fingerprint. YOU CAN'T UNDO unless you save this table first
+    --create_list --robot=robot_name --input_file=/path/to/file.xml 
+                                          : create a list with the xml file under robot_name
+@@ -125,7 +126,7 @@ encryption.
+ ## Check --dump option
+ my %options;
+ unless (&GetOptions(\%main::options, 'dump=s', 'debug|d', ,'log_level=s','foreground', 'service=s','config|f=s', 
+-		    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase','md5_encode_password',
++                    'lang|l=s', 'mail|m', 'keepcopy|k=s', 'help', 'version', 'import=s','make_alias_file','lowercase','sync_list_db','md5_encode_password',
+ 		    'close_list=s','rename_list=s','new_listname=s','new_listrobot=s','purge_list=s','create_list','instantiate_family=s','robot=s','add_list=s','modify_list=s','close_family=s','md5_digest=s',
+ 		    'input_file=s','sync_include=s','upgrade','upgrade_shared','from=s','to=s','reload_list_config','list=s','quiet','close_unknown','test_database_message_buffer','conf_2_db')) {
+     &fatal_err("Unknown options.");
+@@ -156,7 +157,8 @@ $main::options{'batch'} = 1 if ($main::options{'dump'} ||
+ 				$main::options{'upgrade_shared'} ||
+ 				$main::options{'test_database_message_buffer'} || 
+ 				$main::options{'conf_2_db'} || 
+-				$main::options{'reload_list_config'}
++				$main::options{'reload_list_config'} ||
++                                $main::options{'sync_list_db'}
+ 				 );
+ 
+ # Some option force foreground mode
+@@ -925,6 +927,32 @@ elsif ($main::options{'close_family'}) {
+     print STDOUT $string;
+     exit 0;
+ }
++##########################################
++elsif ($main::options{'sync_list_db'}) {       
++    unless ($Conf{'db_list_cache'}) {
++       print STDOUT "\nSympa not configured to use database list caching \n";
++       exit 1;
++    }
++    my $listname = $main::options{'sync_list_db'};
++    if (length($listname) > 1) {
++       my ($listname, $robot) = split /\@/, $listname;
++        my $list = new List ($listname, $robot); 
++       unless (defined $list) {
++           print STDOUT "\nList '$list' does not exist. \n";
++           exit 1;
++       }
++        if (&List::_flush_list_db($listname)) {        
++           $list->_update_list_db;
++       }
++    } else {
++        &List::_flush_list_db();
++        my $all_lists = &List::get_lists('*', undef, undef, 1);
++        foreach my $list (@$all_lists) {
++           $list->_update_list_db;
++        }
++    }
++    exit 0;
++}
+  
+ 
+ ## Do we have right access in the directory
+diff --git a/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in
+index 03e6c81..5c03aa3 100644
+--- a/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in
+@@ -7940,7 +7940,11 @@ sub do_remove_arc {
+      ## Checking families and other virtual hosts.
+      &get_server_details();
+ 
+-     my $all_lists = &List::get_lists($robot);
++     #my $all_lists = &List::get_lists($robot);
++     # use list config db table to get lists
++     my $statement = "SELECT name_list from list_table WHERE status_list = 'pending'";
++     my @lists = &List::get_lists_db($statement);
++     my $all_lists = &List::get_lists($robot, undef, @lists);
+      foreach my $list ( @$all_lists ) {
+ 	 if ($list->{'admin'}{'status'} eq 'pending') {
+ 	     $param->{'pending'}{$list->{'name'}}{'subject'} = $list->{'admin'}{'subject'};
+@@ -7960,7 +7964,11 @@ sub do_remove_arc {
+      ## Checking families and other virtual hosts.
+      &get_server_details();
+ 
+-     my $all_lists = &List::get_lists($robot);
++     #my $all_lists = &List::get_lists($robot);
++     # use list config db table to get lists
++     my $statement = "SELECT name_list from list_table WHERE status_list = 'closed'";
++     my @lists = &List::get_lists_db($statement);
++     my $all_lists = &List::get_lists($robot, undef, @lists);
+      foreach my $list ( @$all_lists ) {
+ 	 if ($list->{'admin'}{'status'} eq 'closed' ||
+ 	     $list->{'admin'}{'status'} eq 'family_closed') {
+@@ -8873,7 +8881,13 @@ Sends back the list creation edition form.
+ 
+      ## Members list
+      my $record = 0;
+-     my $all_lists = &List::get_lists($robot);
++     #my $all_lists = &List::get_lists($robot);
++     # use list config db table to get lists
++     my $regexp = $param->{'regexp'};
++     my $statement = sprintf "SELECT name_list from list_table WHERE name_list RLIKE '%s' OR subject_list RLIKE '%s'", $regexp, $regexp;
++     my @lists = &List::get_lists_db($statement) || undef;
++     my $all_lists = &List::get_lists($robot, undef, @lists);
++
+      foreach my $list ( @$all_lists ) {
+ 	 my $is_admin;
+ 	 ## Search filter
+@@ -10280,7 +10294,7 @@ sub do_rename_list {
+ 		    'error_type' => 'unknown_robot'});
+        return undef;
+      }
+-       
++     $list->save_config();  
+      ## Were aliases installed?
+      if ($param->{'aliases'} == 1) {
+        $param->{'auto_aliases'} = 1;

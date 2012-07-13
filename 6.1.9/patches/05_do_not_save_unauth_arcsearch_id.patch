@@ -1,0 +1,25 @@
+diff --git a/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in
+index aa99c27..3b4979b 100644
+--- a/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.9-src/wwsympa/wwsympa.fcgi.in
+@@ -705,6 +705,7 @@ my %temporary_actions = ( 'logout' => 1,
+  			  'rss' => 1,
+  			  'wsdl' => 1,
+  			  'redirect' => 1,
++                          'arcsearch_id' => 1,
+ 			  );
+ 
+ ## Regexp applied on incoming parameters (%in)
+@@ -7858,7 +7859,11 @@ sub do_remove_arc {
+      &wwslog('info', 'do_arcsearch_id(%s,%s,%s)', $param->{'list'},$in{'archive_name'},$in{'msgid'});
+ 
+      ## Access control
+-     return undef unless (defined &check_authz('do_arcsearch_id', 'web_archive.access'));
++     unless (defined &check_authz('do_arcsearch_id', 'web_archive.access')) {
++         $param->{'action'} = 'authorization_reject';
++         $param->{'reason'} = 'web_archive_closed';
++         return 1;
++     }
+ 
+      use Marc::Search;
+ 

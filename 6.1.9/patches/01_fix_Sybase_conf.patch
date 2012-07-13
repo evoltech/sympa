@@ -1,0 +1,21 @@
+diff --git a/sympa-6.1.9-src/src/etc/script/create_db.Sybase b/sympa-6.1.9-src/src/etc/script/create_db.Sybase
+index 30f84af..7b337f6 100644
+--- a/sympa-6.1.9-src/src/etc/script/create_db.Sybase
++++ b/sympa-6.1.9-src/src/etc/script/create_db.Sybase
+@@ -216,11 +216,12 @@ CREATE TABLE bulkspool_table (
+ 
+ create index messagekey_bulkspool_fk on bulkspool_table (messagekey_bulkspool)
+ go
+-create table conf_tabl
+ 
++create table conf_table (
+   robot_conf        varchar(80)        not null      
+   label_conf	    varchar(80)        not null      
+   value_conf        varchar(300)       null     
+-  constraint ind_conf primary key (robot_conf, label_conf
++  constraint ind_conf primary key (robot_conf, label_conf)
++)
++go
+ 
+-go
+\ No newline at end of file
