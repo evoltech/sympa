@@ -6,6 +6,7 @@
 # Modified by micah to deal with "Argument list too long" - 07/23/03
 # moved lists to expl/ instead of expl/lists.riseup.net -elijah 09/09/06
 # updated for parrot -elijah 6/6/07
+# updated to assume db access via .my.cnf -taggart 07/23/12
 #
 
 SYMPAROOT=/home/sympa
@@ -22,7 +23,7 @@ add_commas() {
 
 list_count=`/usr/bin/find -L $SYMPAROOT/expl -maxdepth 3 -type f -name config | /usr/bin/wc -l`
 
-sub_count=`/usr/bin/mysql -s -u $DB_USER -p$DB_PASS --batch --database=$DB_NAME \
+sub_count=`/usr/bin/mysql -s --batch --database=sympa \
   --execute "select count(user_subscriber) from subscriber_table"`
 
 vis_count=`/usr/bin/find -L $SYMPAROOT/expl -maxdepth 3 -type f -name config \
