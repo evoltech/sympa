@@ -3,6 +3,7 @@
 # only outputs if there is something to report so you can run it via cron
 # Matt Taggart <taggart@riseup.net>
 # NOTE: this script requires the current user has read access to the db
+#   it does not need to run on the lists machine
 
 $size='5000';
 $logdir='/var/log/sympa/biglists';
