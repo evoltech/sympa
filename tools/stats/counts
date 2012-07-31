@@ -1,19 +1,68 @@
 #!/usr/bin/perl
 # counts - list, subscription, user counts
-# NOTE: this script requires the current user has read access to the db
+# NOTE: this script requires the current user has read access to the db and expl
 
-$lists=`mysql --batch --database=sympa --skip-column-names --execute "select count(name_list) from list_table where status_list = 'open'"`;
-$sub=`mysql --batch --database=sympa --skip-column-names --execute "select count(user_subscriber) from subscriber_table"`;
+$symparoot='/home/sympa';
+
+# get list of open lists
+$listssql='mysql --batch --database=sympa --skip-column-names --execute "select name_list from list_table where status_list = \'open\'"';
+open(LISTS, "$listssql|") or die "cannot get dump of open lists from database\n";
+
+$lists=0;
+$visible=0;
+
+# using that list, determine which are visible
+while (<LISTS>) {
+  chomp;
+  $list=$_;
+  
+  $lists++;
+
+  open(CONFIG, "$symparoot/expl/$list/config") or die "cannot open config for $list\n";
+  -f CONFIG and sysread CONFIG, my $_, -s CONFIG;
+
+  $found=0;
+
+  # count it if it's set to anyone
+  if ( /\n\n^ visibility anyone/m ) {
+    #print "$list is set to anyone\n";
+    $visible++;
+  }
+  # if visibility is set make a note
+  if ( /\n\n^visibility/m ) {
+    #print "$list is set to something\n";
+    $found++;
+  }
+
+  if ( ! $found ) {
+    #print "not found\n";
+    $visible++;
+  }
+  close(CONFIG);
+}
+
+close(LISTS);
+
+# get count of subscriptions to open lists
+$sub=`mysql -N --batch --database=sympa --execute "select count(user_subscriber) from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"`;
+chomp($sub);
+
+# get user count (no need to check for open, tasks clean up users that aren't
+#   subscribed to a list)
 $users=`mysql --batch --database=sympa --skip-column-names --execute "select count(email_user) from user_table"`;
+chomp($users);
 
+
+print "Lists: ". commify($lists) . "(" . commify($visible) . " visible)";
+print " Subscriptions: " . commify($sub);
+print " Users: " . commify($users);
 if ( $ARGV[0] eq '-h' ) {
-   print "As of ".`date`."<br>\n";
-   print "Lists: <b>$lists</b>  ";
-   print "Total Subscriptions: <b>$sub</b>  ";
-   print "Unique Users: <b>$users</b>\n";
-} else {
-   print "As of ".`date`."\n";
-   print "Lists: $lists\n";
-   print "Total Subscriptions: $sub\n";
-   print "Unique Users: $users\n";
+   print "<br>";
+}
+print "\n";
+
+sub commify {
+local $_ = shift;
+1 while s/^([-+]?\d+)(\d{3})/$1,$2/;
+return $_;
 }
