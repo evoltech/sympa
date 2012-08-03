@@ -28,10 +28,10 @@ my $tmpdir='/home/sympa/tmp';
 #	'review private' => 'review members',
 #	'review intranet' => 'review owners',
 #	'review public' => 'review members',
-	'\n\nvisibility conceal' => "\n\nvisibility members",
-	'\n\nvisibility noconceal' => "\n\nvisibility anyone",
-	'\n\nvisibility secret' => "\n\nvisibility members",
-	'\n\nvisibility intranet' => "\n\nvisibility members",
+	'\nvisibility conceal' => "\nvisibility members",
+	'\nvisibility noconceal' => "\nvisibility anyone",
+	'\nvisibility secret' => "\nvisibility members",
+	'\nvisibility intranet' => "\nvisibility members",
 # DONE
 #	'info open' => 'info anyone',
 #	'info private' => 'info members',
@@ -103,12 +103,12 @@ foreach $config (@configs) {
   $newversion = 0;
 
   foreach $line (keys %replacements) {
-    if ($config_text =~ /$line\n/) {
+    if ($config_text =~ /\n$line\n/) {
       print "NOTE: found '$line' in $list\n";
       print "  replacing with '$replacements{$line}'\n";
       # we're creating a new config file
       $newversion = 1;
-      $config_text =~ s/$line\n/$replacements{$line}\n/;
+      $config_text =~ s/\n$line\n/\n$replacements{$line}\n/;
     }
   }  
 
