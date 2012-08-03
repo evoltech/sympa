@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # changescenari - do a search and replace on every config file.
-# edit the $listdir and $replacements to configure
+# edit the $listdir and $replacesments to configure
 # originally by elijah in php4
 # rewritten in perl by taggart 2012-02
 
@@ -22,10 +22,30 @@ my $tmpdir='/home/sympa/tmp';
 
 # create hash of replacements
 %replacements = (
-	'd_edit editor' => 'd_edit editors',
-	'd_edit owner' => 'd_edit owners',
-	'd_edit private' => 'd_edit members',
+	'review owner' => 'review owners',
+	'review private' => 'review members',
+	'review intranet' => 'review owners',
+	'review public' => 'review members',
+# WARNING: we can't yet do this for visibility because it occurs multiple times
+#	'visibility conceal' => 'visibility members',
+#	'visibility noconceal' => 'visibility anyone',
+#	'visibility secret' => 'visibility members',
+#	'visibility intranet' => 'visibility members',
 # DONE
+#	'info open' => 'info anyone',
+#	'info private' => 'info members',
+#	'access public' => 'access anyone',
+#	'access private' => 'access members',
+#	'access owner' => 'access owners',
+#	'd_read owner' => 'd_read owners',
+#	'd_read public' => 'd_read anyone',
+#	'd_read private' => 'd_read members',
+#	'd_read private-https' => 'd_read members',
+#	'd_edit editor' => 'd_edit editors',
+#	'd_edit owner' => 'd_edit owners',
+#	'd_edit public' => 'd_edit members',
+#	'd_edit private' => 'd_edit members',
+#	'd_edit private-https' => 'd_edit members',
 #	'del auth' => 'del verified',
 #	'del owner' => 'del verified',
 #	'del owner_notify' => 'del verified_notify',
