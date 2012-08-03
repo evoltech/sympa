@@ -103,12 +103,12 @@ foreach $config (@configs) {
   $newversion = 0;
 
   foreach $line (keys %replacements) {
-    if ($config_text =~ /$line/) {
+    if ($config_text =~ /$line\n/) {
       print "NOTE: found '$line' in $list\n";
       print "  replacing with '$replacements{$line}'\n";
       # we're creating a new config file
       $newversion = 1;
-      $config_text =~ s/$line/$replacements{$line}/;
+      $config_text =~ s/$line\n/$replacements{$line}\n/;
     }
   }  
 
