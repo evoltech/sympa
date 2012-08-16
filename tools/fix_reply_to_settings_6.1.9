@@ -1,0 +1,105 @@
+#!/usr/bin/perl -w
+# fix_reply_to_settings_6.1.9 - do a search and replace on every config file.
+# in the reply_to_header section, make sure that no list has set:
+# 'apply respect' + 'value list' (this is blatantly ignored by some mail clients)
+# or
+# 'apply forced' + 'value sender' (this causes reply-to to be undef)
+#
+# 'changescenari' originally by elijah in php4
+# 'changescenari' rewritten in perl by taggart 2012-02
+# 'changescenari' revised by taggart in 2012-08
+# 'changescenari' recommissioned as this script by kclair in 2012-08
+
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION="true";
+
+use vars qw($opt_d);
+use vars qw($opt_l);
+
+getopts('dl:');
+
+sub HELP_MESSAGE {
+  print "Usage: changescenari [-d] [-l <listname>]\n";
+  print "     -d  : actually change things\n";
+  print "     -l  : specify list to change\n";
+  print "BE CAREFUL! Run without -d and review what it will do first!\n";
+}
+
+my $listdir='/home/sympa/expl/';
+my $tmpdir='/home/sympa/tmp';
+
+# create hash of replacements
+%replacements = (
+        # we must make sure that any list that sets the list as the reply-to is forced
+        # this is because of some errant mail clients not respecting the 'respect' value
+        '\nreply_to_header\napply respect\nvalue list' => 
+            '\nreply_to_header\napply forced\nvalue list',
+        # we must make sure that any list that sets the sender is reply-to is not forced
+        # this due to a bug where that combination makes the reply-to header undef
+        '\nreply_to_header\napply forced\nvalue sender' => 
+            '\nreply_to_header\napply respect\nvalue sender'
+);
+
+if ($opt_l) {
+  @configs = ("$listdir/$opt_l/config");
+}else {
+  # get list of configs
+  $output=qx(find $listdir -name config);
+  @configs = split /\n/,$output;
+}
+
+foreach $config (@configs) {
+
+  $list=$config;
+  $list =~ s:^.*/(.*?)/config:$1:;
+
+  print "---\nlooking at $list...\n";
+
+  local $/ = undef;
+  open(OLD,"$config") || die "ERROR: cannot open $config\n";
+  $config_text = <OLD>;
+  close OLD;
+
+  # we're not going to make a new version until we have a reason to
+  $newversion = 0;
+
+  next unless $config_text =~ /\nreply_to_header\n/;
+  if ($config_text =~ /(\nreply_to_header\n.*\n.*)\n\n/) {
+    $reply_to_match = $1;
+    foreach $line (keys %replacements) {
+      if ($reply_to_match =~ /$line/) {
+        print "NOTE: found '$line' in $list\n";
+        print "  replacing with '$replacements{$line}'\n";
+        # we're creating a new config file
+        $newversion = 1;
+        $config_text =~ s/\n$line\n/\n$replacements{$line}\n/;
+      }
+    }     
+    if ($newversion == 0) {
+      print "Did not find a match in $config.\n";
+      print "reply_to_header block is: $reply_to_match\n";   
+    }
+  }else {
+    print "reply_to_header not matched.\n";
+  }
+
+  # only do it if the user specified -d
+  if ($opt_d) {
+    if ($newversion) {
+      # write the new version to a temp file
+      die "ERROR: $config.new exists!\n" if ( -e "$config.new" );
+      open(NEW,">$config.new") || die "ERROR: cannot open $config.new\n";
+      print NEW $config_text;
+      close NEW;
+      # move it in place
+      rename "$config.new", $config || die "ERROR: cannot move $config.new into place\n";
+      # tell sympa to update the config.bin for the list
+      #qx(/home/sympa/bin/sympa.pl --reload_list_config --list=$list@lists.riseup.net)
+    }
+  }
+}
+
+if (! $opt_d and $newversion) {
+    print "WARNING: didn't actually make any changes. Review the above and when you\n";
+    print "  are ready to run for real add the -d flag\n";
+}
