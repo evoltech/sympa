@@ -1,3 +1,0 @@
-title.gettext remove subscriber impossible
-
-true()   smtp,dkim,md5,smime -> reject(reason='del_closed')
