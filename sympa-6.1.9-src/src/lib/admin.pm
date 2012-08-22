@@ -778,16 +778,16 @@ sub rename_list{
      }
 
     # set list status to pending if creation list is moderated
-    if ($r_action =~ /listmaster/) {
-      $list->{'admin'}{'status'} = 'pending' ;
-      &List::send_notify_to_listmaster('request_list_renaming',$list->{'domain'}, 
-				       {'list' => $list,
-					'new_listname' => $param{'new_listname'},
-					'old_listname' => $old_listname,
-					'email' => $param{'user_email'},
-					'mode' => $param{'mode'}});
-      $param{'status'} = 'pending';
-    }
+#    if ($r_action =~ /listmaster/) {
+#      $list->{'admin'}{'status'} = 'pending' ;
+#      &List::send_notify_to_listmaster('request_list_renaming',$list->{'domain'}, 
+#				       {'list' => $list,
+#					'new_listname' => $param{'new_listname'},
+#					'old_listname' => $old_listname,
+#					'email' => $param{'user_email'},
+#					'mode' => $param{'mode'}});
+#      $param{'status'} = 'pending';
+#    }
      
     ## Save config file for the new() later to reload it
     $list->save_config($param{'user_email'});

@@ -10259,6 +10259,7 @@ sub do_rename_list {
 				      remote_addr => $param->{'remote_addr'},
 				      aliases => $param->{'aliases'},
 				      status => $param->{'status'},
+                                      skip_authz => 1,
 				     );
      
      if ($result eq 'incorrect_listname') {       
