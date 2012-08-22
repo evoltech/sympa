@@ -11411,6 +11411,7 @@ sub compute_topic {
 	    my $charset = $part->head->mime_attr("Content-Type.Charset");
 	    $charset = MIME::Charset->new($charset);
 	    if (defined $part->bodyhandle) {
+              if (defined $msg->bodyhandle) {
 		my $body = $msg->bodyhandle->as_string();
 		my $converted;
 		eval {
@@ -11420,6 +11421,9 @@ sub compute_topic {
 		    $converted = Encode::decode('US-ASCII', $body);
 		}
 		$mail_string .= $converted."\n";
+              }else {
+                  &do_log('err','message %s does not have a bodyhandle?',$msg_id);
+              }
 	    }
 	}
     }
