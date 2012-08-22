@@ -1,0 +1,240 @@
+-- SQLITE Database creation script
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `admin_table`
+-- 
+
+CREATE TABLE admin_table ( 
+	 date_admin 	numeric NOT NULL, 
+	 update_admin 	numeric, 
+	 info_admin 	text, 
+	 list_admin 	text NOT NULL, 
+	 reception_admin 	text, 
+	 comment_admin 	text, 
+	 subscribed_admin 	numeric, 
+	 profile_admin 	text, 
+	 role_admin 	text NOT NULL, 
+	 included_admin 	numeric, 
+	 user_admin 	text NOT NULL, 
+	 include_sources_admin 	text, 
+	 robot_admin 	text NOT NULL, 
+	 visibility_admin 	text, 
+	 PRIMARY KEY (robot_admin, list_admin, role_admin, user_admin) 
+ );
+
+CREATE INDEX admin_user_index ON admin_table ( user_admin ); 
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `bulkmailer_table`
+-- 
+
+CREATE TABLE bulkmailer_table ( 
+	 priority_packet_bulkmailer 	integer, 
+	 receipients_bulkmailer 	text, 
+	 reception_date_bulkmailer 	integer, 
+	 packetid_bulkmailer 	text NOT NULL, 
+	 priority_message_bulkmailer 	integer, 
+	 verp_bulkmailer 	numeric, 
+	 merge_bulkmailer 	numeric, 
+	 returnpath_bulkmailer 	text, 
+	 messagekey_bulkmailer 	text NOT NULL, 
+	 messageid_bulkmailer 	text, 
+	 listname_bulkmailer 	text, 
+	 delivery_date_bulkmailer 	integer, 
+	 robot_bulkmailer 	text, 
+	 lock_bulkmailer 	text, 
+	 PRIMARY KEY (messagekey_bulkmailer, packetid_bulkmailer) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `bulkspool_table`
+-- 
+
+CREATE TABLE bulkspool_table ( 
+	 dkim_selector_bulkspool 	text, 
+	 dkim_d_bulkspool 	text, 
+	 dkim_privatekey_bulkspool 	text, 
+	 messageid_bulkspool 	text, 
+	 dkim_i_bulkspool 	text, 
+	 messagekey_bulkspool 	text NOT NULL, 
+	 message_bulkspool 	text, 
+	 lock_bulkspool 	numeric, 
+	 PRIMARY KEY (messagekey_bulkspool) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `conf_table`
+-- 
+
+CREATE TABLE conf_table ( 
+	 robot_conf 	text, 
+	 label_conf 	text, 
+	 value_conf 	text, 
+	 PRIMARY KEY (robot_conf, label_conf) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `exclusion_table`
+-- 
+
+CREATE TABLE exclusion_table ( 
+	 robot_exclusion 	text NOT NULL, 
+	 user_exclusion 	text NOT NULL, 
+	 date_exclusion 	integer, 
+	 family_exclusion 	text, 
+	 list_exclusion 	text NOT NULL, 
+	 PRIMARY KEY (list_exclusion, user_exclusion, robot_exclusion) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `list_table`
+-- 
+
+CREATE TABLE list_table ( 
+	 creation_epoch_list 	numeric, 
+	 name_list 	text NOT NULL, 
+	 topics_list 	text, 
+	 robot_list 	text NOT NULL, 
+	 status_list 	text, 
+	 path_list 	text, 
+	 web_archive_list 	integer, 
+	 owners_list 	text, 
+	 subject_list 	text, 
+	 creation_email_list 	text, 
+	 editors_list 	text, 
+	 PRIMARY KEY (name_list, robot_list) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `logs_table`
+-- 
+
+CREATE TABLE logs_table ( 
+	 list_logs 	text, 
+	 parameters_logs 	text, 
+	 msg_id_logs 	text, 
+	 action_logs 	text NOT NULL, 
+	 client_logs 	text, 
+	 user_email_logs 	text, 
+	 daemon_logs 	text NOT NULL, 
+	 target_email_logs 	text, 
+	 status_logs 	text NOT NULL, 
+	 error_type_logs 	text, 
+	 robot_logs 	text, 
+	 date_logs 	integer NOT NULL, 
+	 id_logs 	integer NOT NULL, 
+	 PRIMARY KEY (id_logs) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `netidmap_table`
+-- 
+
+CREATE TABLE netidmap_table ( 
+	 netid_netidmap 	text NOT NULL, 
+	 email_netidmap 	text, 
+	 robot_netidmap 	text NOT NULL, 
+	 serviceid_netidmap 	text NOT NULL, 
+	 PRIMARY KEY (netid_netidmap, serviceid_netidmap, robot_netidmap) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `one_time_ticket_table`
+-- 
+
+CREATE TABLE one_time_ticket_table ( 
+	 data_one_time_ticket 	text, 
+	 status_one_time_ticket 	text, 
+	 ticket_one_time_ticket 	text, 
+	 remote_addr_one_time_ticket 	text, 
+	 robot_one_time_ticket 	text, 
+	 date_one_time_ticket 	integer, 
+	 email_one_time_ticket 	text, 
+	 PRIMARY KEY (ticket_one_time_ticket) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `session_table`
+-- 
+
+CREATE TABLE session_table ( 
+	 data_session 	text, 
+	 id_session 	text NOT NULL, 
+	 remote_addr_session 	text, 
+	 date_session 	integer NOT NULL, 
+	 robot_session 	text, 
+	 hit_session 	integer, 
+	 email_session 	text, 
+	 start_date_session 	integer NOT NULL, 
+	 PRIMARY KEY (id_session) 
+ );
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `subscriber_table`
+-- 
+
+CREATE TABLE subscriber_table ( 
+	 robot_subscriber 	text NOT NULL, 
+	 reception_subscriber 	text, 
+	 custom_attribute_subscriber 	text, 
+	 list_subscriber 	text NOT NULL, 
+	 visibility_subscriber 	text, 
+	 comment_subscriber 	text, 
+	 suspend_start_date_subscriber 	integer, 
+	 suspend_end_date_subscriber 	integer, 
+	 bounce_address_subscriber 	text, 
+	 bounce_subscriber 	text, 
+	 included_subscriber 	numeric, 
+	 include_sources_subscriber 	text, 
+	 update_subscriber 	numeric, 
+	 user_subscriber 	text NOT NULL, 
+	 topics_subscriber 	text, 
+	 subscribed_subscriber 	numeric, 
+	 date_subscriber 	numeric NOT NULL, 
+	 bounce_score_subscriber 	integer, 
+	 suspend_subscriber 	numeric, 
+	 PRIMARY KEY (robot_subscriber, list_subscriber, user_subscriber) 
+ );
+
+CREATE INDEX subscriber_user_index ON subscriber_table ( user_subscriber ); 
+
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `user_table`
+-- 
+
+CREATE TABLE user_table ( 
+	 email_user 	text NOT NULL, 
+	 last_login_date_user 	integer, 
+	 attributes_user 	text, 
+	 data_user 	text, 
+	 cookie_delay_user 	integer, 
+	 last_login_host_user 	text, 
+	 gecos_user 	text, 
+	 password_user 	text, 
+	 lang_user 	text, 
+	 wrong_login_count_user 	integer, 
+	 PRIMARY KEY (email_user) 
+ );
