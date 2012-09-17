@@ -18,7 +18,7 @@ while (<LISTS>) {
   
   $lists++;
 
-  open(CONFIG, "$symparoot/expl/$list/config") or die "cannot open config for $list\n";
+  open(CONFIG, "$symparoot/expl/$list/config") or warn "cannot open config for $list\n";
   -f CONFIG and sysread CONFIG, my $_, -s CONFIG;
 
   $found=0;
