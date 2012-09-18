@@ -1,0 +1,130 @@
+#!/usr/bin/perl -w
+# findsimilarlists - find lists that are similar, could be spammers
+# NOTE: this script requires the current user has read access to the db
+#   apt-get install liblist-compare-perl libperl6-form-perl
+# Matt Taggart <taggart@riseup.net> 2012-09
+
+use strict;
+
+use vars qw($opt_h $num $small $date $listsql
+            $count $pair $one $two $lcma $list
+            $i $j $sizei $sizej
+            $min $intersection $union $jaccard $subset
+            @ignore %lists %results );
+
+# number we want to see
+$num = 25;
+
+# under this size we don't bother to compare
+$small=5000;
+
+# ignore these lists
+#@ignore = ( 'mailusers', 'listadmins', 'newsletter' );
+@ignore = ( );
+
+use List::Compare;
+use Perl6::Form;
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION="true";
+
+getopts('h');
+
+sub HELP_MESSAGE {
+  print "Usage: findsimilarlists [-h]\n";
+}
+
+$date=`date`;
+chomp($date);
+
+$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table"';
+#$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+#$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\' limit 1000000"';
+
+open(LISTDUMP, "$listsql|") or die "cannot get dump of address+list pairs from database\n";
+
+
+# load all the addresses into a hash of arrays
+# this is _way_ faster than doing lost of sql queries and currently (for
+# lists.riseup.net) is about 62mb
+while (<LISTDUMP>) {
+   chomp;
+   m/^(.*)\t(.*)$/;
+   push @{ $lists{$1} },"$2";
+}
+
+# remove the lists we want to ignore
+foreach $list ( @ignore ) {
+    delete $lists{$list};
+}
+
+# remove the small lists
+foreach $list ( keys %lists ) {
+  if ( $#{ $lists{$list} } <= $small ) {
+    delete $lists{$list};
+  }
+}
+
+foreach $i ( keys %lists) {
+  foreach $j ( keys %lists) {
+    # don't compare an array to itself and we only need to do unique pairs
+    last if $i eq $j;
+ 
+    #print "Comparing $i with $j...\n";
+    $lcma = List::Compare->new('-u', $lists{$i}, $lists{$j});
+
+    $intersection = $lcma->get_intersection;
+    $union = $lcma->get_union;
+    # compute the Jaccard index
+    # http://en.wikipedia.org/wiki/Jaccard_index
+    $jaccard = $intersection / $union * 100;
+    # determine the smaller list
+    $sizei = $#{ $lists{$i} };
+    $sizej = $#{ $lists{$j} };
+    $min = [$sizej, $sizei]->[$sizei <= $sizej];
+    # divide the intersection by the smaller size
+    $subset = $intersection / $min * 100 ;
+    $results{"$i $j"}= [ $jaccard, $subset ];
+  }
+}
+
+if ( $opt_h ) {
+  print "<style>table.single{border: 1px solid;border-collapse: collapse;}\n.single td, .single th{border-width: 1px 1px 1px 1px;border-style: solid;}\n</style>\n";
+  print "<h3>Similar large lists</h3>\n";
+  print "(<i>generated ".$date."</i>)\n";
+  print "<table class=\"single\">\n";
+  print "<tr><th align=center>Similar</th><th align=center>Subset</th><th align=center>Lists</th></tr>\n";
+} else {
+  print "Similar large lists\n";
+  print "(generated ".$date.")\n";
+  print "Similar Subset  Lists\n";
+  print "-------------------------------------------------------------------\n";
+}
+
+$count=0;
+
+foreach $pair ( sort { $results{$b}[0] <=> $results{$a}[0] } keys %results) {
+  # stop when we get to $num
+  last if $count >= $num;
+  # don't bother to print anything tiny
+  last if $results{$pair}[0] <= .1;
+
+  ( $one, $two ) = split(/ /,$pair);
+
+  if ( $opt_h ) {
+    print form
+      "<tr><td>{].0}</td><td>{].0}</td><td><a href=\"https://lists.riseup.net/www/info/{<+}\">{<+}</a> / <a href=\"https://lists.riseup.net/www/info/{<+}\">{<+}</a></td></tr>",
+      $results{$pair}[0], $results{$pair}[1], $one, $one, $two, $two;
+  } else {
+    print form
+      "{].0}   {].0}   {<<+}  /  {<<+}",
+      $results{$pair}[0], $results{$pair}[1], $one, $two;
+  }
+  $count++;
+}
+
+if ( $opt_h ) {
+   print "</table>\n";
+   print "Similar is intersection divided by union, 100 is identical.<br>\n";
+   print "Subset is intersection divided by the size of the smaller list, 100 means the smaller list is a perfect subset of the larger.</p>\n";
+}
+
