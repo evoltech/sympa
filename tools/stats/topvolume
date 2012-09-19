@@ -1,0 +1,97 @@
+#!/usr/bin/perl
+# toplists - top $num lists and their volume / size, sorted descending by volume
+# NOTE: this script requires the current user has read access to the db and arc/
+
+$num=25;
+$arc='/home/sympa/arc';
+
+$date=`date`;
+chomp($date);
+$lastmonth=`date +%Y-%m -d'last month'`;
+chomp($lastmonth);
+
+$subscribersql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+#subscribersql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\' limit 100000"';
+#$subscribersql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table"';
+
+open(SQL, "$subscribersql|") or die "cannot get subscriber data from database\n";
+
+format Wiki =
+|[@*->https://lists.riseup.net/www/info/@*]|[@*->https://lists.riseup.net/www/arc/@*]|[@*->https://lists.riseup.net/www/review/@*]|
+  $list,                            $list, $volume, $list, $subscribers, $list
+.
+
+format Plain =
+@>>>>>> @>>>>>       @*
+$volume, $subscribers, $list
+.
+
+format Html =
+<tr><td><a href="https://lists.riseup.net/www/info/@*">@*</a></td><td align=right><a href=https://lists.riseup.net/www/arc/">@*</a></td><td><a href=https://lists.riseup.net/www/review/">@*</a></td></tr>
+                                                $list, $list, $list, $volume, $list, $subscribers
+.
+
+format Pcre =
+/@@*@lists\.riseup\.net$/ [10.0.1.44]
+"^", $list, "@"
+.
+
+if ( $ARGV[0] eq '-w' ) {
+  $~='Wiki';
+  print "h3. Top $num lists by monthly volume\n\n";
+  print "(generated ".$date.")\n\n";
+  print "|_.List name|_.Volume|_.Subscribers|\n";
+} elsif ($ARGV[0] eq '-h' ) {
+  $~='Html';
+  print "<style>table.single{border: 1px solid;border-collapse: collapse;}\n.single td, .single th{border-width: 1px 1px 1px 1px;border-style: solid;}\n</style>\n";
+  print "<h3>Top $num lists by monthly volume</h3>\n";
+  print "(<i>generated ".$date."</i>)\n";
+  print "<table class=\"single\">\n";
+  print "<tr><th align=center>List name</th><th align=center>Volume</th><th>Subscribers</th></tr>\n";
+} elsif ($ARGV[0] eq '-r' ) {
+  $~='Pcre';
+} else {
+  $~='Plain';
+  print "Top $num lists by monthly volume\n";
+  print "(generated ".$date.")\n";
+  print "Volume  Subscribers  List name\n";
+  print "---------------------------------------------------------\n";
+}
+
+while (<SQL>) {
+  chomp;
+  m/^(.*)\t(.*)$/;
+  push @{ $lists{$1} },"$2";
+}
+
+foreach $list ( keys %lists ) {
+  $listarc="$arc/$list\@lists.riseup.net/$lastmonth/arctxt/";
+  #print "listarc is $listarc\n";
+
+  # if it didn't have an archive last month skip it
+  next if ( ! -e $listarc );
+
+  # if we can't open an archive, die since we're probably not running as the
+  # right user
+  die "ERROR: cannot open archive (are you the right user?)\n" if ( ! -r $listarc );
+
+  $msgs=`ls $listarc |wc -l`;
+  chomp($msgs);
+  $volume=$msgs*$#{ $lists{$list} };
+  $vols{$list}=$volume;
+}
+
+$count=0;
+
+foreach $list ( sort { $vols{$b} <=> $vols{$a} } keys %vols ) {
+  last if ( $count > $num );
+  $count++;
+  $subscribers=$#{ $lists{$list} };
+  $volume=$vols{$list};
+  print "volume is $volume subscribers is $subscribers\n";
+  write;
+}
+
+if ($ARGV[0] eq '-h' ) {
+  print "</table>\n";
+}
