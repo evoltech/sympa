@@ -16,11 +16,10 @@ use vars qw($opt_h $num $small $date $listsql
 $num = 25;
 
 # under this size we don't bother to compare
-$small=5000;
+$small=500;
 
 # ignore these lists
-#@ignore = ( 'mailusers', 'listadmins', 'newsletter' );
-@ignore = ( );
+@ignore = ( 'mailusers', 'listadmins', 'newsletter' );
 
 use List::Compare;
 use Perl6::Form;
@@ -38,7 +37,7 @@ chomp($date);
 
 $listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table"';
 #$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
-#$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\' limit 1000000"';
+#$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\' limit 100000"';
 
 open(LISTDUMP, "$listsql|") or die "cannot get dump of address+list pairs from database\n";
 
@@ -112,12 +111,12 @@ foreach $pair ( sort { $results{$b}[0] <=> $results{$a}[0] } keys %results) {
 
   if ( $opt_h ) {
     print form
-      "<tr><td>{].0}</td><td>{].0}</td><td><a href=\"https://lists.riseup.net/www/info/{<+}\">{<+}</a> / <a href=\"https://lists.riseup.net/www/info/{<+}\">{<+}</a></td></tr>",
-      $results{$pair}[0], $results{$pair}[1], $one, $one, $two, $two;
+      "<tr><td>{].0}</td><td>{].0}</td><td><a href=\"https://lists.riseup.net/www/info/{<+}\">{<+}</a>({<+}) / <a href=\"https://lists.riseup.net/www/info/{<+}\">{<+}</a>({<+})</td></tr>",
+      $results{$pair}[0], $results{$pair}[1], $one, $one, $#{ $lists{$one} }, $two, $two, $#{ $lists{$two} };
   } else {
     print form
-      "{].0}   {].0}   {<<+}  /  {<<+}",
-      $results{$pair}[0], $results{$pair}[1], $one, $two;
+      "{].0}   {].0}   {<+} ({<+})  /  {<+} ({<+})",
+      $results{$pair}[0], $results{$pair}[1], $one, $#{ $lists{$one} }, $two, $#{ $lists{$two} };
   }
   $count++;
 }
