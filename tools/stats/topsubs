@@ -1,0 +1,89 @@
+#!/usr/bin/perl -w
+# topsubs - list the subscribers with the most subscriptions and the lists
+#  they are on.
+# NOTE: this script requires the current user has read access to the db
+# Matt Taggart <taggart@riseup.net> 2012-10
+
+use strict;
+
+use vars qw($opt_h $num $date $subscriberssql $size $lists $text
+            $count $address $list %subscribers );
+
+# number we want to see
+$num = 25;
+
+use Perl6::Form;
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION="true";
+
+getopts('h');
+
+sub HELP_MESSAGE {
+  print "Usage: topsubs [-h]\n";
+  print "       -h: html output\n";
+}
+
+$date=`date`;
+chomp($date);
+
+$subscriberssql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+#$subscriberssql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\' limit 10000"';
+
+open(SUBSCRIBERS, "$subscriberssql|") or die "cannot get dump of subscribers from database\n";
+
+while (<SUBSCRIBERS>) {
+   # $1 is the list name
+   # $2 is the subscriber address
+   # sympa subscriber names might have leading/trailing space and/or <>
+   # english version of the regexp:
+   # match the beginning of the line, then non-greedily match everything up to
+   # the first tab as $1, then maybe some space characters, then maybe a <
+   # symbol, then match greedily some characters up to maybe a > symbol and
+   # then the rest of the line
+   m/^(.*?)\t\s*<?(.*)>?\s*$/;
+   $list=$1;
+   $address=$2;
+
+   # load into a hash of arrays
+   push(@{ $subscribers{$2} },$list);
+}
+
+if ( $opt_h ) {
+  print "<style>table.single{border: 1px solid;border-collapse: collapse;}\n.single td, .single th{border-width: 1px 1px 1px 1px;border-style: solid;}\n</style>\n";
+  print "<h3>Top subscribers</h3>\n";
+  print "(<i>generated ".$date."</i>. This data is only to be used for tracking down abusers.)\n\n";
+  print "<table class=\"single\">\n";
+  print "<tr><th align=right>Count</th><th>Address</th><th>Lists</th></tr>\n";
+} else {
+  print "Top Subscribers\n";
+  print "(generated ".$date.")\n";
+  print "Count  Address                           Lists\n";
+  print "--------------------------------------------------------------------------------\n";
+}
+
+$count=0;
+
+foreach $address ( sort { @{ $subscribers{$b} } <=> @{ $subscribers{$a} } } keys %subscribers) {
+  # stop when we get to $num
+  last if $count >= $num;
+
+  $size = $#{ $subscribers{$address} };
+  # above is 0 indexed, so add one to the count
+  $size++;
+  $lists = join(", ", @{ $subscribers{$address} });
+  $text = substr $lists, 0, 36;
+  if ( $opt_h ) {
+    print form
+      "<tr><td>{>+}</td><td>{<+}</td><td>{<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<}...</td></tr>",
+      $size, $address, $text;
+  } else {
+    print form
+      " {>>}  {<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<}  {<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<}...",
+      $size, $address, $text;
+  }
+  $count++;
+}
+
+if ( $opt_h ) {
+   print "</table>\n";
+}
