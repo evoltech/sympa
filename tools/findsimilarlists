@@ -8,8 +8,8 @@ use strict;
 
 use vars qw($opt_h $num $small $date $listsql
             $count $pair $one $two $lcma $list
-            $i $j $sizei $sizej
-            $min $intersection $union $jaccard $subset
+            $i $j $sizei $sizej $min $ratio
+            $intersection $union $jaccard $subset
             @ignore %lists %results );
 
 # number we want to see
@@ -67,8 +67,17 @@ foreach $i ( keys %lists) {
   foreach $j ( keys %lists) {
     # don't compare an array to itself and we only need to do unique pairs
     last if $i eq $j;
+
+    # determine the smaller list
+    $sizei = $#{ $lists{$i} };
+    $sizej = $#{ $lists{$j} };
+    $min = [$sizej, $sizei]->[$sizei <= $sizej];
+
+    # if list sizes are really different, don't bother to compute
+    $ratio = $min / ( $sizei + $sizej - $min );
+    next if ( $ratio >= 0.1 );
  
-    #print "Comparing $i with $j...\n";
+    print "Comparing $i with $j...\n";
     $lcma = List::Compare->new('-u', $lists{$i}, $lists{$j});
 
     $intersection = $lcma->get_intersection;
@@ -76,10 +85,6 @@ foreach $i ( keys %lists) {
     # compute the Jaccard index
     # http://en.wikipedia.org/wiki/Jaccard_index
     $jaccard = $intersection / $union * 100;
-    # determine the smaller list
-    $sizei = $#{ $lists{$i} };
-    $sizej = $#{ $lists{$j} };
-    $min = [$sizej, $sizei]->[$sizei <= $sizej];
     # divide the intersection by the smaller size
     $subset = $intersection / $min * 100 ;
     $results{"$i $j"}= [ $jaccard, $subset ];
