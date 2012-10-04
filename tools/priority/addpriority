@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+
+$priority='8';
+$sympa='/home/sympa/bin/sympa.pl';
+$expl='/home/sympa/expl';
+$file=$ARGV[0];
+
+open(LISTS, "$file") or die "cannot open $file\n";
+
+while (<LISTS>) {
+  chomp;
+  $list=$_;
+
+  if ( ! `grep -H priority $expl/$list/config` ) {
+    print "setting priority of list $list to $priority\n";
+    `echo "priority $priority" >>$expl/$list/config`;
+  } else {
+    print "adjusting priority of list $list to $priority\n";
+    `$sympa --set_list_priority  --list=$list --robot=lists.riseup.net --priority=$priority`; 
+  }
+  
+}
+`$sympa --reload_list_config`;
