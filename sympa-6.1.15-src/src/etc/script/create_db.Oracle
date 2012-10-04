@@ -1,0 +1,276 @@
+## ORACLE Database creation script
+
+/Bases/oracle/product/7.3.4.1/bin/sqlplus loginsystem/passwdoracle <<-!
+create user SYMPA identified by SYMPA default tablespace TABLESP
+temporary tablespace TEMP;
+ grant create session to SYMPA;
+ grant create table to SYMPA;
+ grant create synonym to SYMPA;
+ grant create view to SYMPA;
+ grant execute any procedure to SYMPA;
+ grant select any table to SYMPA;
+ grant select any sequence to SYMPA;
+ grant resource to SYMPA;
+!
+
+/Bases/oracle/product/7.3.4.1/bin/sqlplus SYMPA/SYMPA <<-!
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `admin_table`
+## 
+
+CREATE TABLE admin_table ( 
+	 comment_admin 	varchar2(150), 
+	 date_admin 	date NOT NULL, 
+	 include_sources_admin 	varchar2(50), 
+	 included_admin 	number, 
+	 info_admin 	varchar2(150), 
+	 list_admin 	varchar2(50) NOT NULL, 
+	 profile_admin 	varchar2(20), 
+	 reception_admin 	varchar2(20), 
+	 robot_admin 	varchar2(80) NOT NULL, 
+	 role_admin 	varchar2(20) NOT NULL, 
+	 subscribed_admin 	number, 
+	 update_admin 	date, 
+	 user_admin 	varchar2(100) NOT NULL, 
+	 visibility_admin 	varchar2(20), 
+	 CONSTRAINT ind_admin PRIMARY KEY (robot_admin, list_admin, role_admin, user_admin) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `bulkmailer_table`
+## 
+
+CREATE TABLE bulkmailer_table ( 
+	 delivery_date_bulkmailer 	number, 
+	 listname_bulkmailer 	varchar2(50), 
+	 lock_bulkmailer 	varchar2(30), 
+	 merge_bulkmailer 	number, 
+	 messageid_bulkmailer 	varchar2(200), 
+	 messagekey_bulkmailer 	varchar2(80) NOT NULL, 
+	 packetid_bulkmailer 	varchar2(33) NOT NULL, 
+	 priority_message_bulkmailer 	number, 
+	 priority_packet_bulkmailer 	number, 
+	 receipients_bulkmailer 	varchar2(500), 
+	 reception_date_bulkmailer 	number, 
+	 returnpath_bulkmailer 	varchar2(100), 
+	 robot_bulkmailer 	varchar2(80), 
+	 verp_bulkmailer 	number, 
+	 CONSTRAINT ind_bulkmailer PRIMARY KEY (messagekey_bulkmailer, packetid_bulkmailer) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `bulkspool_table`
+## 
+
+CREATE TABLE bulkspool_table ( 
+	 dkim_d_bulkspool 	varchar2(50), 
+	 dkim_i_bulkspool 	varchar2(100), 
+	 dkim_privatekey_bulkspool 	varchar2(1000), 
+	 dkim_selector_bulkspool 	varchar2(50), 
+	 lock_bulkspool 	number, 
+	 message_bulkspool 	long, 
+	 messageid_bulkspool 	varchar2(200), 
+	 messagekey_bulkspool 	varchar2(33) NOT NULL, 
+	 CONSTRAINT ind_bulkspool PRIMARY KEY (messagekey_bulkspool) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `conf_table`
+## 
+
+CREATE TABLE conf_table ( 
+	 label_conf 	varchar2(80), 
+	 robot_conf 	varchar2(80), 
+	 value_conf 	varchar2(300), 
+	 CONSTRAINT ind_conf PRIMARY KEY (robot_conf, label_conf) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `exclusion_table`
+## 
+
+CREATE TABLE exclusion_table ( 
+	 date_exclusion 	number, 
+	 family_exclusion 	varchar2(50), 
+	 list_exclusion 	varchar2(50) NOT NULL, 
+	 robot_exclusion 	varchar2(50) NOT NULL, 
+	 user_exclusion 	varchar2(100) NOT NULL, 
+	 CONSTRAINT ind_exclusion PRIMARY KEY (list_exclusion, user_exclusion, robot_exclusion) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `list_table`
+## 
+
+CREATE TABLE list_table ( 
+	 creation_email_list 	varchar2(100), 
+	 creation_epoch_list 	date, 
+	 editors_list 	varchar2(100), 
+	 name_list 	varchar2(100) NOT NULL, 
+	 owners_list 	varchar2(100), 
+	 path_list 	varchar2(100), 
+	 robot_list 	varchar2(100) NOT NULL, 
+	 status_list 	varchar2(20), 
+	 subject_list 	varchar2(100), 
+	 topics_list 	varchar2(100), 
+	 web_archive_list 	tinyint(1), 
+	 CONSTRAINT ind_list PRIMARY KEY (name_list, robot_list) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `logs_table`
+## 
+
+CREATE TABLE logs_table ( 
+	 action_logs 	varchar2(50) NOT NULL, 
+	 client_logs 	varchar2(100), 
+	 daemon_logs 	varchar2(10) NOT NULL, 
+	 date_logs 	number NOT NULL, 
+	 error_type_logs 	varchar2(150), 
+	 id_logs 	number NOT NULL, 
+	 list_logs 	varchar2(50), 
+	 msg_id_logs 	varchar2(255), 
+	 parameters_logs 	varchar2(100), 
+	 robot_logs 	varchar2(80), 
+	 status_logs 	varchar2(10) NOT NULL, 
+	 target_email_logs 	varchar2(100), 
+	 user_email_logs 	varchar2(100), 
+	 CONSTRAINT ind_logs PRIMARY KEY (id_logs) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `netidmap_table`
+## 
+
+CREATE TABLE netidmap_table ( 
+	 email_netidmap 	varchar2(100), 
+	 netid_netidmap 	varchar2(100) NOT NULL, 
+	 robot_netidmap 	varchar2(80) NOT NULL, 
+	 serviceid_netidmap 	varchar2(100) NOT NULL, 
+	 CONSTRAINT ind_netidmap PRIMARY KEY (netid_netidmap, serviceid_netidmap, robot_netidmap) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `one_time_ticket_table`
+## 
+
+CREATE TABLE one_time_ticket_table ( 
+	 data_one_time_ticket 	varchar2(200), 
+	 date_one_time_ticket 	number, 
+	 email_one_time_ticket 	varchar2(100), 
+	 remote_addr_one_time_ticket 	varchar2(60), 
+	 robot_one_time_ticket 	varchar2(80), 
+	 status_one_time_ticket 	varchar2(60), 
+	 ticket_one_time_ticket 	varchar2(30), 
+	 CONSTRAINT ind_one_time_ticket PRIMARY KEY (ticket_one_time_ticket) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `session_table`
+## 
+
+CREATE TABLE session_table ( 
+	 data_session 	varchar2(500), 
+	 date_session 	number NOT NULL, 
+	 email_session 	varchar2(100), 
+	 hit_session 	number, 
+	 id_session 	varchar2(30) NOT NULL, 
+	 remote_addr_session 	varchar2(60), 
+	 robot_session 	varchar2(80), 
+	 start_date_session 	number NOT NULL, 
+	 CONSTRAINT ind_session PRIMARY KEY (id_session) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `subscriber_table`
+## 
+
+CREATE TABLE subscriber_table ( 
+	 bounce_address_subscriber 	varchar2(100), 
+	 bounce_score_subscriber 	number, 
+	 bounce_subscriber 	varchar2(35), 
+	 comment_subscriber 	varchar2(150), 
+	 custom_attribute_subscriber 	varchar2(500), 
+	 date_subscriber 	date NOT NULL, 
+	 include_sources_subscriber 	varchar2(50), 
+	 included_subscriber 	number, 
+	 list_subscriber 	varchar2(50) NOT NULL, 
+	 reception_subscriber 	varchar2(20), 
+	 robot_subscriber 	varchar2(80) NOT NULL, 
+	 subscribed_subscriber 	number, 
+	 suspend_end_date_subscriber 	number, 
+	 suspend_start_date_subscriber 	number, 
+	 suspend_subscriber 	number, 
+	 topics_subscriber 	varchar2(200), 
+	 update_subscriber 	date, 
+	 user_subscriber 	varchar2(100) NOT NULL, 
+	 visibility_subscriber 	varchar2(20), 
+	 CONSTRAINT ind_subscriber PRIMARY KEY (robot_subscriber, list_subscriber, user_subscriber) 
+ );
+
+
+
+
+## --------------------------------------------------------
+##
+## Table structure for table `user_table`
+## 
+
+CREATE TABLE user_table ( 
+	 attributes_user 	varchar2(500), 
+	 cookie_delay_user 	number, 
+	 data_user 	varchar2(500), 
+	 email_user 	varchar2(100) NOT NULL, 
+	 gecos_user 	varchar2(150), 
+	 lang_user 	varchar2(10), 
+	 last_login_date_user 	number, 
+	 last_login_host_user 	varchar2(60), 
+	 password_user 	varchar2(40), 
+	 wrong_login_count_user 	number, 
+	 CONSTRAINT ind_user PRIMARY KEY (email_user) 
+ );
+
+

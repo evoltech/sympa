@@ -1,0 +1,71 @@
+<!-- $Id: home.tt2 7616 2012-09-22 23:17:21Z sikeda $ -->
+   <h1>[%|loc%]Mailing lists server[%END%]</h1>
+<p class="text_justify">
+[%|loc%]This server provides you access to your mailing list environment. Starting from this web page, you can perform subscription options, unsubscription, archive, list moderation, list configuration.[%END%]
+</p>
+
+<h2>[%|loc%]Mailing lists categories[%END%]</h2>
+<br />
+
+<div id="home_container">
+
+ <div id="global_mailing_lists">
+ 
+  [% SET single_topic = "other" %]
+  [% FOREACH topic = topics %]
+    [% IF topic.id && topic.id != "other" && topic.id != "topicsless" %]
+      [% SET single_topic = "" %]
+      [% LAST %]
+    [% ELSIF topic.sub %]
+      [% FOREACH subtopic = topic.sub %]
+	[% SET single_topic = "" %]
+	[% LAST %]
+      [% END %]
+    [% END %]
+  [% END %]
+  [% IF single_topic != "" %]
+    <ul class="mailing_lists_menu">
+      <li><a href="[% path_cgi %]/lists"><strong>[%|loc%]List of lists[%END%]</strong></a></li>
+    </ul>
+  [% ELSE %]
+      <ul class="mailing_lists_menu">
+    [% SET topic_other = 0 %]
+    [% FOREACH topic = topics %]
+      [% IF topic.id == 'other' || topic.id == 'topicsless' %]
+	[% UNLESS topic_other %]
+          <li><a href="[% path_cgi %]/lists/[% topic.id %]"><strong>[% IF topic.current_title %][% topic.current_title %][% ELSE %][%|loc%]Others[%END%][% END %]</strong></a></li>
+	  [% SET topic_other = 1 %]
+	[% END %]
+      [% ELSE %]
+       <li><a href="[% path_cgi %]/lists/[% topic.id %]"><strong>[% topic.current_title %]</strong></a></li>
+      [% END %]
+
+      [% IF topic.sub.size %]
+            <ul class="no_style">
+      [% FOREACH subtopic = topic.sub %]
+              <li class="smaller"><a href="[% path_cgi %]/lists/[% topic.id %]/[% subtopic.key %]">[% subtopic.value.current_title %]</a></li>
+      [% END %]
+      </ul>
+      [% END %]
+      [% IF topic.next %]
+       </ul>
+   
+   
+      <ul class="mailing_lists_menu">
+      [% END %]
+    [% END %]
+      </ul>
+  [% END %]
+
+  </div>
+<div id="home_search_list">
+ <form action="[% path_cgi %]" method="post"> 
+ <fieldset id="home_rss_news">
+    <input type="submit" name="action_rss_request" value="[%|loc%]RSS news[%END%]" />
+ </fieldset> 
+ </form>
+</div>
+
+</div>
+<br />
+<!-- end home.tt2 -->
