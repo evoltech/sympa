@@ -1,0 +1,13 @@
+Patches
+========
+
+01_rename_lists_no_pending
+--------------------------
+prevents lists going in to 'pending' status if they are renamed.
+https://labs.riseup.net/code/issues/4066
+
+02_disable_copy_list
+--------------------
+disables the ability to copy an existing list at the perl library level. this is also done on the 
+template level (which is not included in this patch).
+https://labs.riseup.net/code/projects/lists/activity?from=2012-10-05
