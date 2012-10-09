@@ -6,53 +6,88 @@ gathering.
 
 currently used / reviewed and useful
 ------------------------------------
+bad-domains/ - scripts to find and clean up long term unresolving domains
+biglists - list that reports changes in the list of lists with >5k subscribers
+   is run via cron with mail sent to listmaster
+changescenari - script to adjust scenari values in list config files
+checkbanned.pl - check the sympa database for traces of users we've banned,
+   uses lists of regexs installed by puppet
+countbounces - generate a list of lists with high bounce scores addresses
+countbouncesuser - generates a list of addresses with high bounce scores
+countlang - count the number of lists per specified language type
+countscenari - count types of scenari
+countsendtypes - count send types, countscenari can do the same thing but
+   not quite as nice, they should be merged
+ecology - clean up old unused lists
+findaccount - find all traces of a user in the db
+findadmin - find and list admins that match a substring
+findbadlists - find lists that are in the db but not expl, and vice versa
+findbogus - find addresses that aren't rfc valid, produce some reports
+findbounces - find users that match a substring and list bounce score
+findnoarchive - print a list of lists that have archives turned off
+findnonsubscribed - list all users that do not have any subscriptions (sympa
+   should clean these up, but this can check)
+findoldsmall - list old lists with only 0 or 1 subscribers
+findsimilarlists - find lists that are similar, could be spammers
+finduser - find users in the subscriber table
+fix_reply_to_settings_6.1.9 - fix reply to settings for lists
+listaolbounces - list aol users with high bounce scores
+listlists - list open lists
+listlongnames - list the 10 longest list names (for finding limit problems)
+listmembers - list members of a list
+nukelist - removes all traces of a list from the db
+nukeuser - completely removes a user, use with caution
+nukeusers - completely removes a list of users, use with caution
+priority/ - scripts for adjusting lists priorities
+rebuildarchives.rb - rebuld the archives slowly so as to not overload the server
+remind/ - stuff for issuing remind processes from the commandline
+remove_user - remove a user from a list/lists
+stats/ - scripts tha generate statistics
+typos/ - system and data to find typo domains and remove them from lists
+
 
 historical stuff, might be useful again
 ---------------------------------------
+aol/ - some old stuff for cleaning up aol bounces
+backup - old backup script, unknown state
+common - file sourced by other scripts to get the db info so it doesn't need
+   to be embedded in each script. we're moving all script to just assume that
+   the running user has a my.cnf setup. this will go away once it's not used
+   by other scripts
+cdSympaEnv.pl - testing script
+createEmail.pl - testing script
+cSympaEnvNoAPI.pl - testing script
 
 unknown, needs to be reviewed
 -----------------------------
-aol
-backup
-badroot
-bounces
-cdSympaEnv.pl
-change-scenerio
 changeUserDomains.pl
-checkdaemons
-cleanspool
-common
-configfixin
-create-admins-file
-createEmail.pl
-cSympaEnvNoAPI.pl
-decrypt
+checkdaemons - check if daemons are running, untested
+cleanspool - cleans spools, untested. sympa should be doing this, but it might
+   be nice to have a tool that checks
+configfixin/ - some scripts to fix config files, maybe replaced by
+   changescenari?
+create-admins-file - generates a list of all admins, don't we do this via a
+   dynamic list now?
+create_list_table - bit ofg sql for creating the db, likely out of date and
+   should be cleaned up
+decrypt - some old thing to decrypt passwds, delete?
 disable_annoying_tasks
-ecology: lets you manage old and dormant lists.
-email-unsub-instruct
-findaccount
-findaccount2
-find_lists_without_owners.rb
-findmissing
-findzero
-fs.php
-lib
-list.close: closes a list.  (no longer needed?)
-list.common
-listmembers
-list_stats
+email-unsub-instruct - sorta like remind
+find_lists_without_owners.rb - untested
+findmissing - check logs for "Unable to open", delete?
+fs.php - some php functions, unsure if needed
+lib/ - maybe needed by testing stuff?
+list.close - script to close a list, unneeded?
+list.common - ?
+list_stats - some old stats, maybe replaced by stats/
 merge-arctxt
-missingkeyfix.py
+missingkeyfix.p
 pluckspam.pl
 pluckspam.pl.old
-rebuildarchives.rb
-remindnow
-remove_user
+sanity-check
 sympa_pass.pl
 tlsreport
-topdomains
 updatedirectory.php
-updatedirectory.rb
-updatestats
+updatedirectory.rb - generates the web directory of lists
 user.unsubscribe
 withincludes
