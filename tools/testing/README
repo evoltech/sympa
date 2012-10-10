@@ -1,0 +1,15 @@
+This directory contains scripts that can be used to create 
+a sympa environment for testing.
+
+These scripts do not set up the full environment. They assume 
+that sympa has been compiled, installed, and configured.  They
+assume that sympa is in a working state.
+
+cdSympaEnv.pl:
+script to set up and tear down a number of lists and subscribers
+
+createEmail.pl:
+sends emails to a random number of lists
+
+cSympaEnvNoAPI.pl:
+subscribers users to lists using the database

@@ -43,6 +43,7 @@ rebuildarchives.rb - rebuld the archives slowly so as to not overload the server
 remind/ - stuff for issuing remind processes from the commandline
 remove_user - remove a user from a list/lists
 stats/ - scripts tha generate statistics
+testing/ - scripts used to set up testing environments
 typos/ - system and data to find typo domains and remove them from lists
 
 
@@ -54,9 +55,6 @@ common - file sourced by other scripts to get the db info so it doesn't need
    to be embedded in each script. we're moving all script to just assume that
    the running user has a my.cnf setup. this will go away once it's not used
    by other scripts
-cdSympaEnv.pl - testing script
-createEmail.pl - testing script
-cSympaEnvNoAPI.pl - testing script
 
 unknown, needs to be reviewed
 -----------------------------
