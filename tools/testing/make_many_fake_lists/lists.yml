@@ -1,0 +1,73 @@
+# configure the total number of lists to create
+total_lists: 17000
+total_subscribers: 1000000
+
+# This section defines the defaults that will be used 
+# unless they are overridden in a custom lists section.
+# [% i %] will be replaced by the index in the list creation loop
+
+defaults:
+  listname: "list_[% i %]"
+  # type is any in create_list_templates
+  type: "discussion_list"
+  subject: "list_[% i %] subject"
+  description: "list_[% i %] is a test list."
+  status: "open"
+  shared_edit: "editor"
+  shared_read: "private"
+  language: "fr"
+  owners:
+    - "list_[% i %]_owner@foo.com"
+  moderators:
+  #  - "list_[% i %]_moderator@foo.com"
+  # topic should be defined in topics.conf
+  topic: "computing"
+  # default range of number of subscribers in a list,
+  # the number of subscribers will be randomly selected between these numbers.
+  # can be overriden in custom lists definitions.
+  subscribers_min: 3
+  subscribers_max: 400 
+
+# create any amount of lists with non-default config options.
+# simply indicate the number of lists desired and 
+# only define the fields to override the defaults.
+# the top level keys are used for descriptive output in testing.
+custom_order:
+  - huge_lists
+  - lists_with_moderators
+  - closed_lists
+  - private_working_group_lists
+  - topic_arts_lists
+  - pending_lists
+custom_configs:
+  closed_lists: 
+    count: 2000 
+    status: "closed"
+    subscribers_min: 100
+  pending_lists:
+    count: 500
+    status: "pending"
+    # use this for no subscribers
+    subscribers_max: 0
+  private_working_group_lists:
+    count: 4000 
+    type: "private_working_group"
+    subscribers_max: 50
+  lists_with_moderators:
+    count: 1000 
+    moderators:
+      - "list_[% i %]_moderator1@foo.com"
+      - "list_[% i %]_moderator2@foo.com"
+    type: "news-letter"
+    subscribers_min: 500
+    subscribers_max: 1000 
+  huge_lists:
+    count: 500
+    moderators:
+      - "list_[% i %]_moderator1@foo.com"
+    type: "news-letter"
+    subscribers_min: 4000
+    subscribers_max: 5000
+  topic_arts_lists:
+    count: 1000
+    topic: "arts"

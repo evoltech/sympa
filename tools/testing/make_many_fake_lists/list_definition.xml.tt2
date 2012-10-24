@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+  <list>
+      <listname>[% listname %]</listname>
+        <type>[% type %]</type>
+        <subject>[% subject %]</subject>
+        <description>[% listname %] is a test list</description>
+        <status>[% status %]</status>
+        <shared_edit>[% shared_edit %]</shared_edit>
+          <shared_read>[% shared_read %]</shared_read>
+      <language>[% language %]</language>
+      [% FOREACH owner = owners %]
+        <owner multiple="1">
+           <email>[% owner %]</email>
+        </owner>
+      [% END %]
+      [% FOREACH moderator = moderators %]
+        <editor multiple="1">
+          <email>[% moderator %]</email>
+        </editor>
+      [% END %]
+      <topic>[% topic %]</topic>
+  </list>

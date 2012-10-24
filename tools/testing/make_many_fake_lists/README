@@ -1,0 +1,10 @@
+This script will create many fake mailing lists for sympa.
+
+Usage
+--------------------------------------------------------------
+
+0. Do *not* rename lists.yml or list_definition.xml.tt2
+
+1. Edit lists.yml to define the lists you want to create
+
+2. ./create_lists.pl --help
