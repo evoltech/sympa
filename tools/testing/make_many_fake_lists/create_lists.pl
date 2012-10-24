@@ -10,7 +10,7 @@ use strict;
 ## Check options
 my %options;
 unless (&GetOptions(\%main::options, 
-  'setup', 'teardown', 'list_data:s', 'help'
+  'setup', 'teardown', 'help'
   )) {
   die("Unknown options.\n\n".help());
 }
@@ -20,7 +20,7 @@ use constant {
   LISTS_YAML => "./lists.yml",
   TMP_XML => "/tmp/listdef.xml",
   SYMPA_PATH => "/home/sympa/bin/sympa.pl",
-  LIST_DATA => $main::options{'list_data'} || "/home/sympa/list_data"
+  LIST_DATA => "/home/sympa/list_data"
 };
 
 check_files() && die("Missing required files. Exiting.");
@@ -256,16 +256,13 @@ sub check_files {
 sub help {
   print <<EOF;
 
-USAGE:  ./create_lists.pl --setup|teardown|help [--list_data=/path/to/list_data]
+USAGE:  ./create_lists.pl --setup|teardown|help
 
 required, one of:
   --setup	create lists as defined in lists.yml
   --teardown	remove all lists (leaves users)
   --refresh	runs teardown followed by setup
   --help	print usage
-
-optional:
-  --list_data	path to list data directory, defaults to /home/sympa/list_data (sympa's default)
 
 EOF
 }

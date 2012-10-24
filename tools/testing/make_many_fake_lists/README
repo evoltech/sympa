@@ -7,4 +7,8 @@ Usage
 
 1. Edit lists.yml to define the lists you want to create
 
+2. If your list data directory is anything other than /home/sympa/list_data:
+   edit the LIST_DATA constant in create_lists.pl
+
 2. ./create_lists.pl --help
+
