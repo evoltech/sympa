@@ -10,7 +10,7 @@ use strict;
 ## Check options
 my %options;
 unless (&GetOptions(\%main::options, 
-  'setup', 'teardown', 'help'
+  'setup', 'teardown', 'continue', 'nice', 'help'
   )) {
   die("Unknown options.\n\n".help());
 }
@@ -49,14 +49,20 @@ sub teardown {
   my $listdata = LIST_DATA;
   my @all_lists = `/bin/ls $listdata`;
   foreach my $list (@all_lists) {
-    chomp($list);
-    my $cmd = SYMPA_PATH." --purge_list=$list\@foo.com";
-    print `$cmd`; 
-    my $sync_cmd = SYMPA_PATH." --sync_list_db --list=$list\@foo.com";
-    print `$sync_cmd`;
+    &remove_list(chomp($list));
+    sleep 1 if $main::options{'nice'};
   }
 
   print "Finished cleaning up installation.\n";
+}
+
+sub remove_list {
+  my $list = shift;
+
+  my $cmd = SYMPA_PATH." --purge_list=$list\@foo.com";
+  print `$cmd`;
+  my $sync_cmd = SYMPA_PATH." --sync_list_db --list=$list\@foo.com";
+  print `$sync_cmd`;
 }
 
 sub setup {
@@ -146,6 +152,17 @@ sub create_list {
   my $num_subscribers = get_subscriber_count(\%config);
   my $exit_code;
 
+  my $listdir = LIST_DATA . "/" . $config{'listname'};
+  if (-d $listdir) {
+    if ($main::options{'continue'}) {
+      print "Skipping existing list ".$config{'listname'}."\n";
+      return 1;
+    }else {
+      print "WARNING WARNING! Removing existing list ".$config{'listname'}.". Use the --continue option to preserve existing lists.\n";
+      &remove_list($config{'listname'});
+    }
+  }
+
   open(XML, ">".TMP_XML) || die "Cannot open tmp xml file for writing: $!\n";
   $tt->process(LIST_DEF, \%config, TMP_XML) || die($tt->error());
   close XML; 
@@ -158,6 +175,7 @@ sub create_list {
 print "adding $num_subscribers subscribers.\n";
       add_subscribers($config{'listname'}, $subscriber_cache, $num_subscribers);
     }
+    sleep 1 if $main::options{'nice'};
     return 1;
   }else {
     print STDERR "Error creating list $config{'listname'}. Please check the sympa logs\n";
@@ -256,13 +274,19 @@ sub check_files {
 sub help {
   print <<EOF;
 
-USAGE:  ./create_lists.pl --setup|teardown|help
+USAGE:  ./create_lists.pl --setup|teardown|help [--continue] [--nice]
 
 required, one of:
   --setup	create lists as defined in lists.yml
   --teardown	remove all lists (leaves users)
   --refresh	runs teardown followed by setup
   --help	print usage
+
+optional arguments:
+  --continue	do not overwrite existing lists with the same name. this 
+		allows the script to be stopped and resumed, preserving
+		the previous work
+  --nice	sleeps 1 after each purge/add of a list
 
 EOF
 }
