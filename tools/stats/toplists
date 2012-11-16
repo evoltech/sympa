@@ -27,7 +27,7 @@ format Html =
 .
 
 format Pcre =
-/@@*@lists\.riseup\.net$/ [10.0.1.44]
+/@(bounce.*)?@*(-owner)?@lists\.riseup\.net$/ [10.0.1.44]
 "^", $list, "@"
 .
 
