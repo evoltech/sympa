@@ -1,0 +1,40 @@
+#!/usr/bin/perl -w
+# sympa-persistent-511-addresses - look at the lists of 5.1.1 bounces and
+# report those that are persistently bad
+# taggart 2012-11-19
+
+# Because the 511-finder does a uniq on the daily address report, an address
+# with multiple bounces in a day will only be listed once. This means that
+# the threshold set below will result in addresses being reported that had
+# bounces on at least that many seperate days. This should help to eliminate
+# the "server was misconfigured and bounced mail for a day" false positive
+# potential.
+
+# number of 5.1.1 bounces over which we report
+$threshold=10;
+# time period of logs we look at, days from today
+$time='182';
+
+#$logdir='/var/log/511/';
+$logdir='./logs/';
+
+# use all files in the last 6 months
+$filelist=`find $logdir -mtime -$time`;
+
+@files = split /\n/,$filelist;
+
+foreach $file (@files) {
+   open(FILE, "$file") or die "cannot open $file\n";
+
+   while (<FILE>) {
+      chomp;
+      $bad{$_}++;
+   }
+}
+
+foreach $address (sort { $bad{$b} <=> $bad{$a} } keys %bad) {
+   last if ( $bad{$address} < $threshold );
+   #print "$bad{$address} $address\n";
+   print "$address\n";
+}
+

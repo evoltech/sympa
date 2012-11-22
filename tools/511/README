@@ -1,0 +1,24 @@
+Riseup 5.1.1 tools
+------------------
+These tools help determine when addresses on sympa lists that we're
+sending to are bad. The sympa bounce processing has some corner cases
+where bad addresses don't get removed and they tend to build up over time. 
+
+511-finder - cronjob that extracts and saves the dsn=5.1.1 bounces from
+  postfix.log's
+gather-511-logs - a riseup script gather the 511 bounce logs from all the MXs
+sympa-persistent-511-addresses - look at the lists of 5.1.1 bounces and
+  report those that are persistently bad
+findsubscribed - compare a list of addresses with current subscribers
+
+How to use them
+---------------
+1) 511-finder runs via cron on the outbound MX hosts and keeps track of which
+  addresses get 5.1.1 bounces each day
+
+2) Every 6 months, you run gather-511-logs to fetch all these daily logs to one location.
+
+3) Then you run sympa-persistent-511-addresses on the logs and it reports the addresses it's seen bounce more than a certain number of times over a certain time period.
+
+4) Then with that list of bad addresses, you run findsubscribed to determine which of the addresses are currently subscribers and generate some reports about which lists have bad subscribers (this can help spot list admins that are bulk resubscribing)
+

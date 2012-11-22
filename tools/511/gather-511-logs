@@ -1,0 +1,22 @@
+#!/bin/sh
+# gather-511-logs - a riseup script gather the 511 bounce logs from all the MXs
+# taggart 2012-12
+
+# make any error fatal
+set -e
+
+minivet='mx4 mx7'
+moorhen='mx2 mx5 mx8'
+motmot='mx3 mx6'
+hosts="minivet moorhen motmot"
+
+for host in $hosts; do
+  for mx in $(eval echo \$$host); do
+    echo "### Gathering logs from $mx on $host ###"
+    if [ ! -d logs/$mx ]; then
+      mkdir logs/$mx
+    fi
+    (cd logs/$mx;rsync -avz $host.riseup.net:/vservers/$mx/var/log/511/* .)
+  done
+done
+

@@ -1,0 +1,23 @@
+#!/bin/sh
+# 511-finder - extracts and saves the dsn=5.1.1 bounces from postfix.log
+
+# first sleep for 5 mins since we run at the same time as the logs are rotated
+sleep 300
+
+if [ ! -d /var/log/511 ]; then
+   mkdir /var/log/511
+fi
+
+file=`date +%Y-week%V-day%u`
+
+# get a list of all postfix logs last modified within a day (since we
+# rotate pretty aggressively). there is a small chance of counting stuff
+# from the previous day, but then the previous day's count missed stuff
+# too, so it should work out
+logs=`find /var/log/postfix.log* -mtime -1`
+
+if [ ! -f /var/log/postfix.log ]; then
+   echo "ERROR: postfix.log does not exist, exiting"
+fi
+
+grep -e 'dsn=5\.1\.1' $logs |awk -F'to=<' '{print $2}'|awk -F'>, ' '{print $1}' |sort -u >/var/log/511/$file

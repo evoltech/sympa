@@ -1,0 +1,59 @@
+#!/usr/bin/perl -w
+# findsubscribed - compare a list of addresses with current subscribers
+# and return the ones that are currently subscribed. Also calculate which lists
+# have the most of these addresses
+# NOTE: this script requires the current user has read access to the db
+# Matt Taggart <taggart@riseup.net> 2012-11
+
+if (!$ARGV[0]) {
+   print "usage: find-bad-addresses <file>\n";
+   exit;
+}
+
+$file=$ARGV[0];
+
+$listsql='mysql -N --batch --database=sympa --execute "select list_subscriber,user_subscriber from subscriber_table, list_table where list_subscriber=list_table.name_list and list_table.status_list=\'open\'"';
+
+open(BAD, "$file") or die "cannot open $file\n";
+open(LISTDUMP, "$listsql|") or die "cannot get dump of address+list pairs from database\n";
+open(FOUND, ">found") or die "cannot open found\n";
+open(BYLISTC, ">bylistcount") or die "cannot open bylistcount\n";
+open(BYLISTP, ">bylistpercent") or die "cannot open bylistpercent\n";
+
+while (<BAD>) {
+   chomp;
+   $bad{$_}++;
+}
+
+while (<LISTDUMP>) {
+   chomp;
+   # match list and sane address
+   m/^(.*)\t<?(.*\@.*?)>?\s*$/;
+   $list=$1;
+   $address=$2;
+
+   $listcount{$list}++;
+
+   if ( $bad{$address} ) {
+      $badlists{$list}++;
+      $found{$address}++;
+   }
+}
+
+foreach $address ( sort keys %found) {
+   print FOUND "$address\n";
+}
+
+foreach $list ( sort { $badlists{$b} <=> $badlists{$a} } keys %badlists) {
+   $percent{$list} = ( $badlists{$list} / $listcount{$list} ) * 100;
+   printf BYLISTC '%s %s (%.2f%%)', $badlists{$list}, $list, $percent{$list};
+   print BYLISTC "\n";
+}
+
+foreach $list ( sort { $percent{$b} <=> $percent{$a} } keys %percent) {
+   printf BYLISTP '%.2f%% %s (%s)', $percent{$list}, $list, $badlists{$list};
+   print BYLISTP "\n";
+}
+
+print "Done. Found addresses in 'found', counts by domain in 'bydomain',\n";
+print "  by list count in 'bylistcount', by list percent in 'bylistpercent'\n";
