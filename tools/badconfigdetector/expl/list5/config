@@ -1,0 +1,103 @@
+##
+## private working group
+##
+
+visibility members
+
+reply_to_header
+apply forced
+value list
+
+web_archive
+access members
+
+lang es_ES
+
+pictures_feature on
+
+subscribe closed
+
+subject List to test sympa features
+
+serial 30
+
+clean_delay_queuemod 15
+
+editor
+reception mail
+email taggart@riseup.net
+visibility noconceal
+
+editor
+reception mail
+email bissej@riseup.net
+visibility noconceal
+
+editor
+reception mail
+email matt@lackof.org
+visibility noconceal
+
+info anyone
+
+del verified
+
+unsubscribe anyone_notify
+
+update
+email taggart@riseup.net
+date 16 Nov 2012 at 01:43:50
+date_epoch 1353059030
+
+creation
+email taggart@riseup.net
+date 04 Mar 2010 at 01:08:18
+date_epoch 1267693698
+
+priority 5
+
+invite anyone
+
+review owners
+
+send members_or_moderated
+
+add verified
+
+status open
+
+remind listmaster
+
+available_user_options
+reception digest,digestplain,html,mail,nomail,not_me,notice,summary,txt,urlize
+
+rfc2369_header_fields archive,help,owner,post,subscribe,unsubscribe
+
+owner
+reception mail
+profile privileged
+email taggart@riseup.net
+visibility noconceal
+
+owner
+reception mail
+profile normal
+email bissej@riseup.net
+visibility noconceal
+
+owner
+reception mail
+profile normal
+email matt@lackof.org
+visibility noconceal
+
+archive
+period week
+access owner
+
+verp_rate 100%
+
+digest 5 20:56
+
+custom_subject taggart-test
+

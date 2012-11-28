@@ -1,0 +1,193 @@
+#!/usr/bin/perl -w
+# detector - find combinations of configs that are dangerous
+# taggart 2012-10-26
+
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION='true';
+
+use vars qw($opt_c $small $smalllim $medium $mediumlim $large $largelim $debug $date);
+# want to have warning and critical levels eventually
+
+getopts('c');
+
+sub HELP_MESSAGE {
+  print "Usage: detector\n";
+  print "     -c  : only show critical problems\n";
+}
+
+# enable debug to use local test data
+$debug='true';
+
+$date=`date`;
+chomp($date);
+
+if ( $debug ) {
+  $listdir='./expl';
+} else {
+  $listdir='/home/sympa/expl';
+}
+
+# definition of sizes
+$smalllim=100;
+$mediumlim=250;
+$largelim=500;
+
+
+# The checks: array of hashs, description of test is key, array is severity of test, test condition
+%checks = (
+  # only up to 'small' lists should allow unrestricted sending
+  'too large for send anyone_unmoderated' =>		[ 'critical', sub { $d{send} eq 'anyone_unmoderated' && $small } ],
+  'too large for send anyone_unmoderated_verified' =>	[ 'critical', sub { $d{send} eq 'anyone_unmoderated_verified' && $small } ],
+  'too large for send editors_or_moderated' =>		[ 'critical', sub { $d{send} eq 'editors_or_moderated' && $small } ],
+  'too large for send editors_or_moderated_quiet' =>	[ 'critical', sub { $d{send} eq 'editors_or_moderated_quiet' && $small } ],
+  'too large for send members_moderated' =>		[ 'critical', sub { $d{send} eq 'members_moderated' && $small } ],
+  'too large for send members_moderated_verified' =>	[ 'critical', sub { $d{send} eq 'members_moderated_verified' && $small } ],
+  'too large for send members_or_verified' =>		[ 'critical', sub { $d{send} eq 'members_or_verified' && $small } ],
+  # only up to 'medium' lists should allow slightly restricted sending
+  'too large for send anyone_moderated' =>		[ 'critical', sub { $d{send} eq 'anyone_moderated' && $medium } ],
+  'too large for send anyone_moderated_verified' =>	[ 'critical', sub { $d{send} eq 'anyone_moderated_verified' && $medium } ],
+  'too large for send members_unmoderated' =>		[ 'critical', sub { $d{send} eq 'members_unmoderated' && $medium } ],
+  'too large for send members_unmoderated_verified' =>	[ 'critical', sub { $d{send} eq 'members_unmoderated_verified' && $medium } ],
+  'too large for send members_or_moderated' =>		[ 'critical', sub { $d{send} eq 'members_or_moderated' && $medium } ],
+  'too large for send members_or_moderated_quiet' =>	[ 'critical', sub { $d{send} eq 'members_or_moderated_quiet' && $medium } ],
+  'too large for send default (members_or_moderated)'=> [ 'critical', sub { ! $d{send} && $medium } ],
+  'too large for send members_verified' =>		[ 'critical', sub { $d{send} eq 'members_verified' && $medium } ],
+  # stuff that only up to 'large' lists can do
+  # send editors_moderated/editors_unmoderated are fine for any size
+
+  # only up to medium lists should allow members to review subscriber list
+  'too large for send members_verified' => 		[ 'critical', sub { $d{review} eq 'members' && $medium } ],
+
+  # security through obscurity
+  'member list is restricted but archive is open' => 	[ 'warning', sub { $d{visibility} eq 'members' && $d{'web_archive\naccess'} eq 'anyone' } ],
+  'list info is restricted but archive is open' =>	[ 'warning', sub { $d{info} eq 'members' && $d{'web_archive\naccess'} eq 'anyone' } ],
+  'list info is restricted but docs are readable' =>	[ 'warning', sub { $d{info} eq 'members' && $d{d_read} eq 'anyone' } ],
+
+  # list is not visible/info but anyone can invite
+  'member list is restricted but anyone can invite' =>	[ 'warning', sub { $d{visibility} eq 'members' && $d{invite} eq 'anyone' } ],
+  'list info is restricted but anyone can invite' =>	[ 'warning', sub { $d{info} eq 'members' && $d{invite} eq 'anyone' } ],
+
+  # many cases that sympa has by default we don't just because we delete some
+  # scenari because they are always bad, for example unsubscribe.closed
+);
+
+=for comment
+=cut
+
+
+
+# these are the things we want to grab from the config, if you add new checks
+# that use things other than these, add them to the list
+my @fields = ( 'size', 'send', 'review', 'visibility', 'info', 'web_archive\naccess', 'd_read', 'invite');
+
+
+# sql to get 
+if ( $debug ) {
+  $sql=qq(cat testlists);
+} else {
+  $sql=qq(mysql --batch --database=sympa --skip-column-names --execute "SELECT subscriber_table.list_subscriber AS listname, count(subscriber_table.list_subscriber) AS subscribers FROM subscriber_table, list_table where subscriber_table.list_subscriber=list_table.name_list and list_table.status_list='open' GROUP BY subscriber_table.list_subscriber;");
+}
+
+open(LISTS, "$sql|") or die "cannot get subscriber counts from database\n";
+
+while (<LISTS>) {
+  ($list, $count) = split /\t/;
+
+  #print "list:$list count:$count\n";
+
+  # size
+  if ( $count <= $smalllim ) {
+    $small = 1;
+  } elsif ( $count <= $mediumlim ) {
+    $medium = 1;
+  } else {
+    $large = 1;
+  }
+
+  $config = "$listdir/$list/config";
+
+  # grab the list's config
+  local $/ = undef;
+  open(OLD,"$config") || die "ERROR: cannot open $config\n";
+  $config_text = <OLD>;
+  close OLD;
+
+  # extract the fields
+  foreach $key ( @fields ) {
+    #print "$key\n";
+    if ($config_text =~ /\n$key (.+?)\n/) {
+      # found $key, store it
+      #print "list is $list, key is $key, val is $1\n";
+      $d{$key}=$1;
+    }
+  }
+
+  # do the checks
+  foreach $desc ( keys %checks ) {
+    $test=$checks{$desc}[1];
+    if ( $test->() ) {
+      #print "$desc was true\n";
+      push @{ $results{$desc} }, $list;
+    }
+  }
+}
+
+# now display the results
+foreach $desc ( keys %results ) {
+  # if we're only looking for critical and it's not critical, skip
+  next if ( "$checks{$desc}[0]" ne 'critical' && $opt_c );
+  print "### $desc ###\n";
+  foreach ( @{ $results{$desc} } ) {
+    print "$_\n";
+  }
+}
+
+exit 0;
+
+
+
+format Wiki =
+|[@*->https://lists.riseup.net/www/info/@*]|@*|
+  $list,                            $list,$counts{$list}
+.
+
+format Plain =
+@* @*
+$list, $counts{$list}
+.
+
+format Html =
+<tr><td><a href="https://lists.riseup.net/www/info/@*">@*</a></td><td align=right>@*</td></tr>
+                                                $list, $list,     $counts{$list}
+.
+
+format Pcre =
+/@@*@lists\.riseup\.net$/ [10.0.1.44]
+"^", $list, "@"
+.
+
+if ( $ARGV[0] eq '-w' ) {
+   $~='Wiki';
+   print "h3. Top $num lists by size\n\n";
+   print "(generated ".$date.")\n\n";
+   print "|_.List name|_.Subscribers|\n";
+} elsif ($ARGV[0] eq '-h' ) {
+   $~='Html';
+   print "<style>table.single{border: 1px solid;border-collapse: collapse;}\n.single td, .single th{border-width: 1px 1px 1px 1px;border-style: solid;}\n</style>\n";
+   print "<h3>Top $num lists by size</h3>\n";
+   print "(<i>generated ".$date."</i>)\n";
+   print "<table class=\"single\">\n";
+   print "<tr><th align=center>List name</th><th align=center>Subscribers</th></tr>\n";
+} elsif ($ARGV[0] eq '-r' ) {
+   $~='Pcre';
+} else {
+   $~='Plain';
+   print "Top $num lists by size\n";
+   print "(generated ".$date.")\n";
+}
+
+
+
+if ($ARGV[0] eq '-h' ) {
+   print "</table>\n";
+}
