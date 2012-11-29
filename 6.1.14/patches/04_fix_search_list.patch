@@ -1,0 +1,14 @@
+--- a/sympa-6.1.14-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.14-src/wwsympa/wwsympa.fcgi.in
+@@ -8978,7 +8978,10 @@ Sends back the list creation edition form.
+ 
+      ## Members list
+      my $record = 0;
+-     my $all_lists = &List::get_lists($robot);
++     my $regexp = $param->{'regexp'};
++     my $statement = sprintf "name_list RLIKE '%s' OR subject_list RLIKE '%s'", $regexp, $regexp;
++     my @lists = &List::get_lists_db($statement) || undef;
++     my $all_lists = &List::get_lists($robot, undef, @lists);
+      foreach my $list ( @$all_lists ) {
+ 	 my $is_admin;
+ 	 ## Search filter
