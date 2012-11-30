@@ -3990,7 +3990,6 @@ sub do_renewpasswd {
      # should try to actually fix this one day
      return 0;
 
-
      unless (&do_lists()) {
 	 &wwslog('err','do_latest_lists: error while calling do_lists');
 	 return undef;
