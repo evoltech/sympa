@@ -1,0 +1,17 @@
+--- a/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
+@@ -8086,8 +8086,12 @@ sub do_remove_arc {
+      ## Checking families and other virtual hosts.
+      &get_server_details();
+ 
+-    my $all_lists = &List::get_lists($robot,
+-				     { 'filter_query' => [ 'status' => 'pending' ] });
++#    my $all_lists = &List::get_lists($robot,
++#				     { 'filter_query' => [ 'status' => 'pending' ] });
++     my $statement = "status_list = 'pending'";
++     my @lists = &List::get_lists_db($statement);
++     my $all_lists = &List::get_lists($robot, undef, @lists);
++
+     foreach my $list ( @$all_lists ) {
+ 	$param->{'pending'}{$list->{'name'}}{'subject'} = $list->{'admin'}{'subject'};
+ 	$param->{'pending'}{$list->{'name'}}{'by'} = $list->{'admin'}{'creation'}{'email'};

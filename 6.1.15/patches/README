@@ -26,3 +26,6 @@ TODO: need to file a bug for this.
 we still need to disable listing of latest and active lists, since these operations still time out.
 TODO; need to file a bug for this and press the issue upstream
 
+06_fix_pending_lists.patch
+----------------------------
+do_get_pending_lists in wwsympa.fcgi needs to be patched to pre-select all lists with status 'pending', and then it can pass those lists to get_lists.
