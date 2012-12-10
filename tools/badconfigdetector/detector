@@ -36,27 +36,27 @@ $largelim=500;
 # The checks: array of hashs, description of test is key, array is severity of test, test condition
 %checks = (
   # only up to 'small' lists should allow unrestricted sending
-  'too large for send anyone_unmoderated' =>		[ 'critical', sub { $d{send} eq 'anyone_unmoderated' && $small } ],
-  'too large for send anyone_unmoderated_verified' =>	[ 'critical', sub { $d{send} eq 'anyone_unmoderated_verified' && $small } ],
-  'too large for send editors_or_moderated' =>		[ 'critical', sub { $d{send} eq 'editors_or_moderated' && $small } ],
-  'too large for send editors_or_moderated_quiet' =>	[ 'critical', sub { $d{send} eq 'editors_or_moderated_quiet' && $small } ],
-  'too large for send members_moderated' =>		[ 'critical', sub { $d{send} eq 'members_moderated' && $small } ],
-  'too large for send members_moderated_verified' =>	[ 'critical', sub { $d{send} eq 'members_moderated_verified' && $small } ],
-  'too large for send members_or_verified' =>		[ 'critical', sub { $d{send} eq 'members_or_verified' && $small } ],
+  'send anyone_unmoderated and medium' =>		[ 'critical', sub { $d{send} eq 'anyone_unmoderated' && $medium } ],
+  'send anyone_unmoderated_verified and medium' =>	[ 'critical', sub { $d{send} eq 'anyone_unmoderated_verified' && $medium } ],
+  'send editors_or_moderated and medium' =>		[ 'critical', sub { $d{send} eq 'editors_or_moderated' && $medium } ],
+  'send editors_or_moderated_quiet and medium' =>	[ 'critical', sub { $d{send} eq 'editors_or_moderated_quiet' && $medium } ],
+  'send members_moderated and medium' =>		[ 'critical', sub { $d{send} eq 'members_moderated' && $medium } ],
+  'send members_moderated_verified and medium' =>	[ 'critical', sub { $d{send} eq 'members_moderated_verified' && $medium } ],
+  'send members_or_verified and medium' =>		[ 'critical', sub { $d{send} eq 'members_or_verified' && $medium } ],
   # only up to 'medium' lists should allow slightly restricted sending
-  'too large for send anyone_moderated' =>		[ 'critical', sub { $d{send} eq 'anyone_moderated' && $medium } ],
-  'too large for send anyone_moderated_verified' =>	[ 'critical', sub { $d{send} eq 'anyone_moderated_verified' && $medium } ],
-  'too large for send members_unmoderated' =>		[ 'critical', sub { $d{send} eq 'members_unmoderated' && $medium } ],
-  'too large for send members_unmoderated_verified' =>	[ 'critical', sub { $d{send} eq 'members_unmoderated_verified' && $medium } ],
-  'too large for send members_or_moderated' =>		[ 'critical', sub { $d{send} eq 'members_or_moderated' && $medium } ],
-  'too large for send members_or_moderated_quiet' =>	[ 'critical', sub { $d{send} eq 'members_or_moderated_quiet' && $medium } ],
-  'too large for send default (members_or_moderated)'=> [ 'critical', sub { ! $d{send} && $medium } ],
-  'too large for send members_verified' =>		[ 'critical', sub { $d{send} eq 'members_verified' && $medium } ],
+  'send anyone_moderated and large' =>			[ 'critical', sub { $d{send} eq 'anyone_moderated' && $large } ],
+  'send anyone_moderated_verified and large' =>		[ 'critical', sub { $d{send} eq 'anyone_moderated_verified' && $large } ],
+  'send members_unmoderated and large' =>		[ 'critical', sub { $d{send} eq 'members_unmoderated' && $large } ],
+  'send members_unmoderated_verified and large' =>	[ 'critical', sub { $d{send} eq 'members_unmoderated_verified' && $large } ],
+  'send members_or_moderated and large' =>		[ 'critical', sub { $d{send} eq 'members_or_moderated' && $large } ],
+  'send members_or_moderated_quiet and large' =>	[ 'critical', sub { $d{send} eq 'members_or_moderated_quiet' && $large } ],
+  'send default (members_or_moderated) and large'=>	[ 'critical', sub { ! $d{send} && $large } ],
+  'send members_verified and large' =>			[ 'critical', sub { $d{send} eq 'members_verified' && $large } ],
   # stuff that only up to 'large' lists can do
   # send editors_moderated/editors_unmoderated are fine for any size
 
   # only up to medium lists should allow members to review subscriber list
-  'too large for send members_verified' => 		[ 'critical', sub { $d{review} eq 'members' && $medium } ],
+  'send members_verified and large' => 		[ 'critical', sub { $d{review} eq 'members' && $large } ],
 
   # security through obscurity
   'member list is restricted but archive is open' => 	[ 'warning', sub { $d{visibility} eq 'members' && $d{'web_archive\naccess'} eq 'anyone' } ],
