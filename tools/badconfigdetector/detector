@@ -5,18 +5,21 @@
 use Getopt::Std;
 $Getopt::Std::STANDARD_HELP_VERSION='true';
 
-use vars qw($opt_c $small $smalllim $medium $mediumlim $large $largelim $debug $date);
+use vars qw($opt_c $opt_w $opt_s $opt_d $small $smalllim $medium $mediumlim $large $largelim $debug $date);
 # want to have warning and critical levels eventually
 
-getopts('c');
+getopts('cswd');
 
 sub HELP_MESSAGE {
   print "Usage: detector\n";
   print "     -c  : only show critical problems\n";
+  print "     -s  : only show summary report, rather than list names\n";
+  print "     -w  : use redcloth/greencloth wiki output\n";
+  print "     -d  : dump a list of the rules\n";
 }
 
 # enable debug to use local test data
-$debug='true';
+#$debug='true';
 
 $date=`date`;
 chomp($date);
@@ -28,9 +31,9 @@ if ( $debug ) {
 }
 
 # definition of sizes
-$smalllim=100;
-$mediumlim=250;
-$largelim=500;
+$smalllim=500;
+$mediumlim=1000;
+$largelim=2000;
 
 
 # The checks: array of hashs, description of test is key, array is severity of test, test condition
@@ -38,34 +41,48 @@ $largelim=500;
   # only up to 'small' lists should allow unrestricted sending
   'send anyone_unmoderated and medium' =>		[ 'critical', sub { $d{send} eq 'anyone_unmoderated' && $medium } ],
   'send anyone_unmoderated_verified and medium' =>	[ 'critical', sub { $d{send} eq 'anyone_unmoderated_verified' && $medium } ],
-  'send editors_or_moderated and medium' =>		[ 'critical', sub { $d{send} eq 'editors_or_moderated' && $medium } ],
-  'send editors_or_moderated_quiet and medium' =>	[ 'critical', sub { $d{send} eq 'editors_or_moderated_quiet' && $medium } ],
-  'send members_moderated and medium' =>		[ 'critical', sub { $d{send} eq 'members_moderated' && $medium } ],
-  'send members_moderated_verified and medium' =>	[ 'critical', sub { $d{send} eq 'members_moderated_verified' && $medium } ],
-  'send members_or_verified and medium' =>		[ 'critical', sub { $d{send} eq 'members_or_verified' && $medium } ],
-  # only up to 'medium' lists should allow slightly restricted sending
+  # lists that allow members to post after moderation aren't as risky as unrestricted, but still a concern (size dependent)
+  'send members_moderated and huge' =>			[ 'critical', sub { $d{send} eq 'members_moderated' && $huge } ],
+  'send members_moderated and large' =>			[ 'warning',  sub { $d{send} eq 'members_moderated' && $large } ],
+  'send members_moderated_verified and huge' =>		[ 'critical', sub { $d{send} eq 'members_moderated_verified' && $huge } ],
+  'send members_moderated_verified and large' =>	[ 'warning',  sub { $d{send} eq 'members_moderated_verified' && $large } ],
+  # lists that allow members to post unmoderated and anyone to post after moderation are riskier still
+  'send members_or_verified and large' =>		[ 'critical', sub { $d{send} eq 'members_or_verified' && $large } ],
+  'send members_or_verified and medium' =>		[ 'warning',  sub { $d{send} eq 'members_or_verified' && $medium } ],
+  'send editors_or_moderated and large' =>		[ 'critical', sub { $d{send} eq 'editors_or_moderated' && $large } ],
+  'send editors_or_moderated and medium' =>		[ 'warning',  sub { $d{send} eq 'editors_or_moderated' && $medium } ],
+  'send editors_or_moderated_quiet and large' =>	[ 'critical', sub { $d{send} eq 'editors_or_moderated_quiet' && $large } ],
+  'send editors_or_moderated_quiet and medium' =>	[ 'warning',  sub { $d{send} eq 'editors_or_moderated_quiet' && $medium } ],
   'send anyone_moderated and large' =>			[ 'critical', sub { $d{send} eq 'anyone_moderated' && $large } ],
+  'send anyone_moderated and medium' =>			[ 'warning',  sub { $d{send} eq 'anyone_moderated' && $medium } ],
   'send anyone_moderated_verified and large' =>		[ 'critical', sub { $d{send} eq 'anyone_moderated_verified' && $large } ],
+  'send anyone_moderated_verified and medium' =>	[ 'warning',  sub { $d{send} eq 'anyone_moderated_verified' && $medium } ],
   'send members_unmoderated and large' =>		[ 'critical', sub { $d{send} eq 'members_unmoderated' && $large } ],
+  'send members_unmoderated and medium' =>		[ 'warning',  sub { $d{send} eq 'members_unmoderated' && $medium } ],
   'send members_unmoderated_verified and large' =>	[ 'critical', sub { $d{send} eq 'members_unmoderated_verified' && $large } ],
+  'send members_unmoderated_verified and medium' =>	[ 'warning',  sub { $d{send} eq 'members_unmoderated_verified' && $medium } ],
   'send members_or_moderated and large' =>		[ 'critical', sub { $d{send} eq 'members_or_moderated' && $large } ],
+  'send members_or_moderated and medium' =>		[ 'warning',  sub { $d{send} eq 'members_or_moderated' && $medium } ],
   'send members_or_moderated_quiet and large' =>	[ 'critical', sub { $d{send} eq 'members_or_moderated_quiet' && $large } ],
+  'send members_or_moderated_quiet and medium' =>	[ 'warning',  sub { $d{send} eq 'members_or_moderated_quiet' && $medium } ],
   'send default (members_or_moderated) and large'=>	[ 'critical', sub { ! $d{send} && $large } ],
+  'send default (members_or_moderated) and medium'=>	[ 'warning',  sub { ! $d{send} && $medium } ],
   'send members_verified and large' =>			[ 'critical', sub { $d{send} eq 'members_verified' && $large } ],
-  # stuff that only up to 'large' lists can do
+  'send members_verified and medium' =>			[ 'warning',  sub { $d{send} eq 'members_verified' && $medium } ],
   # send editors_moderated/editors_unmoderated are fine for any size
 
   # only up to medium lists should allow members to review subscriber list
-  'send members_verified and large' => 		[ 'critical', sub { $d{review} eq 'members' && $large } ],
+  'review members and large' => 		[ 'critical', sub { $d{review} eq 'members' && $large } ],
+  'review members and medium' => 		[ 'warning', sub { $d{review} eq 'members' && $medium } ],
 
   # security through obscurity
-  'member list is restricted but archive is open' => 	[ 'warning', sub { $d{visibility} eq 'members' && $d{'web_archive\naccess'} eq 'anyone' } ],
-  'list info is restricted but archive is open' =>	[ 'warning', sub { $d{info} eq 'members' && $d{'web_archive\naccess'} eq 'anyone' } ],
-  'list info is restricted but docs are readable' =>	[ 'warning', sub { $d{info} eq 'members' && $d{d_read} eq 'anyone' } ],
+  'member list is restricted but archive is open' => 	[ 'minor', sub { $d{visibility} eq 'members' && $d{'web_archive\naccess'} eq 'anyone' } ],
+  'list info is restricted but archive is open' =>	[ 'minor', sub { $d{info} eq 'members' && $d{'web_archive\naccess'} eq 'anyone' } ],
+  'list info is restricted but docs are readable' =>	[ 'minor', sub { $d{info} eq 'members' && $d{d_read} eq 'anyone' } ],
 
   # list is not visible/info but anyone can invite
-  'member list is restricted but anyone can invite' =>	[ 'warning', sub { $d{visibility} eq 'members' && $d{invite} eq 'anyone' } ],
-  'list info is restricted but anyone can invite' =>	[ 'warning', sub { $d{info} eq 'members' && $d{invite} eq 'anyone' } ],
+  'member list is restricted but anyone can invite' =>	[ 'minor', sub { $d{visibility} eq 'members' && $d{invite} eq 'anyone' } ],
+  'list info is restricted but anyone can invite' =>	[ 'minor', sub { $d{info} eq 'members' && $d{invite} eq 'anyone' } ],
 
   # many cases that sympa has by default we don't just because we delete some
   # scenari because they are always bad, for example unsubscribe.closed
@@ -74,7 +91,37 @@ $largelim=500;
 =for comment
 =cut
 
+# if -d is set, just dump the list of checks in a nice format
+if ( $opt_d ) {
+  print "small <= $smalllim, medium <= $mediumlim, large <= $largelim, huge > $largelim\n";
+  print "(this table generated by 'detector -d -w')\n\n";
+  if ( $opt_w ) {
+    print "|_.Description|_.Severity|_.Test Code|\n";
+  }
 
+  use B::Deparse ();
+
+  foreach $desc ( sort keys %checks ) {
+      my $deparse = B::Deparse->new;
+      $code = $deparse->coderef2text($checks{$desc}[1]);
+      # strip parens, whitespace, newlines
+      $code =~ s/{\n    (.*);\n}/$1/;
+    if ( $opt_w ) {
+      print "|", $desc, "|";
+      if ( "$checks{$desc}[0]" eq 'critical' ) {
+        print "{color:red}.";
+      } elsif ( "$checks{$desc}[0]" eq 'warning' ) {
+        print "{color:orange}.";
+      } elsif ( "$checks{$desc}[0]" eq 'minor' ) {
+        print "{color:yellow}.";
+      }
+      print $checks{$desc}[0], "|", $code, "|\n";
+    } else {
+      print "### description: '$desc' severity: ",$checks{$desc}[0], " test: '$code' ###\n";
+    }
+  }
+  exit 0;
+}
 
 # these are the things we want to grab from the config, if you add new checks
 # that use things other than these, add them to the list
@@ -100,8 +147,10 @@ while (<LISTS>) {
     $small = 1;
   } elsif ( $count <= $mediumlim ) {
     $medium = 1;
-  } else {
+  } elsif ( $count <= $largelim ) {
     $large = 1;
+  } else {
+    $huge = 1;
   }
 
   $config = "$listdir/$list/config";
@@ -132,13 +181,33 @@ while (<LISTS>) {
   }
 }
 
+if ( $opt_w ) {
+  print "small <= $smalllim, medium <= $mediumlim, large <= $largelim, huge > $largelim\n\n";
+  print "|_.Test Description|_.Severity|_.# of Lists|\n";
+}
+
 # now display the results
 foreach $desc ( keys %results ) {
   # if we're only looking for critical and it's not critical, skip
   next if ( "$checks{$desc}[0]" ne 'critical' && $opt_c );
-  print "### $desc ###\n";
-  foreach ( @{ $results{$desc} } ) {
-    print "$_\n";
+  if ( $opt_w ) {
+    print "|", $desc, "|";
+    if ( "$checks{$desc}[0]" eq 'critical' ) {
+      print "{color:red}.";
+    } elsif ( "$checks{$desc}[0]" eq 'warning' ) {
+      print "{color:orange}.";
+    } elsif ( "$checks{$desc}[0]" eq 'minor' ) {
+      print "{color:yellow}.";
+    }
+    print $checks{$desc}[0], "|", $#{ $results{$desc} }, "|\n";
+  } else {
+    print "### test: '$desc' severity: ",$checks{$desc}[0], " lists: ", $#{ $results{$desc} }, " ###\n";
+  }
+
+  if ( $opt_s ) {
+    foreach ( @{ $results{$desc} } ) {
+      print "$_\n";
+    }
   }
 }
 
