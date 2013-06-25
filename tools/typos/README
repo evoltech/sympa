@@ -2,9 +2,8 @@ sympa typo checking scripts
 ---------------------------
 lists/ - contains files listing common typos domains
 
-typoaddresses - returns the list of addresses in the db that match one
-                 of the typo domains. These addresses can be cleaned up
+findtypes - returns the list of addresses in the db that match one of the
+   typo domains and some stats about which lists have a lot of typos and
+   might be violating our ToS by doing bulk adds of non opt-in addresses.
 
-typolists - returns a list of the top 25 lists by number of typo addresses.
-             Lists with a lot of typos might be violating our ToS by doing
-             bulk adds of non opt-in addresses.
+mktransport - generates a postfix map for all the typos
