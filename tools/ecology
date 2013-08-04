@@ -287,7 +287,7 @@ function dormant_list_menu($list,$domain) {
  ********/
  
 function do_update_closed() {
-	global $expl, $closed_datafile, $closed_age, $defaultdomain;
+	global $expl, $closed_datafile, $closed_age, $defaultdomain, $config_change_age;
 	
 	$old = array();
 	$closed = `find $expl -follow -maxdepth 3 -type f -name config | xargs grep -l "^status closed"`;
