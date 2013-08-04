@@ -20,7 +20,8 @@ $arc  = "$home/arc";
 $cemetary    = "$home/cemetary";
 $defaultdomain = 'lists.riseup.net';
 $closed_age  = 4;
-$dormant_age = 28;
+$dormant_age = 18;
+$config_change_age = 6;
 
 $closed_datafile  = dirname(__FILE__) . "/data/closedlists";
 $dormant_datafile = dirname(__FILE__) . "/data/dormantlists";
@@ -304,7 +305,7 @@ function do_update_closed() {
 			$updatetime = get_time($config,'creation');
 
 		if ($updatetime < $threemonthsago)
-			$old["$list@$domain"] = $updatetime;
+			$old["$list@$domain"] = date("m.d.y", $updatetime);
 	}
 	write_array($old, $closed_datafile);
 }
@@ -317,7 +318,7 @@ function do_update_dormant() {
 	for($i=0; $i<=$dormant_age; $i++) {
 		$months[] = date("Y-m", mktime (0,0,0,date("m")-$i,date("d"),date("Y")) );
 	}
-	$oldtime = mktime(0,0,0,date("m")-$dormant_age,date("d"),date("Y"));
+	$oldtime = mktime(0,0,0,date("m")-$config_change_age,date("d"),date("Y"));
 	$lists = `find $arc -mindepth 1 -maxdepth 1 -follow -type d -printf "%f\n"`;
 	$lists = split("\n",trim($lists));
 	
