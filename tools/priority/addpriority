@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+# addpriority - adds a priority setting to  lists that do not already have one
+# (and then they get adjusted by the adjustpriority script). This is needed
+# because sympa's --set_list_priority option doesn't currently work if the
+# list does not have a priority
 
 $priority='8';
 $sympa='/home/sympa/bin/sympa.pl';
@@ -12,12 +16,10 @@ while (<LISTS>) {
   $list=$_;
 
   if ( ! `grep -H priority $expl/$list/config` ) {
-    print "setting priority of list $list to $priority\n";
+    print "$list: no priority detected setting to $priority\n";
     `echo "priority $priority" >>$expl/$list/config`;
-  } else {
-    print "adjusting priority of list $list to $priority\n";
-    `$sympa --set_list_priority  --list=$list --robot=lists.riseup.net --priority=$priority`; 
   }
   
 }
+# do one reload of the configs at the end
 `$sympa --reload_list_config`;
