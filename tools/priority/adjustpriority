@@ -4,6 +4,9 @@
 # NOTE: this script requires the current user has read access to the db
 # Matt Taggart <taggart@riseup.net> 2011-07
 
+$sympa='/home/sympa/bin/sympa.pl';
+$expl='/home/sympa/expl';
+
 # 0,1,9 already have special meanings, 5 is the default priority, so use 2-8
 $bins=7;
 $binstart=2;
@@ -42,8 +45,14 @@ $j=0;
 print "### bin $binstart ###\n";
 foreach $list ( sort { $listcount{$a} <=> $listcount{$b} } keys %listcount) {
    if ( $j < $binsize ) {
-      print "list $list set to priority $i\n";
-      # put the thing to set the priority here
+      $current=`grep priority $expl/$list/config |cut -f2 -d' '`;
+      chomp $current;
+      # only adjust if priority is set and not the same as current
+      if ( $current && $current != $i ) {
+         print "$list: adjusting priority from $current to $i\n";
+         # put the thing to set the priority here
+         #`$sympa --set_list_priority --list=$list --robot=lists.riseup.net --priority=$i`;
+      }
       $j++;
       next;
    }
