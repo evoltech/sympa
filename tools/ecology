@@ -311,7 +311,7 @@ function do_update_closed() {
 }
 
 function do_update_dormant() {
-	global $expl, $arc, $dormant_datafile, $dormant_age, $config_change_age;
+	global $expl, $arc, $dormant_datafile, $dormant_age, $config_change_age, $defaultdomain;
 
 	$dormant = array();
 	# create a list of the last $dormant_age months
@@ -319,13 +319,14 @@ function do_update_dormant() {
 		$months[] = date("Y-m", mktime (0,0,0,date("m")-$i,date("d"),date("Y")) );
 	}
 	$oldtime = mktime(0,0,0,date("m")-$config_change_age,date("d"),date("Y"));
-	$lists = `find $arc -mindepth 1 -maxdepth 1 -follow -type d -printf "%f\n"`;
+	$lists = `find $expl -mindepth 1 -maxdepth 1 -follow -type d -printf "%f\n"`; #look in expl rather than arc to include lists that have never have a message sent
 	$lists = split("\n",trim($lists));
-	
+	$domain = $defaultdomain;
+
 	#$lists = array('mail@lists.riseup.net');
 	foreach($lists as $list) {
 		$found = false;
-		list($list, $domain) = explode('@', $list);
+		#list($list, $domain) = explode('@', $list); #domain not include in /home/sympa/expl
 		foreach($months as $month) {
 			if (is_dir("$arc/$list@$domain/$month")) {
 				$found = true;
