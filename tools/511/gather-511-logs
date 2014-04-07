@@ -5,7 +5,7 @@
 # make any error fatal
 set -e
 
-minivet='mx4 mx7'
+minivet='mx1 mx4 mx7'
 moorhen='mx2 mx5 mx8'
 motmot='mx3 mx6'
 hosts="minivet moorhen motmot"

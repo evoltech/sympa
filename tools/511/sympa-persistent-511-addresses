@@ -19,7 +19,8 @@ $time='182';
 $logdir='./logs/';
 
 # use all files in the last 6 months
-$filelist=`find $logdir -mtime -$time`;
+$filelist=`find $logdir ! -regex mx1/ -mtime -$time`;
+#$filelist=`find $logdir/mx1/ -mtime -$time`;
 
 @files = split /\n/,$filelist;
 
