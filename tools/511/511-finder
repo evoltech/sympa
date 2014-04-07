@@ -20,4 +20,7 @@ if [ ! -f /var/log/postfix.log ]; then
    echo "ERROR: postfix.log does not exist, exiting"
 fi
 
-grep -e 'dsn=5\.1\.1' $logs |awk -F'to=<' '{print $2}'|awk -F'>, ' '{print $1}' |sort -u >/var/log/511/$file
+# grab all 550 5.1.1 errors, but make sure they look like they are really
+#  accounts that don't exist, that the line contains a to=<, and extract the
+#  email address from them
+grep '550 5\.1\.1' $logs |grep -E '(nknown|xist|o mailbox|nvalid|o such)' |grep 'to=<' |awk -F'to=<' '{print $2}'|awk -F'>' '{print $1}' |sort -u >/var/log/511/$file
