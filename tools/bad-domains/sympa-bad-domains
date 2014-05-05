@@ -46,7 +46,8 @@ $pm -> run_on_finish (
 while (<LIST>) {
 	($address, $domain) = m/<?(.+@(.+))>?$/;
 	if ( ! defined $domain ) {
-		die "ERROR: can't detect domain, line is $_, fix the regex!\n";
+		print "ERROR: can't detect domain, line is $_, skipping\n";
+		next;
 	}
 	# if we already have a valid address for this domain, skip it
 	next if ( exists $valid{$domain} );
