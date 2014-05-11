@@ -1,0 +1,15 @@
+--- wwsympa/wwsympa.fcgi.in
++++ wwsympa/wwsympa.fcgi.in
+@@ -7964,7 +7968,11 @@
+      ## Checking families and other virtual hosts.
+      &get_server_details();
+ 
+-     my $all_lists = &List::get_lists($robot);
++     #my $all_lists = &List::get_lists($robot);
++     # use list config db table to get lists
++     my $statement = "SELECT name_list from list_table WHERE status_list = 'closed'";
++     my @lists = &List::get_lists_db($statement);
++     my $all_lists = &List::get_lists($robot, undef, @lists);
+      foreach my $list ( @$all_lists ) {
+ 	 if ($list->{'admin'}{'status'} eq 'closed' ||
+ 	     $list->{'admin'}{'status'} eq 'family_closed') {

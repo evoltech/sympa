@@ -1,0 +1,13 @@
+<!-- $Id: show_exclude.tt2 5204 2008-11-07 13:35:51Z david.verdin $ -->
+<div class="block">
+<h2>[%|loc%]Exclusion table[%END%]</h2>
+
+[%|loc%]Users listed below are excluded from the list. Beware, that this feature is different from the blacklist. Exclusion makes sense
+when a list is based on external data sources ; thanks to exclusion, a user can unsubscribe (or being removed by list owner) even though 
+he should be included via an external data source. Users get into the exclusion table, through the standard unsubscribe/delete functions. 
+They get off the exclusion table with the standard subscribe/add functions.[%END%]
+<br />
+
+[% PROCESS exclusion_table.tt2 %]
+
+<!-- end show_exclude.tt2 -->

@@ -1,0 +1,10 @@
+--- src/lib/admin.pm
++++ src/lib/admin.pm
+@@ -341,6 +341,7 @@
+ 	&do_log('notice', "Synchronizing list members...");
+ 	$list->sync_include();
+     }   
++    $list->save_config;
+ 
+     return $return;
+ }
