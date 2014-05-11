@@ -1,8 +1,8 @@
-This branch contains the patched sympa-6.1.15 source code along with the riseup patches.
+This branch contains the patched sympa-6.1.20 source code along with the riseup patches.
 
-The source code is located in sympa-6.1.5-src/.  It is not compiled, which means that 
-to install or upgrade sympa, the INSTALL and UPGRADE files in the sympa-6.1.15-src/ directory
+The source code is located in sympa-6.1.20-src/.  It is not compiled, which means that 
+to install or upgrade sympa, the INSTALL and UPGRADE files in the sympa-6.1.20-src/ directory
 can be followed. 
 
-The patches are located in 6.1.15/patches/.  These patches have already been applied to the 
-sympa source code in sympa-6.1.15-src/.
+The patches are located in 6.1.20/patches/.  These patches have already been applied to the 
+sympa source code in sympa-6.1.20-src/.
