@@ -2,7 +2,7 @@ diff --git a/sympa-6.1.15-src/src/lib/admin.pm b/sympa-6.1.15-src/src/lib/admin.
 index c94de08..1bcaebf 100644
 --- a/sympa-6.1.15-src/src/lib/admin.pm
 +++ b/sympa-6.1.15-src/src/lib/admin.pm
-@@ -787,16 +787,16 @@ sub rename_list{
+@@ -817,16 +817,16 @@ sub rename_list{
       }
  
      # set list status to pending if creation list is moderated
@@ -33,7 +33,7 @@ diff --git a/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.15-src/wwsympa
 index ee66620..fe1d7c2 100644
 --- a/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
 +++ b/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
-@@ -10277,6 +10277,7 @@ sub do_rename_list {
+@@ -10429,6 +10429,7 @@ sub do_rename_list {
  				      remote_addr => $param->{'remote_addr'},
  				      aliases => $param->{'aliases'},
  				      status => $param->{'status'},
@@ -41,7 +41,7 @@ index ee66620..fe1d7c2 100644
  				     );
       
       if ($result eq 'incorrect_listname') {       
-@@ -10337,9 +10338,9 @@ sub do_rename_list {
+@@ -10489,9 +10490,9 @@ sub do_rename_list {
       }
       
       # set list status to pending if creation list is moderated

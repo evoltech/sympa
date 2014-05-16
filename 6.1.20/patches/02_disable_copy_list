@@ -2,7 +2,7 @@ diff --git a/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.15-src/wwsympa
 index fe1d7c2..ff0d545 100644
 --- a/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
 +++ b/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
-@@ -10253,7 +10253,10 @@ sub _restrict_values {
+@@ -10405,7 +10405,10 @@ sub _restrict_values {
  
  sub do_copy_list {
      &wwslog('info', 'do_copy_list(%s,%s)', $in{'new_listname'}, $in{'new_robot'});
