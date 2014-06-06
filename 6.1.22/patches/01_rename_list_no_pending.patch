@@ -1,0 +1,56 @@
+diff --git a/sympa-6.1.15-src/src/lib/admin.pm b/sympa-6.1.15-src/src/lib/admin.pm
+index c94de08..1bcaebf 100644
+--- a/sympa-6.1.15-src/src/lib/admin.pm
++++ b/sympa-6.1.15-src/src/lib/admin.pm
+@@ -817,16 +817,16 @@ sub rename_list{
+      }
+ 
+     # set list status to pending if creation list is moderated
+-    if ($r_action =~ /listmaster/) {
+-      $list->{'admin'}{'status'} = 'pending' ;
+-      &List::send_notify_to_listmaster('request_list_renaming',$list->{'domain'}, 
+-				       {'list' => $list,
+-					'new_listname' => $param{'new_listname'},
+-					'old_listname' => $old_listname,
+-					'email' => $param{'user_email'},
+-					'mode' => $param{'mode'}});
+-      $param{'status'} = 'pending';
+-    }
++#    if ($r_action =~ /listmaster/) {
++#      $list->{'admin'}{'status'} = 'pending' ;
++#      &List::send_notify_to_listmaster('request_list_renaming',$list->{'domain'}, 
++#				       {'list' => $list,
++#					'new_listname' => $param{'new_listname'},
++#					'old_listname' => $old_listname,
++#					'email' => $param{'user_email'},
++#					'mode' => $param{'mode'}});
++#      $param{'status'} = 'pending';
++#    }
+      
+     ## Save config file for the new() later to reload it
+     $list->save_config($param{'user_email'});
+diff --git a/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
+index ee66620..fe1d7c2 100644
+--- a/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.15-src/wwsympa/wwsympa.fcgi.in
+@@ -10429,6 +10429,7 @@ sub do_rename_list {
+ 				      remote_addr => $param->{'remote_addr'},
+ 				      aliases => $param->{'aliases'},
+ 				      status => $param->{'status'},
++                                      skip_authz => 1,
+ 				     );
+      
+      if ($result eq 'incorrect_listname') {       
+@@ -10489,9 +10490,9 @@ sub do_rename_list {
+      }
+      
+      # set list status to pending if creation list is moderated
+-     if ($param->{'status'} eq 'pending') {
+-	 &report::notice_report_web('pending_list',{},$param->{'action'},$list);
+-     }
++#     if ($param->{'status'} eq 'pending') {
++#	 &report::notice_report_web('pending_list',{},$param->{'action'},$list);
++#     }
+      
+      if ($in{'new_robot'} eq '$robot') {
+ 	 $param->{'redirect_to'} = "$param->{'base_url'}$param->{'path_cgi'}/admin/$in{'new_listname'}";
