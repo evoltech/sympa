@@ -1305,6 +1305,39 @@ our @params = (
         ##default => 'from:sender:reply-to:subject:date:message-id:to:cc:list-id:list-help:list-unsubscribe:list-subscribe:list-post:list-owner:list-archive:in-reply-to:references:resent-date:resent-from:resent-sender:resent-to:resent-cc:resent-message-id:mime-version:content-type:content-transfer-encoding:content-id:content-description',
     ##},
 
+    {
+        'name'    => 'dmarc_protection_mode',
+        'query'   => 'Test mode(s) for DMARC Protection',
+        'sample'  => 'dmarc_reject,dkim_signature',
+        'vhost'   => '1',
+        'edit'    => '1',
+        'optional'=> '1',
+        'advice'  => 'Do not set unless you want to use DMARC protection.  This is a comma separated list of test modes; if multiple are selected then protection is activated if ANY match.  Do not use dmarc_* modes unless you have a local DNS cache as they do a DNS lookup for each received message.',
+    },
+    {
+        'name'    => 'dmarc_protection_domain_regex',
+        'query'   => 'Regexp for domain name match',
+        'vhost'   => '1',
+        'edit'    => '1',
+        'optional'=> '1',
+        'advice'  => 'This is used for the "domain_regex" protection mode.',
+    },
+    {
+        'name'    => 'dmarc_protection_phrase',
+        'query'   => 'Pattern used to create new From header phrase',
+        'vhost'   => '1',
+        'edit'    => '1',
+        'optional'=> '1',
+        'default' => 'name_via_list',
+    },
+    {
+        'name'    => 'dmarc_protection_other_email',
+        'query'   => 'Email to use for replacement From header',
+        'vhost'   => '1',
+        'edit'    => '1',
+        'optional'=> '1',
+    },
+
     { 'title' => 'Antivirus plug-in' },
 
     {

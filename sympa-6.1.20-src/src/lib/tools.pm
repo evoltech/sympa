@@ -3930,35 +3930,42 @@ sub wrap_text {
 #*******************************************
 # Function : addrencode
 # Description : return formatted (and encoded) name-addr as RFC5322 3.4.
-## IN : addr, [phrase, [charset]]
+## IN : addr, [phrase, [charset, [comment]]]
 #*******************************************
 sub addrencode {
     my $addr = shift;
     my $phrase = (shift || '');
     my $charset = (shift || 'utf8');
+    my $comment = (shift || '');
 
     return undef unless $addr =~ /\S/;
 
     if ($phrase =~ /[^\s\x21-\x7E]/) {
-	# Minimal encoding leaves special characters unencoded.
-	# In this case do maximal encoding for workaround.
-	my $minimal =
-	    ($phrase =~ /(\A|\s)[\x21-\x7E]*[\"(),:;<>\@\\][\x21-\x7E]*(\s|\z)/)?
-	    'NO': 'YES';
 	$phrase = MIME::EncWords::encode_mimewords(
 	    Encode::decode('utf8', $phrase),
 	    'Encoding' => 'A', 'Charset' => $charset,
 	    'Replacement' => 'FALLBACK',
 	    'Field' => 'Resent-Sender', # almost longest
-	    'Minimal' => $minimal
+	    'Minimal' => 'DISPNAME',	# needs MIME::EncWords >= 1.012.
             );
-	return "$phrase <$addr>";
     } elsif ($phrase =~ /\S/) {
 	$phrase =~ s/([\\\"])/\\$1/g;
-	return "\"$phrase\" <$addr>";
-    } else {
-	return "<$addr>";
+	$phrase = '"' . $phrase . '"';
     }
+    if ($comment =~ /[^\s\x21-\x27\x2A-\x5B\x5D-\x7E]/) {
+	$comment = MIME::EncWords::encode_mimewords(
+	    Encode::decode('utf8', $comment),
+	    'Encoding' => 'A', 'Charset' => $charset,
+	    'Replacement' => 'FALLBACK',
+	    'Minimal' => 'DISPNAME',
+	    );
+    } elsif ($comment =~ /\S/) {
+	$comment =~ s/([\\\"])/\\$1/g;
+    }
+
+    return ($phrase =~ /\S/ ? "$phrase " : '')
+	. ($comment =~ /\S/ ? "($comment) " : '')
+	. "<$addr>";
 }
 
 #*******************************************
