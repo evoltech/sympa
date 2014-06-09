@@ -1,0 +1,31 @@
+diff --git a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+index ca6ad17..a31f9ff 100644
+--- a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+@@ -9514,6 +9514,26 @@ sub do_edit_list {
+ 	&report::notice_report_web('subscribers_noticed_deleted_topics',{},$param->{'action'});
+     }
+ 
++    ## Checking that list owner address is not set to one of the special 
++    ## addresses:   
++    if (exists $changed{'owner'}) {
++	my $list = $param->{'list'};
++	my @special = ("$list-owner\@$robot", 
++		"$list-editor\@$robot", "$list-admin\@$robot", 
++		"$list-admin\@$robot", "$list-request\@$robot",
++		"$list-bounce\@$robot", "$list-subscribe\@$robot",
++		"$list-unsubscribe\@$robot");	
++	foreach my $owner (@{$new_admin->{'owner'}}) {
++		if (grep (/^$owner->{'email'}$/, @special)) {
++			## generate an error and return
++		    	&report::reject_report_web('user','incorrect_email',{'email'=>$owner->{'email'}},$param->{'action'},$list);
++			&wwslog('info','do_edit_list: Reserved email address %s', $owner->{'email'});
++			&web_db_log({'status' => 'error', 'error_type' => 'incorrect_email'}, 'parameters' => $owner->{'email'});
++			return undef;
++		}
++	}
++    }
++
+     ## Delete selected params
+     foreach my $p (keys %delete) {
+ 	
