@@ -216,6 +216,10 @@ fi
 [ -f $sympaconf ] || exit 0
 [ -f $wwsympaconf ] || exit 0
 
+if [ ! -d /var/lock/subsys ]; then
+	mkdir /var/lock/subsys 
+fi
+
 # See how we were called.
 case "$1" in
   start)

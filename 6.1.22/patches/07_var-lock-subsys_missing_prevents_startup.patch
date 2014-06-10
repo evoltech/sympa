@@ -1,0 +1,15 @@
+diff --git a/sympa-6.1.22-src/src/etc/script/sympa.in b/sympa-6.1.22-src/src/etc/script/sympa.in
+index 48e405d..b6df1cb 100755
+--- a/sympa-6.1.22-src/src/etc/script/sympa.in
++++ b/sympa-6.1.22-src/src/etc/script/sympa.in
+@@ -216,6 +216,10 @@ fi
+ [ -f $sympaconf ] || exit 0
+ [ -f $wwsympaconf ] || exit 0
+ 
++if [ ! -d /var/lock/subsys ]; then
++	mkdir /var/lock/subsys 
++fi
++
+ # See how we were called.
+ case "$1" in
+   start)
