@@ -27,5 +27,13 @@ we still need to disable listing of latest and active lists, since these operati
 TODO; need to file a bug for this and press the issue upstream
 
 06_2685_owner_address_set_to_special_address.patch
-----------------------------
+--------------------------------------------------
 do_edit_list in wwsympa.fcgi needs to be patched to make sure that special list addresses can not be ued as list owner addresses.  See https://labs.riseup.net/code/issues/2685 for more info
+
+07_var-lock-subsys_missing_prevents_startup.patch
+-------------------------------------------------
+This fixes a bug in the init script for Debian Wheezy systems
+
+08_2821_max_list_dispatch.patch
+-------------------------------
+Adds a feature to set hard limits on the size of lists that can send mail.  This is controlled by max_list_dispatch and max_list_dispatch_from_subscriber.  See https://labs.riseup.net/code/issues/2821 for more info.
