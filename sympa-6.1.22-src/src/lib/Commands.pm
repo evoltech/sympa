@@ -2015,6 +2015,19 @@ sub distribute {
 	return 'unknown_list';
     }
 
+    ## Check to make sure that the list does not get dispatched if it is from a
+    ## moderator and the list size is greater then max_list_dispatch
+    ## We do not check to see if the message is being attempted to get dispatched
+    ## by a non privileged user because their access should be rejected by other
+    ## mechanisims at this point anyway.
+    if ($Conf{'max_list_dispatch'} && 
+        ($Conf{'max_list_dispatch'} < $list->get_total()) 
+    ) {
+	&do_log('info', 'DISTRIBUTE %s %s from %s refused, list subscriber count (%d) at max (%d)', $which, $key, $sender, $list->get_total(), $Conf{'max_list_dispatch'});
+	&report::reject_report_msg('user','max_list_dispatch',$sender,{'max_list_dispatch' => $Conf{'max_list_dispatch'}},$robot,'','');
+	return undef;
+    }
+
     &Language::SetLang($list->{'admin'}{'lang'});
 
     #read the moderation queue and purge it

@@ -7557,3 +7557,8 @@ msgstr ""
 #~ "Textdatei oder relationalen Datenbank gespeichert werden oder von "
 #~ "verschiedenen externen Quellen inkludiert werden (Listen, Klartextdatei, "
 #~ "Ergebnis einer Abfrage)."
+
+#: ../web_tt2/error.tt2
+msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
+msgstr "Die Zahl der Abonnenten für diese Liste, "% 1", ist größer als der von den Listenadministratoren festgesetzte Grenze, '% 2'"
+

@@ -7272,6 +7272,10 @@ msgstr ""
 "in nomail mode, he or she will again receive individual mail messages from "
 "the list."
 
+#: ../web_tt2/error.tt2
+msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
+msgstr "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
+
 #~ msgid "subscribers (private);"
 #~ msgstr "subscribers (private);"
 

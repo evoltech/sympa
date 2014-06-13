@@ -1982,9 +1982,27 @@ sub DoMessage{
     my $auth_method = 'smtp';   
     $auth_method = 'dkim' if ($message->{'dkim_pass'});
     $auth_method = 'smime' if ($is_signed->{'body'}) ;
-    
     $result = $list->check_list_authz('send',$auth_method,$context);
     $action = $result->{'action'} if (ref($result) eq 'HASH');
+   
+    ## Defer messages if the list size is greater then the hard coded limit to
+    ## prevent mail servers sending huge amounts of mail
+    my $total = $list->get_total();
+    if (
+	# If there are not more users in the list then the limit for a subscriber
+        ($Conf{'max_list_dispatch_from_subscriber'} && 
+	$total > $Conf{'max_list_dispatch_from_subscriber'}) &&
+
+	# Or if the sender is privileged and there are not more then the limit for privileged users
+        !($list->am_i('owner', $sender) || $list->am_i('editor', $sender) &&
+        $Conf{'max_list_dispatch'} &&
+        $total < $Conf{'max_list_dispatch'}) 
+    ) {
+
+        &do_log('info', 'sympa::DoMessage(): Message diverted to list owner because of constraints placed on list member size (%d) for %s from %s', $Conf{'max_list_dispatch_from_subscriber'}, $listname, $sender);
+        &Log::db_log({'robot' => $robot,'list' => $list->{'name'},'action' => 'DoMessage','parameters' => "$which,$messageid,$robot",'target_email' => '','msg_id' => $messageid,'status' => 'error','error_type' => 'max_list_dispatch','user_email' => $sender,'client' => $ip,'daemon' => $daemon_name});
+        $action = 'editorkey';
+    }
 
     unless (defined $action) {
 	&do_log('err', 'sympa::DoMessage(): message (%s) ignored because unable to evaluate scenario "send" for list %s',$messageid,$listname);

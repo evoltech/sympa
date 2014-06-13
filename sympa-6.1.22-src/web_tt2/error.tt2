@@ -79,6 +79,7 @@
   [% ELSIF u_err.msg == 'listname_needed' %][%|loc%]You need to provide list name[%END%]
   [% ELSIF u_err.msg == 'already_moderated' %][%|loc%]Failed to moderate a message; it was probably moderated by another moderator[%END%]
   [% ELSIF u_err.msg == 'msg_topic_missing' %][%|loc%]Tagging message is required for this list[%END%]
+  [% ELSIF u_err.msg == 'max_list_dispatch' %][%|loc(u_err.list_size,u_err.max_list_dispatch)%]The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'[%END%]
   [% ELSIF u_err.msg == 'empty_archives' %][%|loc%]Archives are empty for this list[%END%]
   [% ELSIF u_err.msg == 'didnt_change_anything' %][%|loc%]You did not select an action to perform[%END%]
   [% ELSIF u_err.msg == 'no_bounce_user' %][%|loc(u_err.email)%]No bounce for user  %1[%END%]

@@ -5673,6 +5673,11 @@ msgstr "Errore di sintassi nel comando."
 msgid "List '%1' does not exist."
 msgstr "La lista '%1' non esiste."
 
+#. (u_err.max_list_dispatch)
+#: default/mail_tt2/message_report.tt2:59
+msgid "List size has exceded the limit, %1, set by the administrators."
+msgstr "Dimensioni List ha exceded il limite,% 1, impostare dagli amministratori."
+
 # nlsref 6,91
 #. (u_err.listname)
 #: ../mail_tt2/command_report.tt2:107

@@ -7040,6 +7040,17 @@ sub do_skinsedit {
 	 return undef;
      } 
 
+     # If the moderator is attempting to dispatch a message but the list 
+     # excceeds the limit set by the robot admin then do not dispatch and
+     # send the moderator a helpful message
+     if ($Conf{'max_list_dispatch'} && ($Conf{'max_list_dispatch'} < $list->get_total())) {
+	 &report::reject_report_web('user', 'max_list_dispatch', {'list_size' => $list->get_total(), 'max_list_dispatch' => $Conf{'max_list_dispatch'}}, $param->{'action'});
+	 &wwslog('info','do_distribute: number of subscribers greater then robot limit');
+	 &web_db_log({'parameters' => $in{'id'},
+		      'status' => 'error',
+		      'error_type' => 'no_topic'});
+	 return undef;
+     }
 
      ## messages
      foreach my $id (split (/,/, $in{'id'})) { # QUIET DISTRIBUTE

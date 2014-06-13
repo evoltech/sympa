@@ -54,6 +54,9 @@ Note: Because binary files have to be encoded in less-efficient ASCII format bef
 [% ELSIF entry == 'list_unknown' -%]
 
 [%|loc(listname)%]List '%1' does not exist.[%END%]
+[% ELSIF entry == 'max_list_dispatch' -%]
+
+[%|loc(max_list_dispatch)%]List size has exceded the limit, %1, set by the administrators.[%END%]
 [% ELSIF entry == 'dyn_cant_create' -%]
 
 [%|loc(listname)%]The %1 list could not be created.[%END%]

@@ -1,0 +1,333 @@
+diff --git a/sympa-6.1.22-src/mail_tt2/message_report.tt2 b/sympa-6.1.22-src/mail_tt2/message_report.tt2
+index b8834cf..99c8a0f 100644
+--- a/sympa-6.1.22-src/mail_tt2/message_report.tt2
++++ b/sympa-6.1.22-src/mail_tt2/message_report.tt2
+@@ -54,6 +54,9 @@ Note: Because binary files have to be encoded in less-efficient ASCII format bef
+ [% ELSIF entry == 'list_unknown' -%]
+ 
+ [%|loc(listname)%]List '%1' does not exist.[%END%]
++[% ELSIF entry == 'max_list_dispatch' -%]
++
++[%|loc(max_list_dispatch)%]List size has exceded the limit, %1, set by the administrators.[%END%]
+ [% ELSIF entry == 'dyn_cant_create' -%]
+ 
+ [%|loc(listname)%]The %1 list could not be created.[%END%]
+diff --git a/sympa-6.1.22-src/po-wwsympa/de.po b/sympa-6.1.22-src/po-wwsympa/de.po
+index ebd517d..72f987e 100755
+--- a/sympa-6.1.22-src/po-wwsympa/de.po
++++ b/sympa-6.1.22-src/po-wwsympa/de.po
+@@ -7557,3 +7557,8 @@ msgstr ""
+ #~ "Textdatei oder relationalen Datenbank gespeichert werden oder von "
+ #~ "verschiedenen externen Quellen inkludiert werden (Listen, Klartextdatei, "
+ #~ "Ergebnis einer Abfrage)."
++
++#: ../web_tt2/error.tt2
++msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++msgstr "Die Zahl der Abonnenten für diese Liste, "% 1", ist größer als der von den Listenadministratoren festgesetzte Grenze, '% 2'"
++
+diff --git a/sympa-6.1.22-src/po-wwsympa/el.po b/sympa-6.1.22-src/po-wwsympa/el.po
+index 5f5c873..dd5a52e 100755
+--- a/sympa-6.1.22-src/po-wwsympa/el.po
++++ b/sympa-6.1.22-src/po-wwsympa/el.po
+@@ -5860,3 +5860,8 @@ msgstr ""
+ #~ msgstr ""
+ #~ "(Προκαθορισμένη τιμή: παραλαβή ταχυδρομείου,απόδειξη παραλαβής,επισκόπηση,"
+ #~ "κοινή επισκόπηση,περίληψη,χωρίς ταχυδρομείο)"
++
++#: ../web_tt2/error.tt2
++msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++msgstr "Ο αριθμός των συνδρομητών για αυτήν τη λίστα, '% 1', είναι μεγαλύτερη από το όριο που καθορίζεται από τους διαχειριστές της λίστας '% 2'"
++
+diff --git a/sympa-6.1.22-src/po-wwsympa/en.po b/sympa-6.1.22-src/po-wwsympa/en.po
+index b4383f5..484a433 100755
+--- a/sympa-6.1.22-src/po-wwsympa/en.po
++++ b/sympa-6.1.22-src/po-wwsympa/en.po
+@@ -7272,6 +7272,10 @@ msgstr ""
+ "in nomail mode, he or she will again receive individual mail messages from "
+ "the list."
+ 
++#: ../web_tt2/error.tt2
++msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++msgstr "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++
+ #~ msgid "subscribers (private);"
+ #~ msgstr "subscribers (private);"
+ 
+diff --git a/sympa-6.1.22-src/po-wwsympa/es.po b/sympa-6.1.22-src/po-wwsympa/es.po
+index 2b7c2bf..43e33d2 100755
+--- a/sympa-6.1.22-src/po-wwsympa/es.po
++++ b/sympa-6.1.22-src/po-wwsympa/es.po
+@@ -7532,3 +7532,7 @@ msgstr ""
+ 
+ #~ msgid "value"
+ #~ msgstr "valor"
++
++#: ../web_tt2/error.tt2
++msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++msgstr "El número de suscriptores de esta lista, '% 1', es mayor que el límite establecido por los administradores de la lista, '% 2'"
+diff --git a/sympa-6.1.22-src/po-wwsympa/fr.po b/sympa-6.1.22-src/po-wwsympa/fr.po
+index e65dff1..6ed5e38 100644
+--- a/sympa-6.1.22-src/po-wwsympa/fr.po
++++ b/sympa-6.1.22-src/po-wwsympa/fr.po
+@@ -7921,3 +7921,7 @@ msgstr ""
+ # nlsref 16,91
+ #~ msgid "value"
+ #~ msgstr "valeur"
++
++#: ../web_tt2/error.tt2
++msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++msgstr "Le nombre d'abonnés à cette liste, '% 1', est supérieure à la limite fixée par les administrateurs de la liste, '% 2'"
+diff --git a/sympa-6.1.22-src/po-wwsympa/it.po b/sympa-6.1.22-src/po-wwsympa/it.po
+index 3434351..10ae265 100755
+--- a/sympa-6.1.22-src/po-wwsympa/it.po
++++ b/sympa-6.1.22-src/po-wwsympa/it.po
+@@ -5891,3 +5891,7 @@ msgstr ""
+ # nlsref 16,91
+ #~ msgid "value"
+ #~ msgstr "valore"
++
++#: ../web_tt2/error.tt2
++msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++msgstr "Il numero di abbonati per questa lista, '% 1', è maggiore del limite fissato dagli amministratori della lista, '% 2'"
+diff --git a/sympa-6.1.22-src/po-wwsympa/pt.po b/sympa-6.1.22-src/po-wwsympa/pt.po
+index 13c8230..8784ff2 100755
+--- a/sympa-6.1.22-src/po-wwsympa/pt.po
++++ b/sympa-6.1.22-src/po-wwsympa/pt.po
+@@ -5509,3 +5509,7 @@ msgstr ""
+ #~ msgstr ""
+ #~ "(Valor por defeito: modo de recepção mail,notice,digest,digestplain,"
+ #~ "summary,nomail)"
++
++#: ../web_tt2/error.tt2
++msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
++msgstr "O número de assinantes para esta lista, '% 1', é maior do que o limite definido pelos administradores da lista, '% 2'"
+diff --git a/sympa-6.1.22-src/po/de.po b/sympa-6.1.22-src/po/de.po
+index 209c6f7..f3d84f9 100755
+--- a/sympa-6.1.22-src/po/de.po
++++ b/sympa-6.1.22-src/po/de.po
+@@ -5597,6 +5597,11 @@ msgstr "Befehls-Syntaxfehler."
+ msgid "List '%1' does not exist."
+ msgstr "Liste '%1' existiert nicht."
+ 
++#. (u_err.max_list_dispatch)
++#: default/mail_tt2/message_report.tt2:59
++msgid "List size has exceded the limit, %1, set by the administrators."
++msgstr "Größe der Liste hat die Grenze,% 1, die von den Administratoren übertraf."
++
+ #. (u_err.listname)
+ #: ../mail_tt2/command_report.tt2:107
+ msgid "%1 mailing list does not provide subscriber preferences."
+diff --git a/sympa-6.1.22-src/po/el.po b/sympa-6.1.22-src/po/el.po
+index a08f4a6..e89be0b 100755
+--- a/sympa-6.1.22-src/po/el.po
++++ b/sympa-6.1.22-src/po/el.po
+@@ -5598,6 +5598,11 @@ msgstr "Λάθος σύνταξη εντολής."
+ msgid "List '%1' does not exist."
+ msgstr "Η λίστα '%1' δεν υπάρχει."
+ 
++#. (u_err.max_list_dispatch)
++#: default/mail_tt2/message_report.tt2:59
++msgid "List size has exceded the limit, %1, set by the administrators."
++msgstr "Μέγεθος της λίστας έχει exceded το όριο, 1%, που καθορίζεται από τους διαχειριστές."
++
+ #. (u_err.listname)
+ #: ../mail_tt2/command_report.tt2:107
+ msgid "%1 mailing list does not provide subscriber preferences."
+diff --git a/sympa-6.1.22-src/po/en.po b/sympa-6.1.22-src/po/en.po
+index 932bfc1..9b0eb9c 100755
+--- a/sympa-6.1.22-src/po/en.po
++++ b/sympa-6.1.22-src/po/en.po
+@@ -8940,6 +8940,11 @@ msgstr "Command syntax error."
+ msgid "List '%1' does not exist."
+ msgstr "List '%1' does not exist."
+ 
++#. (u_err.max_list_dispatch)
++#: default/mail_tt2/message_report.tt2:59
++msgid "List size has exceded the limit, %1, set by the administrators."
++msgstr "List size has exceded the limit, %1, set by the administrators."
++
+ #. (u_err.listname)
+ #: default/mail_tt2/command_report.tt2:106
+ msgid "%1 mailing list does not provide subscriber preferences."
+diff --git a/sympa-6.1.22-src/po/es.po b/sympa-6.1.22-src/po/es.po
+index e943bb6..557f0bc 100755
+--- a/sympa-6.1.22-src/po/es.po
++++ b/sympa-6.1.22-src/po/es.po
+@@ -5591,6 +5591,11 @@ msgstr "Error de sintaxis."
+ msgid "List '%1' does not exist."
+ msgstr "La lista '%1' no existe."
+ 
++#. (u_err.max_list_dispatch)
++#: default/mail_tt2/message_report.tt2:59
++msgid "List size has exceded the limit, %1, set by the administrators."
++msgstr "Tamaño de la lista ha rebasadas el límite,% 1, fijado por los administradores."
++
+ #. (u_err.listname)
+ #: ../mail_tt2/command_report.tt2:107
+ msgid "%1 mailing list does not provide subscriber preferences."
+diff --git a/sympa-6.1.22-src/po/fr.po b/sympa-6.1.22-src/po/fr.po
+index 693d3c0..e40d819 100755
+--- a/sympa-6.1.22-src/po/fr.po
++++ b/sympa-6.1.22-src/po/fr.po
+@@ -5674,6 +5674,11 @@ msgstr "Erreur de syntaxe."
+ msgid "List '%1' does not exist."
+ msgstr "La liste '%1' est inconnue."
+ 
++#. (u_err.max_list_dispatch)
++#: default/mail_tt2/message_report.tt2:59
++msgid "List size has exceded the limit, %1, set by the administrators."
++msgstr "Taille de la liste a exceded la limite, 1%, fixé par les administrateurs."
++
+ # nlsref 6,91
+ #. (u_err.listname)
+ #: ../mail_tt2/command_report.tt2:107
+diff --git a/sympa-6.1.22-src/po/it.po b/sympa-6.1.22-src/po/it.po
+index 243798d..d0c355f 100755
+--- a/sympa-6.1.22-src/po/it.po
++++ b/sympa-6.1.22-src/po/it.po
+@@ -5673,6 +5673,11 @@ msgstr "Errore di sintassi nel comando."
+ msgid "List '%1' does not exist."
+ msgstr "La lista '%1' non esiste."
+ 
++#. (u_err.max_list_dispatch)
++#: default/mail_tt2/message_report.tt2:59
++msgid "List size has exceded the limit, %1, set by the administrators."
++msgstr "Dimensioni List ha exceded il limite,% 1, impostare dagli amministratori."
++
+ # nlsref 6,91
+ #. (u_err.listname)
+ #: ../mail_tt2/command_report.tt2:107
+diff --git a/sympa-6.1.22-src/po/pt.po b/sympa-6.1.22-src/po/pt.po
+index f84f385..e131b47 100755
+--- a/sympa-6.1.22-src/po/pt.po
++++ b/sympa-6.1.22-src/po/pt.po
+@@ -5286,6 +5286,11 @@ msgstr ""
+ msgid "List '%1' does not exist."
+ msgstr ""
+ 
++#. (u_err.max_list_dispatch)
++#: default/mail_tt2/message_report.tt2:59
++msgid "List size has exceded the limit, %1, set by the administrators."
++msgstr "Tamanho da lista tenha ultrapassado o limite,% 1, definido pelos administradores."
++
+ #. (u_err.listname)
+ #: ../mail_tt2/command_report.tt2:107
+ msgid "%1 mailing list does not provide subscriber preferences."
+diff --git a/sympa-6.1.22-src/src/lib/Commands.pm b/sympa-6.1.22-src/src/lib/Commands.pm
+index 173374e..8f00c9a 100644
+--- a/sympa-6.1.22-src/src/lib/Commands.pm
++++ b/sympa-6.1.22-src/src/lib/Commands.pm
+@@ -2015,6 +2015,19 @@ sub distribute {
+ 	return 'unknown_list';
+     }
+ 
++    ## Check to make sure that the list does not get dispatched if it is from a
++    ## moderator and the list size is greater then max_list_dispatch
++    ## We do not check to see if the message is being attempted to get dispatched
++    ## by a non privileged user because their access should be rejected by other
++    ## mechanisims at this point anyway.
++    if ($Conf{'max_list_dispatch'} && 
++        ($Conf{'max_list_dispatch'} < $list->get_total()) 
++    ) {
++	&do_log('info', 'DISTRIBUTE %s %s from %s refused, list subscriber count (%d) at max (%d)', $which, $key, $sender, $list->get_total(), $Conf{'max_list_dispatch'});
++	&report::reject_report_msg('user','max_list_dispatch',$sender,{'max_list_dispatch' => $Conf{'max_list_dispatch'}},$robot,'','');
++	return undef;
++    }
++
+     &Language::SetLang($list->{'admin'}{'lang'});
+ 
+     #read the moderation queue and purge it
+diff --git a/sympa-6.1.22-src/src/lib/confdef.pm b/sympa-6.1.22-src/src/lib/confdef.pm
+index 012d717..0dbb4e8 100644
+--- a/sympa-6.1.22-src/src/lib/confdef.pm
++++ b/sympa-6.1.22-src/src/lib/confdef.pm
+@@ -1548,6 +1548,22 @@ our @params = (
+         'edit'    => '1',
+         'file'    => 'sympa.conf',
+     },
++    {
++        'name'    => 'max_list_dispatch',
++        'query'   => 'The maximum list size that messages can be sent to, aka the maximum number of emails sent per list reciept from moderators',
++        'default' => 1000000,
++	'vhost'   => '1',
++        'edit'    => '1',
++        'file'    => 'sympa.conf',
++    },
++    {
++        'name'    => 'max_list_dispatch_from_subscriber',
++        'query'   => 'The maximum list size that messages can be sent to from list subscribers, aka the maximum number of emails sent per list reciept from list subscribers',
++        'default' => 1000000,
++	'vhost'   => '1',
++        'edit'    => '1',
++        'file'    => 'sympa.conf',
++    },
+ 
+ ## Not implemented yet.
+ ##    {
+diff --git a/sympa-6.1.22-src/src/sympa.pl.in b/sympa-6.1.22-src/src/sympa.pl.in
+index 6c307dd..96f9733 100644
+--- a/sympa-6.1.22-src/src/sympa.pl.in
++++ b/sympa-6.1.22-src/src/sympa.pl.in
+@@ -1982,9 +1982,27 @@ sub DoMessage{
+     my $auth_method = 'smtp';   
+     $auth_method = 'dkim' if ($message->{'dkim_pass'});
+     $auth_method = 'smime' if ($is_signed->{'body'}) ;
+-    
+     $result = $list->check_list_authz('send',$auth_method,$context);
+     $action = $result->{'action'} if (ref($result) eq 'HASH');
++   
++    ## Defer messages if the list size is greater then the hard coded limit to
++    ## prevent mail servers sending huge amounts of mail
++    my $total = $list->get_total();
++    if (
++	# If there are not more users in the list then the limit for a subscriber
++        ($Conf{'max_list_dispatch_from_subscriber'} && 
++	$total > $Conf{'max_list_dispatch_from_subscriber'}) &&
++
++	# Or if the sender is privileged and there are not more then the limit for privileged users
++        !($list->am_i('owner', $sender) || $list->am_i('editor', $sender) &&
++        $Conf{'max_list_dispatch'} &&
++        $total < $Conf{'max_list_dispatch'}) 
++    ) {
++
++        &do_log('info', 'sympa::DoMessage(): Message diverted to list owner because of constraints placed on list member size (%d) for %s from %s', $Conf{'max_list_dispatch_from_subscriber'}, $listname, $sender);
++        &Log::db_log({'robot' => $robot,'list' => $list->{'name'},'action' => 'DoMessage','parameters' => "$which,$messageid,$robot",'target_email' => '','msg_id' => $messageid,'status' => 'error','error_type' => 'max_list_dispatch','user_email' => $sender,'client' => $ip,'daemon' => $daemon_name});
++        $action = 'editorkey';
++    }
+ 
+     unless (defined $action) {
+ 	&do_log('err', 'sympa::DoMessage(): message (%s) ignored because unable to evaluate scenario "send" for list %s',$messageid,$listname);
+diff --git a/sympa-6.1.22-src/web_tt2/error.tt2 b/sympa-6.1.22-src/web_tt2/error.tt2
+index 8bede87..65d97b8 100644
+--- a/sympa-6.1.22-src/web_tt2/error.tt2
++++ b/sympa-6.1.22-src/web_tt2/error.tt2
+@@ -79,6 +79,7 @@
+   [% ELSIF u_err.msg == 'listname_needed' %][%|loc%]You need to provide list name[%END%]
+   [% ELSIF u_err.msg == 'already_moderated' %][%|loc%]Failed to moderate a message; it was probably moderated by another moderator[%END%]
+   [% ELSIF u_err.msg == 'msg_topic_missing' %][%|loc%]Tagging message is required for this list[%END%]
++  [% ELSIF u_err.msg == 'max_list_dispatch' %][%|loc(u_err.list_size,u_err.max_list_dispatch)%]The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'[%END%]
+   [% ELSIF u_err.msg == 'empty_archives' %][%|loc%]Archives are empty for this list[%END%]
+   [% ELSIF u_err.msg == 'didnt_change_anything' %][%|loc%]You did not select an action to perform[%END%]
+   [% ELSIF u_err.msg == 'no_bounce_user' %][%|loc(u_err.email)%]No bounce for user  %1[%END%]
+diff --git a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+index a31f9ff..5c5af41 100644
+--- a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+@@ -7040,6 +7040,17 @@ sub do_skinsedit {
+ 	 return undef;
+      } 
+ 
++     # If the moderator is attempting to dispatch a message but the list 
++     # excceeds the limit set by the robot admin then do not dispatch and
++     # send the moderator a helpful message
++     if ($Conf{'max_list_dispatch'} && ($Conf{'max_list_dispatch'} < $list->get_total())) {
++	 &report::reject_report_web('user', 'max_list_dispatch', {'list_size' => $list->get_total(), 'max_list_dispatch' => $Conf{'max_list_dispatch'}}, $param->{'action'});
++	 &wwslog('info','do_distribute: number of subscribers greater then robot limit');
++	 &web_db_log({'parameters' => $in{'id'},
++		      'status' => 'error',
++		      'error_type' => 'no_topic'});
++	 return undef;
++     }
+ 
+      ## messages
+      foreach my $id (split (/,/, $in{'id'})) { # QUIET DISTRIBUTE

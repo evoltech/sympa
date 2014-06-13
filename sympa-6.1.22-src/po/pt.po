@@ -5286,6 +5286,11 @@ msgstr ""
 msgid "List '%1' does not exist."
 msgstr ""
 
+#. (u_err.max_list_dispatch)
+#: default/mail_tt2/message_report.tt2:59
+msgid "List size has exceded the limit, %1, set by the administrators."
+msgstr "Tamanho da lista tenha ultrapassado o limite,% 1, definido pelos administradores."
+
 #. (u_err.listname)
 #: ../mail_tt2/command_report.tt2:107
 msgid "%1 mailing list does not provide subscriber preferences."

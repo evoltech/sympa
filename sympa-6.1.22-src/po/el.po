@@ -5598,6 +5598,11 @@ msgstr "Λάθος σύνταξη εντολής."
 msgid "List '%1' does not exist."
 msgstr "Η λίστα '%1' δεν υπάρχει."
 
+#. (u_err.max_list_dispatch)
+#: default/mail_tt2/message_report.tt2:59
+msgid "List size has exceded the limit, %1, set by the administrators."
+msgstr "Μέγεθος της λίστας έχει exceded το όριο, 1%, που καθορίζεται από τους διαχειριστές."
+
 #. (u_err.listname)
 #: ../mail_tt2/command_report.tt2:107
 msgid "%1 mailing list does not provide subscriber preferences."

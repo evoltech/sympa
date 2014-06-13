@@ -7532,3 +7532,7 @@ msgstr ""
 
 #~ msgid "value"
 #~ msgstr "valor"
+
+#: ../web_tt2/error.tt2
+msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
+msgstr "El número de suscriptores de esta lista, '% 1', es mayor que el límite establecido por los administradores de la lista, '% 2'"

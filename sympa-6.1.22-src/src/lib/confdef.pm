@@ -1548,6 +1548,22 @@ our @params = (
         'edit'    => '1',
         'file'    => 'sympa.conf',
     },
+    {
+        'name'    => 'max_list_dispatch',
+        'query'   => 'The maximum list size that messages can be sent to, aka the maximum number of emails sent per list reciept from moderators',
+        'default' => 1000000,
+	'vhost'   => '1',
+        'edit'    => '1',
+        'file'    => 'sympa.conf',
+    },
+    {
+        'name'    => 'max_list_dispatch_from_subscriber',
+        'query'   => 'The maximum list size that messages can be sent to from list subscribers, aka the maximum number of emails sent per list reciept from list subscribers',
+        'default' => 1000000,
+	'vhost'   => '1',
+        'edit'    => '1',
+        'file'    => 'sympa.conf',
+    },
 
 ## Not implemented yet.
 ##    {

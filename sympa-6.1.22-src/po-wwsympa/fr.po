@@ -7921,3 +7921,7 @@ msgstr ""
 # nlsref 16,91
 #~ msgid "value"
 #~ msgstr "valeur"
+
+#: ../web_tt2/error.tt2
+msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
+msgstr "Le nombre d'abonnés à cette liste, '% 1', est supérieure à la limite fixée par les administrateurs de la liste, '% 2'"

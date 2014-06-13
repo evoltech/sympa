@@ -8940,6 +8940,11 @@ msgstr "Command syntax error."
 msgid "List '%1' does not exist."
 msgstr "List '%1' does not exist."
 
+#. (u_err.max_list_dispatch)
+#: default/mail_tt2/message_report.tt2:59
+msgid "List size has exceded the limit, %1, set by the administrators."
+msgstr "List size has exceded the limit, %1, set by the administrators."
+
 #. (u_err.listname)
 #: default/mail_tt2/command_report.tt2:106
 msgid "%1 mailing list does not provide subscriber preferences."

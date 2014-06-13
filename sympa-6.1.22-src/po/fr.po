@@ -5674,6 +5674,11 @@ msgstr "Erreur de syntaxe."
 msgid "List '%1' does not exist."
 msgstr "La liste '%1' est inconnue."
 
+#. (u_err.max_list_dispatch)
+#: default/mail_tt2/message_report.tt2:59
+msgid "List size has exceded the limit, %1, set by the administrators."
+msgstr "Taille de la liste a exceded la limite, 1%, fixé par les administrateurs."
+
 # nlsref 6,91
 #. (u_err.listname)
 #: ../mail_tt2/command_report.tt2:107

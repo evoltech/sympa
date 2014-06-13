@@ -5509,3 +5509,7 @@ msgstr ""
 #~ msgstr ""
 #~ "(Valor por defeito: modo de recepção mail,notice,digest,digestplain,"
 #~ "summary,nomail)"
+
+#: ../web_tt2/error.tt2
+msgid "The number of subscribers for this list, '%1', is greater then the limit set by the list administrators, '%2'"
+msgstr "O número de assinantes para esta lista, '% 1', é maior do que o limite definido pelos administradores da lista, '% 2'"
