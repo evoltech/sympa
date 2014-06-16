@@ -7519,7 +7519,7 @@ sub add_user {
     
     foreach my $new_user (@new_users) {
 	my $who = &tools::clean_email($new_user->{'email'});
-	unless ($who) {
+	unless ($who || ! &tools::valid_email($new_user->{'email'})) {
 	    Log::do_log('err', 'Ignoring %s which is not a valid email',$new_user->{'email'});
 	    next;
 	}

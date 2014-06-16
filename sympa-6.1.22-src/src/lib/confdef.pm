@@ -1564,6 +1564,13 @@ our @params = (
         'edit'    => '1',
         'file'    => 'sympa.conf',
     },
+    {
+        'name'    => 'email_validation',
+        'query'   => 'The email validation techniques to be used against email addresses that are added to mailing lists. Options come from Email::Validate (http://search.cpan.org/~rjbs/Email-Valid-1.194/lib/Email/Valid.pm). Commenting this out turns off email validation.',
+        'default' => 'tldcheck,fqdn,rfc822',
+        'edit'    => '1',
+        'file'    => 'sympa.conf',
+    },
 
 ## Not implemented yet.
 ##    {

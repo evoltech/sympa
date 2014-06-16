@@ -2746,6 +2746,30 @@ sub valid_email {
 	return undef;
     }
 
+    # If email_validation is set then apply additional email validation set
+    # by Email::Valid as per the configuration
+    if ($Conf::Conf{'email_validation'}) {
+        use Email::Valid;
+	my $technique_map = {
+	    'tldcheck' => '-tldcheck',
+	    'fqdn' => '-fqdn',
+	    'mxcheck' => '-mxcheck',
+	    'fudge' => '-fudge',
+	    'allow_ip' => '-allow_ip',
+	    'local_rules' => '-local_rules'
+	};
+        my @techniques = split(',', $Conf::Conf{'email_validation'});
+	my @options;
+	foreach (@techniques) {
+	    push @options, $technique_map->{$_};
+	}
+	my $valid = new Email::Valid(@options);
+	if (!$valid->address($email)) {
+	    do_log('err', "Invalid email address '%s' [%s]", $email, $valid->details());
+	    return undef;
+	}
+    }
+
     return 1;
 }
 

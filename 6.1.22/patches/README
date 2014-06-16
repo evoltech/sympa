@@ -37,3 +37,7 @@ This fixes a bug in the init script for Debian Wheezy systems
 08_2821_max_list_dispatch.patch
 -------------------------------
 Adds a feature to set hard limits on the size of lists that can send mail.  This is controlled by max_list_dispatch and max_list_dispatch_from_subscriber.  See https://labs.riseup.net/code/issues/2821 for more info.
+
+09_1913_email_validation.patch
+------------------------------
+Adds configureable email validations provided by Email::Valid.  See https://labs.riseup.net/code/issues/1913 for more info.

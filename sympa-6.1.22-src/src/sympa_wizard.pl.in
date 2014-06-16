@@ -380,6 +380,12 @@ sub check_cpan {
 				     mandatory => 1,
 				     usage => 'module for character encoding processing',
 				    },
+			'Email::Valid' => {
+				  required_version =>'1.194',
+				  package_name => 'Email-Valid',
+				  mandatory => 1,
+				  usage => 'used to compute validate email addresses',
+					  },
 			'FCGI' => {
 				   required_version => '0.67',
 				   package_name => 'FCGI',

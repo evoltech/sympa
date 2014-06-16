@@ -1,0 +1,83 @@
+diff --git a/sympa-6.1.22-src/src/lib/List.pm b/sympa-6.1.22-src/src/lib/List.pm
+index ca917d4..c0fb591 100644
+--- a/sympa-6.1.22-src/src/lib/List.pm
++++ b/sympa-6.1.22-src/src/lib/List.pm
+@@ -7519,7 +7519,7 @@ sub add_user {
+     
+     foreach my $new_user (@new_users) {
+ 	my $who = &tools::clean_email($new_user->{'email'});
+-	unless ($who) {
++	unless ($who || ! &tools::valid_email($new_user->{'email'})) {
+ 	    Log::do_log('err', 'Ignoring %s which is not a valid email',$new_user->{'email'});
+ 	    next;
+ 	}
+diff --git a/sympa-6.1.22-src/src/lib/confdef.pm b/sympa-6.1.22-src/src/lib/confdef.pm
+index 0dbb4e8..7b471dc 100644
+--- a/sympa-6.1.22-src/src/lib/confdef.pm
++++ b/sympa-6.1.22-src/src/lib/confdef.pm
+@@ -1564,6 +1564,13 @@ our @params = (
+         'edit'    => '1',
+         'file'    => 'sympa.conf',
+     },
++    {
++        'name'    => 'email_validation',
++        'query'   => 'The email validation techniques to be used against email addresses that are added to mailing lists. Options come from Email::Validate (http://search.cpan.org/~rjbs/Email-Valid-1.194/lib/Email/Valid.pm). Commenting this out turns off email validation.',
++        'default' => 'tldcheck,fqdn,rfc822',
++        'edit'    => '1',
++        'file'    => 'sympa.conf',
++    },
+ 
+ ## Not implemented yet.
+ ##    {
+diff --git a/sympa-6.1.22-src/src/lib/tools.pm b/sympa-6.1.22-src/src/lib/tools.pm
+index d9be037..37bd999 100644
+--- a/sympa-6.1.22-src/src/lib/tools.pm
++++ b/sympa-6.1.22-src/src/lib/tools.pm
+@@ -2746,6 +2746,30 @@ sub valid_email {
+ 	return undef;
+     }
+ 
++    # If email_validation is set then apply additional email validation set
++    # by Email::Valid as per the configuration
++    if ($Conf::Conf{'email_validation'}) {
++        use Email::Valid;
++	my $technique_map = {
++	    'tldcheck' => '-tldcheck',
++	    'fqdn' => '-fqdn',
++	    'mxcheck' => '-mxcheck',
++	    'fudge' => '-fudge',
++	    'allow_ip' => '-allow_ip',
++	    'local_rules' => '-local_rules'
++	};
++        my @techniques = split(',', $Conf::Conf{'email_validation'});
++	my @options;
++	foreach (@techniques) {
++	    push @options, $technique_map->{$_};
++	}
++	my $valid = new Email::Valid(@options);
++	if (!$valid->address($email)) {
++	    do_log('err', "Invalid email address '%s' [%s]", $email, $valid->details());
++	    return undef;
++	}
++    }
++
+     return 1;
+ }
+ 
+diff --git a/sympa-6.1.22-src/src/sympa_wizard.pl.in b/sympa-6.1.22-src/src/sympa_wizard.pl.in
+index 0d4789d..cb886fd 100644
+--- a/sympa-6.1.22-src/src/sympa_wizard.pl.in
++++ b/sympa-6.1.22-src/src/sympa_wizard.pl.in
+@@ -380,6 +380,12 @@ sub check_cpan {
+ 				     mandatory => 1,
+ 				     usage => 'module for character encoding processing',
+ 				    },
++			'Email::Valid' => {
++				  required_version =>'1.194',
++				  package_name => 'Email-Valid',
++				  mandatory => 1,
++				  usage => 'used to compute validate email addresses',
++					  },
+ 			'FCGI' => {
+ 				   required_version => '0.67',
+ 				   package_name => 'FCGI',
