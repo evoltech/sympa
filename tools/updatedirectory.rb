@@ -1,7 +1,10 @@
 #!/usr/bin/ruby
 
+#
+# Requires Ruby 1.9 or later
+#
+
 require 'fileutils'
-require 'iconv'
 
 domain       = "lists.riseup.net"
 home_dir     = "/home/sympa"
@@ -13,13 +16,15 @@ footer_file  = "#{inc_dir}/footer.html"
 directory_dir  = "#{home_dir}/docroot/directory"
 directory_file = "#{template_dir}/custom_list_directory.tt2"
 
+Encoding.default_internal = Encoding::UTF_8
+
 ##############################################################
 # FUNCTIONS
 
 def load_topics( file )
   topics = []
   topic = nil
-  open( file ).each do |line|
+  File.open(file, 'r:utf-8').each do |line|
     if line =~ /^title (.*)$/
       topics << [topic, $1] if topic
     elsif line =~ /xother/
@@ -33,8 +38,9 @@ end
 
 def load_config(file)
   conf = {}
-  open(file).each do |line|
-    if line =~ /^(status|visibility|topics|subject|info)\s*(.*)\s*$/u
+  File.open(file, 'r:utf-8').each do |line|
+    line.encode!('UTF-8', 'UTF-8', :invalid => :replace)
+    if line =~ /^(status|visibility|topics|subject|info)\s*(.*)\s*$/
       option, value = $1.to_sym, $2
       conf[option] = value unless option == :visibility and conf[:visibility] # don't reset visibility if it was already set. in some config files, it is first set for the whole list, and then later in the file it includes the visibility of list owners/moderators   
     end
@@ -63,12 +69,10 @@ end
 
 # we don't know if string is already unicode, or something else
 def convert_string_to_utf8(string)
-  begin
-    # string is probably already unicode if it parses at UTF-8
-    return Iconv.iconv('UTF-8', 'UTF-8', string)
-  rescue
-    # try ISO-8859-15, then give up.
-    return Iconv.iconv( 'UTF-8', 'ISO-8859-15', string ) rescue string
+  if string
+    string.encode!('UTF-8', 'UTF-8', :invalid => :replace)
+  else
+    ""
   end
 end
 
@@ -109,7 +113,7 @@ topics.each do |topic|
   html += footer
   
   FileUtils.mkdir_p(topic_dir)
-  open(topic_file,'w') do |f|
+  File.open(topic_file,'w') do |f|
     f << html
   end
 end
@@ -130,6 +134,6 @@ topics.each do |topic|
 end
 html += "</tr></table></blockquote>\n"
 
-open(directory_file,'w') do |f|
+File.open(directory_file,'w') do |f|
   f << html
 end
