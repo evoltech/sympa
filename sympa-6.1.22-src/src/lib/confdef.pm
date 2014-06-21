@@ -1571,6 +1571,13 @@ our @params = (
         'edit'    => '1',
         'file'    => 'sympa.conf',
     },
+    {
+        'name'    => 'password_validation',
+        'query'   => 'The password validation techniques to be used against user passwords that are added to mailing lists. Options come from Data::Password (http://search.cpan.org/~razinf/Data-Password-1.07/Password.pm#VARIABLES), ie password_validation MINLEN=8,GROUPS=3,DICTIONARY=4,DICTIONARIES=/pentest/dictionaries',
+        'default' => undef,
+        'edit'    => '1',
+        'file'    => 'sympa.conf',
+    },
 
 ## Not implemented yet.
 ##    {

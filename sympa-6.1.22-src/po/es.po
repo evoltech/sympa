@@ -11170,6 +11170,10 @@ msgstr ""
 msgid "Plugin"
 msgstr ""
 
+#: ../default/web_tt2/error.tt2:77
+msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
+msgstr "La contraseña que escribió no coincide con estos sitios niveles de fuerza:% 1. Por favor, escoja una contraseña fuerte."
+
 #, fuzzy
 #~ msgid "The configuration file contains errors.\n"
 #~ msgstr "El archivo de configuración --CONFIG-- contiene errores.\n"

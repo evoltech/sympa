@@ -324,6 +324,12 @@ sub check_cpan {
 						 package_name => 'Crypt-CipherSaber',
 						 usage => 'this module provides reversible encryption of user passwords in the database.  Useful when updating from old version with password reversible encryption, or if secure session cookies in non-SSL environments are required.',
 						},
+			'Data::Password' => {
+				      required_version =>'1.07',
+				      package_name => 'Data-Password',
+				      mandatory => 0,
+				      usage => 'Used for configureable hardening of passwords via the password_validation sympa.conf directive.',
+				     },
 			'DB_File' => {
 				      required_version =>'1.75',
 				      package_name => 'DB_File',

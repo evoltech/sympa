@@ -10474,6 +10474,10 @@ msgstr "modèle d'alias de liste"
 msgid "no mail (useful for vacations)"
 msgstr "interrompre la réception des messages (utile pendant les vacances)"
 
+#: ../default/web_tt2/error.tt2:77
+msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
+msgstr "Le mot de passe que vous avez saisi ne correspond pas à ces sites normes de résistance:% 1. S'il vous plaît choisir un mot de passe fort."
+
 #~ msgid "The configuration file contains errors.\n"
 #~ msgstr "Le fichier de configuration contient des erreurs.\n"
 

@@ -4048,4 +4048,28 @@ sub decode_header {
     }
 }
 
+sub password_validation {
+	my ($password) = @_;
+	my $pv = $Conf::Conf{'password_validation'};
+	if ($pv && $password) {
+		use Data::Password qw(:all);
+		use Switch;
+		my @techniques = split(/,/, $pv);
+		foreach my $technique (@techniques) {
+			my ($key, $value) = $technique =~ /([^=]+)=(.*)/;
+			switch ($key) {
+				case 'DICTIONARY' { $DICTIONARY = $value; }
+				case 'FOLLOWING' { $FOLLOWING = $value; }
+				case 'GROUPS' { $GROUPS = $value; }
+				case 'MINLEN' { $MINLEN = $value; }
+				case 'MAXLEN' { $MAXLEN = $value; }
+				# TODO: How do we handle a list of dictionaries?
+				case 'DICTIONARIES' { push @DICTIONARIES, $value; }
+			}
+		}
+		return IsBadPassword($password);
+	}
+	return undef;
+}
+
 1;

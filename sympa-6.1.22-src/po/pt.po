@@ -11928,6 +11928,10 @@ msgid ""
 "was over the maximum size allowed on this list."
 msgstr ""
 
+#: ../default/web_tt2/error.tt2:77
+msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
+msgstr "A senha que você digitou não corresponde esse Sites padrões de força:% 1. Por favor escolha uma senha forte."
+
 #, fuzzy
 #~ msgid "URL of main Web page"
 #~ msgstr "Página de Administração %1"

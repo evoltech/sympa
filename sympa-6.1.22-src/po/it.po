@@ -11363,6 +11363,10 @@ msgstr ""
 msgid "Searches are limited to 50 results, except when using a @domain mask."
 msgstr ""
 
+#: ../default/web_tt2/error.tt2:77
+msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
+msgstr "La password digitata non corrisponde a questi siti norme di forza:% 1. Si prega di scegliere una password forte."
+
 # nlsref 1,1
 #, fuzzy
 #~ msgid "The configuration file contains errors.\n"

@@ -11012,6 +11012,10 @@ msgstr ""
 msgid "%s / %s"
 msgstr ""
 
+#: ../default/web_tt2/error.tt2:77
+msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
+msgstr "Ο κωδικός πρόσβασης που πληκτρολογήσατε δεν ταιριάζει με αυτό sites πρότυπα της δύναμης:% 1. Παρακαλώ επιλέξτε μια ισχυρότερη κωδικό πρόσβασης."
+
 #, fuzzy
 #~ msgid "The configuration file contains errors.\n"
 #~ msgstr "Το αρχείο διαμόρφωσης --CONFIG-- περιέχει λάθη.\n"
