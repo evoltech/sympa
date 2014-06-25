@@ -12662,10 +12662,6 @@ msgid "Contains invalid characters"
 msgstr "Se considera no válida por SYMPA"
 
 #: .. / Src / lib / tools.pm
-msgid "Contains invalid characters"
-msgstr "Contiene caracteres no válidos"
-
-#: .. / Src / lib / tools.pm
 msgid "Invalid top level domain in address"
 msgstr "dominio de nivel superior no válido en la dirección"
 
