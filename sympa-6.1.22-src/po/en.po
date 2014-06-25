@@ -12252,6 +12252,35 @@ msgstr ""
 msgid "Unknown provider."
 msgstr "Unknown error."
 
+#: ../src/lib/tools.pm
+msgid "Considered invalid by SYMPA"
+msgstr "Considered invalid by SYMPA"
+
+#: ../src/lib/tools.pm
+msgid "Contains invalid characters"
+msgstr "Contains invalid characters"
+
+#: ../src/lib/tools.pm
+msgid "Invalid top level domain in address"
+msgstr "Invalid top level domain in address"
+
+#: ../src/lib/tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr "Fully qualified domain does not exist in address"
+
+#: ../src/lib/tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr "Address domain does not have a valid MX record"
+
+#: ../src/lib/tools.pm
+msgid "Address does not comply with RFC822"
+msgstr "Address does not comply with RFC822"
+
+#: ../src/lib/tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr "The local part of the email address is greater then 64 characters"
+
+
 #~ msgid "Powered by"
 #~ msgstr "Powered by"
 

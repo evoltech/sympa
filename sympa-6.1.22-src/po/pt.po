@@ -12171,3 +12171,31 @@ msgstr "A senha que você digitou não corresponde esse Sites padrões de força
 #, fuzzy
 #~ msgid "notify bouncing users"
 #~ msgstr " As %1 ultimas listas "
+
+#: .. / Src / lib / tools.pm
+msgid "Considered invalid by SYMPA"
+msgstr "considerada inválida por SYMPA"
+
+#: .. / Src / lib / tools.pm
+msgid "Contains invalid characters"
+msgstr "contém caracteres inválidos"
+
+#: .. / Src / lib / tools.pm
+msgid "Invalid top level domain in address"
+msgstr "domínio de nível superior inválido no endereço"
+
+#: .. / Src / lib / tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr "domínio totalmente qualificado não existe no endereço"
+
+#: .. / Src / lib / tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr "Endereço de domínio não tem um registro MX válido"
+
+#: .. / Src / lib / tools.pm
+msgid "Address does not comply with RFC822"
+msgstr "Endereço não cumprir RFC822"
+
+#: .. / Src / lib / tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr "A parte local do endereço de e-mail é maior do que 64 caracteres"

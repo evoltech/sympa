@@ -15523,3 +15523,31 @@ msgstr "La password digitata non corrisponde a questi siti norme di forza:% 1. S
 # nlsref 1,1
 #~ msgid "The configuration file --CONFIG-- contains errors.\n"
 #~ msgstr "Il file di configurazione   CONFIG   contiene degli errori.\n"
+
+#: .. / Src / lib / tools.pm
+msgid "Considered invalid by SYMPA"
+msgstr "Considerato invalido SYMPA"
+
+#: .. / Src / lib / tools.pm
+msgid "Contains invalid characters"
+msgstr "contiene caratteri non validi"
+
+#: .. / Src / lib / tools.pm
+msgid "Invalid top level domain in address"
+msgstr "Invalid dominio di primo livello di indirizzo"
+
+#: .. / Src / lib / tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr "completo dominio non esiste in indirizzo"
+
+#: .. / Src / lib / tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr "dominio Indirizzo non dispone di un record MX valido"
+
+#: .. / Src / lib / tools.pm
+msgid "Address does not comply with RFC822"
+msgstr "Indirizzo non è conforme a RFC822"
+
+#: .. / Src / lib / tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr "La parte locale dell'indirizzo di posta elettronica è maggiore di 64 caratteri"

@@ -833,8 +833,13 @@ sub subscribe {
 	    $u->{'gecos'} = $comment;
 	    $u->{'date'} = $u->{'update_date'} = time;
 
-	    unless ($list->add_user($u)){
-		my $error = "Unable to add user $user in list $listname";
+	    my ($ct, %invalids) = $list->add_user($u);
+	    unless ($ct){
+
+		#TODO: this is untranslateable with variables in it $reason is already
+		# translated, and the other variables just need to be sent in as parameters
+		my $reason = $invalids{$sender};
+		my $error = "Unable to add user $user in list $listname: $reason";
 		&report::reject_report_cmd('intern',$error,{'listname'=>$which},$cmd_line,$sender,$robot);
 		return undef; 
 	    }
@@ -1277,8 +1282,14 @@ sub add {
 	    $u->{'gecos'} = $comment;
 	    $u->{'date'} = $u->{'update_date'} = time;
 	    
-	    unless ($list->add_user($u)) {
-		my $error = "Unable to add user $user in list $listname";
+	    my ($ct, %invalids) = $list->add_user($u);
+	    unless ($ct){
+
+		#TODO: this is untranslateable with variables in it $reason is already
+		# translated, and the other variables just need to be sent in as parameters
+		my $reason = $invalids{$sender};
+		my $error = "Unable to add user $user in list $listname: $reason";
+
 		&report::reject_report_cmd('intern',$error,{'listname'=>$which},$cmd_line,$sender,$robot);
 		return undef; 
 	    }
