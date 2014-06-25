@@ -12741,3 +12741,31 @@ msgstr "interrompre la réception des messages (utile pendant les vacances)"
 
 #~ msgid "Choose notification "
 #~ msgstr "Choisissez une notification"
+
+#: .. / Src / lib / tools.pm
+msgid "Considered invalid by SYMPA"
+msgstr "Considéré comme invalide par SYMPA"
+
+#: .. / Src / lib / tools.pm
+msgid "Contains invalid characters"
+msgstr "contient des caractères non valides"
+
+#: .. / Src / lib / tools.pm
+msgid "Invalid top level domain in address"
+msgstr "Invalid domaine de niveau supérieur dans l'adresse"
+
+#: .. / Src / lib / tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr "n'existe pas domaine complet dans l'adresse"
+
+#: .. / Src / lib / tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr "domaine d'adresses ne possède pas d'enregistrement MX valide"
+
+#: .. / Src / lib / tools.pm
+msgid "Address does not comply with RFC822"
+msgstr "Adresse n'est pas conforme à la RFC 822"
+
+#: .. / Src / lib / tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr "La partie locale de l'adresse e-mail est supérieure à 64 caractères"

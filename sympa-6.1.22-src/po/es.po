@@ -12652,3 +12652,31 @@ msgstr ""
 
 #~ msgid "The configuration file --CONFIG-- contains errors.\n"
 #~ msgstr "El archivo de configuración --CONFIG-- contiene errores.\n"
+
+#: .. / Src / lib / tools.pm
+msgid "Contains invalid characters"
+msgstr "Se considera no válida por SYMPA"
+
+#: .. / Src / lib / tools.pm
+msgid "Contains invalid characters"
+msgstr "Contiene caracteres no válidos"
+
+#: .. / Src / lib / tools.pm
+msgid "Invalid top level domain in address"
+msgstr "dominio de nivel superior no válido en la dirección"
+
+#: .. / Src / lib / tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr "dominio completo no existe en la dirección"
+
+#: .. / Src / lib / tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr "Dirección de dominio no tiene un registro MX válido"
+
+#: .. / Src / lib / tools.pm
+msgid "Address does not comply with RFC822"
+msgstr "Dirección no cumple con RFC822"
+
+#: .. / Src / lib / tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr "La parte local de la dirección de correo electrónico es mayor que 64 caracteres"
