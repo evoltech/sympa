@@ -1577,6 +1577,7 @@ our @params = (
         'default' => undef,
         'edit'    => '1',
         'file'    => 'sympa.conf',
+        'optional' => '1',
     },
 
 ## Not implemented yet.
