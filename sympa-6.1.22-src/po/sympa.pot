@@ -8691,3 +8691,39 @@ msgstr ""
 #: ../wwsympa/wwslib.pm:39
 msgid "no mail (useful for vacations)"
 msgstr ""
+
+#: ../default/mail_tt2/message_report.tt2:59
+msgid "List size has exceded the limit, %1, set by the administrators."
+msgstr ""
+
+#: ../default/web_tt2/error.tt2:77
+msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
+msgstr ""
+
+#: ../src/lib/tools.pm
+msgid "Considered invalid by SYMPA"
+msgstr ""
+
+#: ../src/lib/tools.pm
+msgid "Contains invalid characters"
+msgstr ""
+
+#: ../src/lib/tools.pm
+msgid "Invalid top level domain in address"
+msgstr ""
+
+#: ../src/lib/tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr ""
+
+#: ../src/lib/tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr ""
+
+#: ../src/lib/tools.pm
+msgid "Address does not comply with RFC822"
+msgstr ""
+
+#: ../src/lib/tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr ""

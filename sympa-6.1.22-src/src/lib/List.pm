@@ -7516,10 +7516,13 @@ sub add_user {
     unless ($dbh and $dbh->ping) {
 	return undef unless &db_connect();
     }	   
-    
+
+		my %invalids = (); 
     foreach my $new_user (@new_users) {
 	my $who = &tools::clean_email($new_user->{'email'});
-	unless ($who || ! &tools::valid_email($new_user->{'email'})) {
+	my ($status, $reason) = &tools::valid_email($new_user->{'email'});
+	unless ($who || !$status ) {
+			$invalids{$new_user->{'email'}} = $reason;
 	    Log::do_log('err', 'Ignoring %s which is not a valid email',$new_user->{'email'});
 	    next;
 	}
@@ -7603,7 +7606,7 @@ sub add_user {
     $self->{'total'} += $total;
     $self->savestats();
 
-    return $total;
+    return ($total, %invalids);
 }
 
 
@@ -9851,8 +9854,9 @@ sub sync_include {
 	    $u->{'date'} = time;
 	    @add_tab = ($u);
 	    my $user_added = 0;
-	    unless( $user_added = $self->add_user( @add_tab ) ) {
-		&do_log('err', 'List:sync_include(%s): Failed to add new users', $name);
+			my ($added, %invalids) = $self->add_user( @add_tab );
+	    unless( $added ) {
+		&do_log('err', 'List:sync_include(%s): Failed to add new users: %s', $name, $invalids{$email});
 		return undef;
 	    }
 	    if ($user_added) {

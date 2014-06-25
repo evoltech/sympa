@@ -771,8 +771,9 @@ sub add {
 	$u->{'password'} = $u2->{'password'} || &tools::tmp_passwd($email) ;
 	$u->{'lang'} = $u2->{'lang'} || $list->{'admin'}{'lang'};
 	
-	unless ($list->add_user($u)) {
-	    &Log::do_log('info', 'add %s@%s %s from %s : Unable to add user', $listname,$robot,$email,$sender);
+	my ($status, %invalids) = $list->add_user($u);
+	unless ($status) {
+	    &Log::do_log('info', 'add %s@%s %s from %s : Unable to add user: %s', $listname,$robot,$email,$sender, $invalids{$email});
 	    my $error = "Unable to add user $email in list $listname";
 	    die SOAP::Fault->faultcode('Server')
 		->faultstring('Unable to add user')
@@ -1228,10 +1229,11 @@ sub subscribe {
 	  $u->{'gecos'} = $gecos;
 	  $u->{'date'} = $u->{'update_date'} = time;
 	  
+		my ($ct, %invalids) = $list->add_user($u);
 	  die SOAP::Fault->faultcode('Server')
 	      ->faultstring('Undef')
 		  ->faultdetail("SOAP subscribe : add user failed")
-		      unless $list->add_user($u);
+		      unless $ct;
       }
       
       if ($List::use_db) {

@@ -54,7 +54,8 @@ sub password_fingerprint{
 
      my ($canonic, $user);
 
-     if( &tools::valid_email($auth)) {
+     my ($status, $reason) = &tools::valid_email($auth);
+     if($status) {
 	 return &authentication($robot, $auth,$pwd);
      }else{
 	 ## This is an UID
@@ -283,7 +284,8 @@ sub ldap_authentication {
      &do_log('debug3',"canonic: $canonic_email[0]");
      ## If the identifier provided was a valid email, return the provided email.
      ## Otherwise, return the canonical email guessed after the login.
-     if( &tools::valid_email($auth) && !$Conf::Conf{'robots'}{$robot}{'ldap_force_canonical_email'}) {
+     my ($status, $reason) =  &tools::valid_email($auth);
+     if( $status && !$Conf::Conf{'robots'}{$robot}{'ldap_force_canonical_email'}) {
 	 return ($auth);
      }else{
 	 return lc($canonic_email[0]);

@@ -1,42 +1,444 @@
-diff --git a/sympa-6.1.22-src/src/lib/List.pm b/sympa-6.1.22-src/src/lib/List.pm
-index ca917d4..c0fb591 100644
---- a/sympa-6.1.22-src/src/lib/List.pm
-+++ b/sympa-6.1.22-src/src/lib/List.pm
-@@ -7519,7 +7519,7 @@ sub add_user {
-     
-     foreach my $new_user (@new_users) {
- 	my $who = &tools::clean_email($new_user->{'email'});
--	unless ($who) {
-+	unless ($who || ! &tools::valid_email($new_user->{'email'})) {
- 	    Log::do_log('err', 'Ignoring %s which is not a valid email',$new_user->{'email'});
- 	    next;
- 	}
-diff --git a/sympa-6.1.22-src/src/lib/confdef.pm b/sympa-6.1.22-src/src/lib/confdef.pm
-index 0dbb4e8..7b471dc 100644
---- a/sympa-6.1.22-src/src/lib/confdef.pm
-+++ b/sympa-6.1.22-src/src/lib/confdef.pm
-@@ -1564,6 +1564,13 @@ our @params = (
-         'edit'    => '1',
-         'file'    => 'sympa.conf',
-     },
-+    {
-+        'name'    => 'email_validation',
-+        'query'   => 'The email validation techniques to be used against email addresses that are added to mailing lists. Options come from Email::Validate (http://search.cpan.org/~rjbs/Email-Valid-1.194/lib/Email/Valid.pm). Commenting this out turns off email validation.',
-+        'default' => 'tldcheck,fqdn,rfc822',
-+        'edit'    => '1',
-+        'file'    => 'sympa.conf',
-+    },
+diff --cc sympa-6.1.22-src/po/sympa.pot
+index 81e0251,833acf6..0000000
+--- a/sympa-6.1.22-src/po/sympa.pot
++++ b/sympa-6.1.22-src/po/sympa.pot
+@@@ -8691,3 -8691,39 +8691,39 @@@ msgstr "
+  #: ../wwsympa/wwslib.pm:39
+  msgid "no mail (useful for vacations)"
+  msgstr ""
++ 
+ -#: default/mail_tt2/message_report.tt2:59
+++#: ../default/mail_tt2/message_report.tt2:59
++ msgid "List size has exceded the limit, %1, set by the administrators."
++ msgstr ""
++ 
++ #: ../default/web_tt2/error.tt2:77
++ msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
++ msgstr ""
++ 
++ #: ../src/lib/tools.pm
++ msgid "Considered invalid by SYMPA"
++ msgstr ""
++ 
++ #: ../src/lib/tools.pm
++ msgid "Contains invalid characters"
++ msgstr ""
++ 
++ #: ../src/lib/tools.pm
++ msgid "Invalid top level domain in address"
++ msgstr ""
++ 
++ #: ../src/lib/tools.pm
++ msgid "Fully qualified domain does not exist in address"
++ msgstr ""
++ 
++ #: ../src/lib/tools.pm
++ msgid "Address domain does not have a valid MX record"
++ msgstr ""
++ 
++ #: ../src/lib/tools.pm
++ msgid "Address does not comply with RFC822"
++ msgstr ""
++ 
++ #: ../src/lib/tools.pm
++ msgid "The local part of the email address is greater then 64 characters",
++ msgstr ""
+
+diff --git a/sympa-6.1.22-src/soap/sympasoap.pm b/sympa-6.1.22-src/soap/sympasoap.pm
+index bfc6d7c..810e155 100644
+--- a/sympa-6.1.22-src/soap/sympasoap.pm
++++ b/sympa-6.1.22-src/soap/sympasoap.pm
+@@ -771,8 +771,9 @@ sub add {
+ 	$u->{'password'} = $u2->{'password'} || &tools::tmp_passwd($email) ;
+ 	$u->{'lang'} = $u2->{'lang'} || $list->{'admin'}{'lang'};
+ 	
+-	unless ($list->add_user($u)) {
+-	    &Log::do_log('info', 'add %s@%s %s from %s : Unable to add user', $listname,$robot,$email,$sender);
++	my ($status, %invalids) = $list->add_user($u);
++	unless ($status) {
++	    &Log::do_log('info', 'add %s@%s %s from %s : Unable to add user: %s', $listname,$robot,$email,$sender, $invalids{$email});
+ 	    my $error = "Unable to add user $email in list $listname";
+ 	    die SOAP::Fault->faultcode('Server')
+ 		->faultstring('Unable to add user')
+@@ -1228,10 +1229,11 @@ sub subscribe {
+ 	  $u->{'gecos'} = $gecos;
+ 	  $u->{'date'} = $u->{'update_date'} = time;
+ 	  
++		my ($ct, %invalids) = $list->add_user($u);
+ 	  die SOAP::Fault->faultcode('Server')
+ 	      ->faultstring('Undef')
+ 		  ->faultdetail("SOAP subscribe : add user failed")
+-		      unless $list->add_user($u);
++		      unless $ct;
+       }
+       
+       if ($List::use_db) {
+diff --git a/sympa-6.1.22-src/src/lib/Commands.pm b/sympa-6.1.22-src/src/lib/Commands.pm
+index 8f00c9a..1ed166b 100644
+--- a/sympa-6.1.22-src/src/lib/Commands.pm
++++ b/sympa-6.1.22-src/src/lib/Commands.pm
+@@ -833,8 +833,13 @@ sub subscribe {
+ 	    $u->{'gecos'} = $comment;
+ 	    $u->{'date'} = $u->{'update_date'} = time;
  
- ## Not implemented yet.
- ##    {
-diff --git a/sympa-6.1.22-src/src/lib/tools.pm b/sympa-6.1.22-src/src/lib/tools.pm
-index d9be037..37bd999 100644
---- a/sympa-6.1.22-src/src/lib/tools.pm
-+++ b/sympa-6.1.22-src/src/lib/tools.pm
-@@ -2746,6 +2746,30 @@ sub valid_email {
+-	    unless ($list->add_user($u)){
+-		my $error = "Unable to add user $user in list $listname";
++	    my ($ct, %invalids) = $list->add_user($u);
++	    unless ($ct){
++
++		#TODO: this is untranslateable with variables in it $reason is already
++		# translated, and the other variables just need to be sent in as parameters
++		my $reason = $invalids{$sender};
++		my $error = "Unable to add user $user in list $listname: $reason";
+ 		&report::reject_report_cmd('intern',$error,{'listname'=>$which},$cmd_line,$sender,$robot);
+ 		return undef; 
+ 	    }
+@@ -1277,8 +1282,14 @@ sub add {
+ 	    $u->{'gecos'} = $comment;
+ 	    $u->{'date'} = $u->{'update_date'} = time;
+ 	    
+-	    unless ($list->add_user($u)) {
+-		my $error = "Unable to add user $user in list $listname";
++	    my ($ct, %invalids) = $list->add_user($u);
++	    unless ($ct){
++
++		#TODO: this is untranslateable with variables in it $reason is already
++		# translated, and the other variables just need to be sent in as parameters
++		my $reason = $invalids{$sender};
++		my $error = "Unable to add user $user in list $listname: $reason";
++
+ 		&report::reject_report_cmd('intern',$error,{'listname'=>$which},$cmd_line,$sender,$robot);
+ 		return undef; 
+ 	    }
+diff --git a/sympa-6.1.22-src/src/lib/Message.pm b/sympa-6.1.22-src/src/lib/Message.pm
+index fcddac9..ac45e66 100644
+--- a/sympa-6.1.22-src/src/lib/Message.pm
++++ b/sympa-6.1.22-src/src/lib/Message.pm
+@@ -347,7 +347,8 @@ sub _get_envelope_sender {
+ 	    return '<>';
+ 	} else {
+ 	    my @addrs = Mail::Address->parse($addr);
+-	    if (@addrs and tools::valid_email($addrs[0]->address)) {
++			my ($status, $reason) = tools::valid_email($addrs[0]->address);
++	    if (@addrs and $status) {
+ 		return $addrs[0]->address;
+ 	    }
+ 	}
+@@ -392,8 +393,9 @@ sub _get_sender_email {
+ 	do_log('err', 'No valid sender address');
+ 	return undef;
+     }
+-    unless (tools::valid_email($sender)) {
+-	do_log('err', 'Invalid sender address "%s"', $sender);
++		my ($status, $reason) = tools::valid_email($sender);
++    unless ($status) {
++	do_log('err', 'Invalid sender address "%s" %s', $sender, $reason);
  	return undef;
      }
  
+diff --git a/sympa-6.1.22-src/src/lib/Upgrade.pm b/sympa-6.1.22-src/src/lib/Upgrade.pm
+index 394ad7a..7a3b57f 100644
+--- a/sympa-6.1.22-src/src/lib/Upgrade.pm
++++ b/sympa-6.1.22-src/src/lib/Upgrade.pm
+@@ -616,9 +616,11 @@ sub upgrade {
+ 		$list->{'total'} = 0;
+ 		
+ 		## Add users to the DB
+-		my $total = $list->add_user(@users);
++		my ($total, %invalids) = $list->add_user(@users);
+ 		unless (defined $total) {
+-		    &do_log('err', 'Failed to add users');
++				foreach my $addr (keys %invalids) {
++					&do_log('err', 'Failed to add user %s: %s', $addr, $invalids{$addr});
++				}
+ 		    next;
+ 		}
+ 		
+diff --git a/sympa-6.1.22-src/src/sympa.pl.in b/sympa-6.1.22-src/src/sympa.pl.in
+index 96f9733..ea4bff9 100644
+--- a/sympa-6.1.22-src/src/sympa.pl.in
++++ b/sympa-6.1.22-src/src/sympa.pl.in
+@@ -535,8 +535,11 @@ if ($main::options{'dump'}) {
+ 	$u->{'email'} = $email;
+ 	$u->{'gecos'} = $gecos;
+ 
+-	unless ($list->add_user($u)) {
+-	    printf STDERR "\nCould not add %s\n", $email;
++	my ($num, %invalids) = $list->add_user($u);
++	unless ($num) {
++			foreach my $addr (keys %invalids) {
++				printf STDERR "\nCould not add %s: %s\n", $email, $invalids{$addr};
++			}
+ 	    next;
+ 	}
+ 	print STDERR '+';
+diff --git a/sympa-6.1.22-src/web_tt2/error.tt2 b/sympa-6.1.22-src/web_tt2/error.tt2
+index 65d97b8..3518609 100644
+--- a/sympa-6.1.22-src/web_tt2/error.tt2
++++ b/sympa-6.1.22-src/web_tt2/error.tt2
+@@ -55,7 +55,7 @@
+   [% ELSIF u_err.msg == 'missing_arg' %][%|loc(u_err.argument)%]Missing argument %1[%END%]
+   [% ELSIF u_err.msg == 'wrong_value' %][%|loc(u_err.argument)%]Wrong value for parameter %1[%END%]
+   [% ELSIF u_err.msg == 'no_user' %][%|loc%]You need to login[%END%]
+-  [% ELSIF u_err.msg == 'incorrect_email' %][%|loc(u_err.email)%]Address "%1" is incorrect[%END%]
++  [% ELSIF u_err.msg == 'incorrect_email' %][%|loc(u_err.email,u_err.reason)%]Address "%1" is incorrect: %2[%END%]
+   [% ELSIF u_err.msg == 'incorrect_passwd' %][%|loc%]Provided password is incorrect[%END%]
+   [% ELSIF u_err.msg == 'init_passwd' %][%|loc%]You did not choose a password, request a reminder of the initial password[%END%]
+   [% ELSIF u_err.msg == 'ldap_user' %][%|loc%]Your password is stored in an LDAP directory, therefore Sympa cannot post you a reminder[%END%]
+diff --git a/sympa-6.1.22-src/wwsympa/Auth.pm b/sympa-6.1.22-src/wwsympa/Auth.pm
+index 144ad29..d57e912 100644
+--- a/sympa-6.1.22-src/wwsympa/Auth.pm
++++ b/sympa-6.1.22-src/wwsympa/Auth.pm
+@@ -54,7 +54,8 @@ sub password_fingerprint{
+ 
+      my ($canonic, $user);
+ 
+-     if( &tools::valid_email($auth)) {
++     my ($status, $reason) = &tools::valid_email($auth);
++     if($status) {
+ 	 return &authentication($robot, $auth,$pwd);
+      }else{
+ 	 ## This is an UID
+@@ -283,7 +284,8 @@ sub ldap_authentication {
+      &do_log('debug3',"canonic: $canonic_email[0]");
+      ## If the identifier provided was a valid email, return the provided email.
+      ## Otherwise, return the canonical email guessed after the login.
+-     if( &tools::valid_email($auth) && !$Conf::Conf{'robots'}{$robot}{'ldap_force_canonical_email'}) {
++     my ($status, $reason) =  &tools::valid_email($auth);
++     if( $status && !$Conf::Conf{'robots'}{$robot}{'ldap_force_canonical_email'}) {
+ 	 return ($auth);
+      }else{
+ 	 return lc($canonic_email[0]);
+diff --git a/sympa-6.1.22-src/wwsympa/wwslib.pm b/sympa-6.1.22-src/wwsympa/wwslib.pm
+index 1d13a3d..be8ba46 100644
+--- a/sympa-6.1.22-src/wwsympa/wwslib.pm
++++ b/sympa-6.1.22-src/wwsympa/wwslib.pm
+@@ -274,13 +274,6 @@ sub new_passwd {
+     return 'init'.$passwd;
+ }
+ 
+-## Basic check of an email address
+-sub valid_email {
+-    my $email = shift;
+-    
+-    $email =~ /^([\w\-\_\.\/\+\=]+|\".*\")\@[\w\-]+(\.[\w\-]+)+$/;
+-}
+-
+ sub init_passwd {
+     my ($robot, $email, $data) = @_;
+     
+diff --git a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+index 5c5af41..d78a479 100644
+--- a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+@@ -3605,7 +3605,8 @@ sub do_sso_login_succeeded {
+ 	     my @alternative_conf = split(/,/,$ldap->{'alternative_email_attribute'});
+ 	     my $attrs = $ldap->{'email_attribute'};
+ 
+-	     if (&tools::valid_email($auth)){
++	     my ($status, $reason) = &tools::valid_email($auth);
++	     if ($status){
+ 		 $filter = $ldap->{'get_dn_by_email_filter'};
+ 	     }else{
+ 		 $filter = $ldap->{'get_dn_by_uid_filter'};
+@@ -3775,9 +3776,10 @@ sub sendssopasswd {
+ 	return 'requestemail';
+     }
+     
+-    unless (&tools::valid_email($email)) {
+-	&report::reject_report_web('user','incorrect_email',{'email' => $email},$param->{'action'});
+-	&wwslog('info','do_sendssopasswd: incorrect email %s', $email);
++    my ($status, $reason) = &tools::valid_email($email);
++    unless ($status) {
++	&report::reject_report_web('user','incorrect_email',{'email' => $email, 'reason' => $reason},$param->{'action'});
++	&wwslog('info','do_sendssopasswd: incorrect email %s: %s', $email, $reason);
+ 	&web_db_log({'parameters' => $email,
+ 		     'target_email' => $email,
+ 		     'status' => 'error',
+@@ -3841,11 +3843,12 @@ sub do_renewpasswd {
+ 
+      my $url_redirect;
+      if($in{'email'}){
++	 my ($status, $reason) = &tools::valid_email($in{'email'});
+ 	 if($url_redirect = &is_ldap_user($in{'email'})){
+ 	     $param->{'redirect_to'} = $url_redirect
+ 		 if ($url_redirect && ($url_redirect != 1));
+-	 }elsif (! &tools::valid_email($in{'email'})) {
+-	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}},$param->{'action'});
++	 }elsif (! $status) {
++	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}, 'reason' => $reason},$param->{'action'});
+ 	     &wwslog('info','do_renewpasswd: incorrect email \"%s\"', $in{'email'});
+ 	     &web_db_log({'parameters' => $in{'email'},
+ 			  'target_email' => $in{'email'},
+@@ -4655,9 +4658,10 @@ sub do_pref {
+ 
+      if ($in{'new_email'} && ($in{'email'} ne $in{'new_email'})) {
+ 
+-	 unless ($in{'new_email'} && &tools::valid_email($in{'new_email'})) {
+-	     &wwslog('notice', "do_set:incorrect email %s",$in{'new_email'});
+-	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'new_email'}},$param->{'action'});
++	 my ($status, $reason) = &tools::valid_email($in{'new_email'});
++	 unless ($in{'new_email'} && $status) {
++	     &wwslog('notice', "do_set:incorrect email %s: %s",$in{'new_email'}, $reason);
++	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'new_email'}, 'reason' => $reason},$param->{'action'});
+ 	     &web_db_log({'parameters' => "$in{'reception'},$in{'visibility'}",
+ 			  'status' => 'error',
+ 			  'error_type' => 'incorrect_email'});		      
+@@ -4964,8 +4968,9 @@ sub do_subscribe {
+ 		$u->{'custom_attribute'} = $xml_custom_attribute if (defined $xml_custom_attribute);
+ 		$u->{'lang'} = $param->{'user'}{'lang'} || $param->{'lang'};
+ 		
+-		unless ($list->add_user($u)) {
+-		    &report::reject_report_web('intern','add_subscriber_db_failed',{'sub'=>$param->{'user'}{'email'}},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
++		my ($ct, %invalids) = $list->add_user($u);
++		unless ($ct) {
++		    &report::reject_report_web('intern','add_subscriber_db_failed',{'sub'=>$param->{'user'}{'email'}, 'reason' => $invalids{$u->{'email'}}},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
+ 		    &wwslog('info', 'do_subscribe: subscribe failed');
+ 		    &web_db_log({'parameters' => $in{'email'},
+ 				 'status' => 'error',
+@@ -5139,9 +5144,10 @@ sub do_subrequest {
+ 	    return 1;
+ 	}
+ 	## valid email address?
+-	unless (&tools::valid_email($in{'email'})) {
+-	    &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}},$param->{'action'},$list);
+-	    &wwslog('info','do_subrequest: incorrect email %s', $in{'email'});
++	my ($result, $reason) = &tools::valid_email($in{'email'});
++	unless ($result) {
++	    &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}, 'reason' => $reason},$param->{'action'},$list);
++	    &wwslog('info','do_subrequest: incorrect email %s: %s', $in{'email'}, $reason);
+ 	    &web_db_log({'target_email' => $in{'email'},
+ 			 'status' => 'error',
+ 			 'error_type' => 'incorrect_email'});
+@@ -5445,9 +5451,10 @@ sub unsubscribe {
+ 	 return 1;
+      }
+      ## valid email address?
+-     unless (&tools::valid_email($in{'email'})) {
+-	&report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}},$param->{'action'},$list);
+-	&wwslog('info','do_sigrequest: incorrect email %s', $in{'email'});
++     my ($result, $reason) = &tools::valid_email($in{'email'});
++     unless ($result) {
++	&report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}, 'reason' => $reason},$param->{'action'},$list);
++	&wwslog('info','do_sigrequest: incorrect email %s: %s', $in{'email'}, $reason);
+ 	&web_db_log({'target_email' => $in{'email'},
+ 		    'status' => 'error',
+ 		    'error_type' => 'incorrect_email'});
+@@ -6342,7 +6349,7 @@ sub do_skinsedit {
+ 	 return undef;
+      }
+      
+-     my ($total, @new_users, @added_users );
++     my ($total, @new_users, @added_users, %invalids );
+      my $comma_emails ;
+      foreach my $email (keys %user) {
+ 	 &wwslog('debug', "do_add subscription \$subscriptions->{$email}{custom_attribute} = $subscriptions->{$email}{'custom_attribute'})" );
+@@ -6372,8 +6379,9 @@ sub do_skinsedit {
+ 	     next;
+ 	 }
+ 	 
+-	 unless (&tools::valid_email($email)) {
+-	     &report::reject_report_web('user','incorrect_email',{'email' => $email},$param->{'action'},$list);
++	 my ($status, $reason) = &tools::valid_email($email);
++	 unless ($status) {
++	     &report::reject_report_web('user','incorrect_email',{'email' => $email, 'reason' => $reason},$param->{'action'},$list);
+ 	     &wwslog('info','do_add: incorrect email %s', $email);
+ 	     &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
+ 			  'status' => 'error',
+@@ -6418,13 +6426,15 @@ sub do_skinsedit {
+ 	 }
+      }
+      
+-     $total = $list->add_user(@new_users);
++     ($total, %invalids) = $list->add_user(@new_users);
+      unless( defined $total) {
+-	 &report::reject_report_web('intern','add_subscriber_db_failed',{},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
+-	 &wwslog('info','do_add: failed adding');
+-	 &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
+-		      'status' => 'error',
+-		      'error_type' => 'internal'});
++			foreach my $addr (keys %invalids) {
++			 &report::reject_report_web('intern','add_subscriber_db_failed',{'reason'=>$invalids{$addr}},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
++			 &wwslog('info','do_add: failed adding');
++			 &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
++							'status' => 'error',
++							'error_type' => 'internal'});
++			}
+ 	 return undef;
+      }
+      
+@@ -14755,8 +14765,9 @@ sub d_test_existing_and_rights {
+      }
+ 
+      # the email must look like an email "somebody@somewhere"
+-     unless (&tools::valid_email($in{'content'})) {
+-	 &report::reject_report_web('user','incorrect_email',{'email' => $in{'content'}},$param->{'action'},$list);
++     my ($result, $reason) = &tools::valid_email($in{'content'});
++     unless ($result) {
++	 &report::reject_report_web('user','incorrect_email',{'email' => $in{'content'}, 'reason' => $reason},$param->{'action'},$list);
+ 	 &wwslog('info',"d_set_owner : $in{'content'} : incorrect email");
+ 	 &web_db_log({'robot' => $robot,'list' => $list->{'name'},'action' => $param->{'action'},'parameters' => "$in{'name_doc'}",'target_email' => "",'msg_id' => '','status' => 'error','error_type' => 'incorrect_email','user_email' => $param->{'user'}{'email'},'client' => $ip,'daemon' => $daemon_name});
+ 	 return undef;
+diff --git a/sympa-6.1.22-src/src/lib/List.pm b/sympa-6.1.22-src/src/lib/List.pm
+index ca917d4..522e1e5 100644
+--- a/sympa-6.1.22-src/src/lib/List.pm
++++ b/sympa-6.1.22-src/src/lib/List.pm
+@@ -7516,10 +7516,13 @@ sub add_user {
+     unless ($dbh and $dbh->ping) {
+ 	return undef unless &db_connect();
+     }	   
+-    
++
++		my %invalids = (); 
+     foreach my $new_user (@new_users) {
+ 	my $who = &tools::clean_email($new_user->{'email'});
+-	unless ($who) {
++	my ($status, $reason) = &tools::valid_email($new_user->{'email'});
++	unless ($who || !$status ) {
++			$invalids{$new_user->{'email'}} = $reason;
+ 	    Log::do_log('err', 'Ignoring %s which is not a valid email',$new_user->{'email'});
+ 	    next;
+ 	}
+@@ -7603,7 +7606,7 @@ sub add_user {
+     $self->{'total'} += $total;
+     $self->savestats();
+ 
+-    return $total;
++    return ($total, %invalids);
+ }
+ 
+ 
+@@ -9851,8 +9854,9 @@ sub sync_include {
+ 	    $u->{'date'} = time;
+ 	    @add_tab = ($u);
+ 	    my $user_added = 0;
+-	    unless( $user_added = $self->add_user( @add_tab ) ) {
+-		&do_log('err', 'List:sync_include(%s): Failed to add new users', $name);
++			my ($added, %invalids) = $self->add_user( @add_tab );
++	    unless( $added ) {
++		&do_log('err', 'List:sync_include(%s): Failed to add new users: %s', $name, $invalids{$email});
+ 		return undef;
+ 	    }
+ 	    if ($user_added) {
+diff --git a/sympa-6.1.22-src/src/lib/tools.pm b/sympa-6.1.22-src/src/lib/tools.pm
+index d9be037..2cae36f 100644
+--- a/sympa-6.1.22-src/src/lib/tools.pm
++++ b/sympa-6.1.22-src/src/lib/tools.pm
+@@ -2737,13 +2737,47 @@ sub valid_email {
+     
+     unless ($email =~ /^$regexp{'email'}$/) {
+ 	do_log('err', "Invalid email address '%s'", $email);
+-	return undef;
++	return (undef, gettext('Considered invalid by SYMPA'));
+     }
+     
+     ## Forbidden characters
+     if ($email =~ /[\|\$\*\?\!]/) {
+ 	do_log('err', "Invalid email address '%s'", $email);
+-	return undef;
++	return (undef, gettext('Contains invalid characters'));
++    }
++
 +    # If email_validation is set then apply additional email validation set
 +    # by Email::Valid as per the configuration
 +    if ($Conf::Conf{'email_validation'}) {
@@ -49,7 +451,17 @@ index d9be037..37bd999 100644
 +	    'allow_ip' => '-allow_ip',
 +	    'local_rules' => '-local_rules'
 +	};
-+        my @techniques = split(',', $Conf::Conf{'email_validation'});
++
++	my $reason_map = {
++	    'tldcheck' => gettext('Invalid top level domain in address'),
++	    'fqdn' => gettext('Fully qualified domain does not exist in address'),
++	    'mxcheck' => gettext('Address domain does not have a valid MX record'),
++	    'local_rules' => gettext('Does not satisfy the restictions on aol.com addresses'),
++			'localpart' => gettext('The local part of the email address is greater then 64 characters'),
++			'rfc822' => gettext('Address does not comply with RFC822')
++	};
++
++  my @techniques = split(',', $Conf::Conf{'email_validation'});
 +	my @options;
 +	foreach (@techniques) {
 +	    push @options, $technique_map->{$_};
@@ -57,27 +469,44 @@ index d9be037..37bd999 100644
 +	my $valid = new Email::Valid(@options);
 +	if (!$valid->address($email)) {
 +	    do_log('err', "Invalid email address '%s' [%s]", $email, $valid->details());
-+	    return undef;
++	    return (undef, $reason_map->{$valid->details()});
 +	}
-+    }
-+
-     return 1;
- }
+     }
  
+     return 1;
+diff --git a/sympa-6.1.22-src/src/lib/confdef.pm b/sympa-6.1.22-src/src/lib/confdef.pm
+index 0dbb4e8..548f55c 100644
+--- a/sympa-6.1.22-src/src/lib/confdef.pm
++++ b/sympa-6.1.22-src/src/lib/confdef.pm
+@@ -1564,6 +1564,14 @@ our @params = (
+         'edit'    => '1',
+         'file'    => 'sympa.conf',
+     },
++		{
++
++			 'name' => 'email_validation',
++			 'query' => 'The email validation techniques to be used against email addresses that are added to mailing lists. Options come from Email::Validate (http://search.cpan.org/~rjbs/Email-Valid-1.194/lib/Email/Valid.pm). Commenting this out turns off email validation.',
++			 'default' => 'tldcheck,fqdn,rfc822',
++			 'edit' => '1',
++			 'file' => 'sympa.conf',
++	 },
+ 
+ ## Not implemented yet.
+ ##    {
 diff --git a/sympa-6.1.22-src/src/sympa_wizard.pl.in b/sympa-6.1.22-src/src/sympa_wizard.pl.in
-index 0d4789d..cb886fd 100644
+index 0d4789d..3ee8c82 100644
 --- a/sympa-6.1.22-src/src/sympa_wizard.pl.in
 +++ b/sympa-6.1.22-src/src/sympa_wizard.pl.in
 @@ -380,6 +380,12 @@ sub check_cpan {
  				     mandatory => 1,
  				     usage => 'module for character encoding processing',
  				    },
-+			'Email::Valid' => {
-+				  required_version =>'1.194',
-+				  package_name => 'Email-Valid',
-+				  mandatory => 1,
-+				  usage => 'used to compute validate email addresses',
-+					  },
++      'Email::Valid' => {
++             required_version =>'1.194',
++             package_name => 'Email-Valid',
++             mandatory => 1,
++             usage => 'used to compute validate email addresses',
++      },
  			'FCGI' => {
  				   required_version => '0.67',
  				   package_name => 'FCGI',

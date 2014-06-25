@@ -535,8 +535,11 @@ if ($main::options{'dump'}) {
 	$u->{'email'} = $email;
 	$u->{'gecos'} = $gecos;
 
-	unless ($list->add_user($u)) {
-	    printf STDERR "\nCould not add %s\n", $email;
+	my ($num, %invalids) = $list->add_user($u);
+	unless ($num) {
+			foreach my $addr (keys %invalids) {
+				printf STDERR "\nCould not add %s: %s\n", $email, $invalids{$addr};
+			}
 	    next;
 	}
 	print STDERR '+';

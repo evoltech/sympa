@@ -2737,13 +2737,13 @@ sub valid_email {
     
     unless ($email =~ /^$regexp{'email'}$/) {
 	do_log('err', "Invalid email address '%s'", $email);
-	return undef;
+	return (undef, gettext('Considered invalid by SYMPA'));
     }
     
     ## Forbidden characters
     if ($email =~ /[\|\$\*\?\!]/) {
 	do_log('err', "Invalid email address '%s'", $email);
-	return undef;
+	return (undef, gettext('Contains invalid characters'));
     }
 
     # If email_validation is set then apply additional email validation set
@@ -2758,7 +2758,17 @@ sub valid_email {
 	    'allow_ip' => '-allow_ip',
 	    'local_rules' => '-local_rules'
 	};
-        my @techniques = split(',', $Conf::Conf{'email_validation'});
+
+	my $reason_map = {
+	    'tldcheck' => gettext('Invalid top level domain in address'),
+	    'fqdn' => gettext('Fully qualified domain does not exist in address'),
+	    'mxcheck' => gettext('Address domain does not have a valid MX record'),
+	    'local_rules' => gettext('Does not satisfy the restictions on aol.com addresses'),
+			'localpart' => gettext('The local part of the email address is greater then 64 characters'),
+			'rfc822' => gettext('Address does not comply with RFC822')
+	};
+
+  my @techniques = split(',', $Conf::Conf{'email_validation'});
 	my @options;
 	foreach (@techniques) {
 	    push @options, $technique_map->{$_};
@@ -2766,7 +2776,7 @@ sub valid_email {
 	my $valid = new Email::Valid(@options);
 	if (!$valid->address($email)) {
 	    do_log('err', "Invalid email address '%s' [%s]", $email, $valid->details());
-	    return undef;
+	    return (undef, $reason_map->{$valid->details()});
 	}
     }
 

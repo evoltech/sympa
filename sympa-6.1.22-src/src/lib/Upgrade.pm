@@ -616,9 +616,11 @@ sub upgrade {
 		$list->{'total'} = 0;
 		
 		## Add users to the DB
-		my $total = $list->add_user(@users);
+		my ($total, %invalids) = $list->add_user(@users);
 		unless (defined $total) {
-		    &do_log('err', 'Failed to add users');
+				foreach my $addr (keys %invalids) {
+					&do_log('err', 'Failed to add user %s: %s', $addr, $invalids{$addr});
+				}
 		    next;
 		}
 		

@@ -347,7 +347,8 @@ sub _get_envelope_sender {
 	    return '<>';
 	} else {
 	    my @addrs = Mail::Address->parse($addr);
-	    if (@addrs and tools::valid_email($addrs[0]->address)) {
+			my ($status, $reason) = tools::valid_email($addrs[0]->address);
+	    if (@addrs and $status) {
 		return $addrs[0]->address;
 	    }
 	}
@@ -392,8 +393,9 @@ sub _get_sender_email {
 	do_log('err', 'No valid sender address');
 	return undef;
     }
-    unless (tools::valid_email($sender)) {
-	do_log('err', 'Invalid sender address "%s"', $sender);
+		my ($status, $reason) = tools::valid_email($sender);
+    unless ($status) {
+	do_log('err', 'Invalid sender address "%s" %s', $sender, $reason);
 	return undef;
     }
 
