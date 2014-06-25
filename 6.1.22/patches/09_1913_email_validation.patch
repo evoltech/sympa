@@ -510,3 +510,15 @@ index 0d4789d..3ee8c82 100644
  			'FCGI' => {
  				   required_version => '0.67',
  				   package_name => 'FCGI',
+diff --git a/sympa-6.1.22-src/src/lib/confdef.pm b/sympa-6.1.22-src/src/lib/confdef.pm
+index 7b471dc..9feb752 100644
+--- a/sympa-6.1.22-src/src/lib/confdef.pm
++++ b/sympa-6.1.22-src/src/lib/confdef.pm
+@@ -1570,6 +1570,7 @@ our @params = (
+         'default' => 'tldcheck,fqdn,rfc822',
+         'edit'    => '1',
+         'file'    => 'sympa.conf',
++				'optional'=> '1',
+     },
+ 
+ ## Not implemented yet.

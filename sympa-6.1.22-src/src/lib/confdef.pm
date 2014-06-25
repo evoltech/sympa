@@ -1570,6 +1570,7 @@ our @params = (
         'default' => 'tldcheck,fqdn,rfc822',
         'edit'    => '1',
         'file'    => 'sympa.conf',
+				'optional'=> '1',
     },
 
 ## Not implemented yet.
