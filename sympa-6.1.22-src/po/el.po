@@ -14136,3 +14136,31 @@ msgstr "Ο κωδικός πρόσβασης που πληκτρολογήσατ
 
 #~ msgid "The configuration file --CONFIG-- contains errors.\n"
 #~ msgstr "Το αρχείο διαμόρφωσης --CONFIG-- περιέχει λάθη.\n"
+
+#: .. / Src / lib / tools.pm
+msgid "Considered invalid by SYMPA"
+msgstr "Θεωρείται άκυρο από SYMPA"
+
+#: .. / Src / lib / tools.pm
+msgid "Contains invalid characters"
+msgstr "Περιέχει έγκυρους χαρακτήρες"
+
+#: .. / Src / lib / tools.pm
+msgid "Invalid top level domain in address"
+msgstr "Μη έγκυρο τομέα ανωτάτου επιπέδου στην διεύθυνση"
+
+#: .. / Src / lib / tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr "Πλήρως εξειδικευμένο τομέα δεν υπάρχει στην διεύθυνση"
+
+#: .. / Src / lib / tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr "πεδίο Διεύθυνση δεν έχει έγκυρη εγγραφή MX"
+
+#: .. / Src / lib / tools.pm
+msgid "Address does not comply with RFC822"
+msgstr "Διεύθυνση δεν συμμορφώνεται με RFC822"
+
+#: .. / Src / lib / tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr "Το τοπικό τμήμα της διεύθυνσης ηλεκτρονικού ταχυδρομείου είναι μεγαλύτερη από 64 χαρακτήρες"

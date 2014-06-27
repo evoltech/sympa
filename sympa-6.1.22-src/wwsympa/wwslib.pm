@@ -274,13 +274,6 @@ sub new_passwd {
     return 'init'.$passwd;
 }
 
-## Basic check of an email address
-sub valid_email {
-    my $email = shift;
-    
-    $email =~ /^([\w\-\_\.\/\+\=]+|\".*\")\@[\w\-]+(\.[\w\-]+)+$/;
-}
-
 sub init_passwd {
     my ($robot, $email, $data) = @_;
     

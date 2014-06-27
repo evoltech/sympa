@@ -10919,7 +10919,6 @@ msgid ""
 "Visit  %3/oauth_check/%2 to check the token state and renew it if necessary."
 msgstr ""
 
-
 #: ../default/web_tt2/error.tt2:77
 msgid "The password you typed does not match this sites standards of strength: %1. Please pick a stronger password."
 msgstr "Die von Ihnen eingegebene Passwort stimmt nicht mit diesen Seiten Normen der Stärke:% 1. Bitte wählen Sie eine stärkere Passwort."
@@ -12567,3 +12566,31 @@ msgstr "Die von Ihnen eingegebene Passwort stimmt nicht mit diesen Seiten Normen
 #, fuzzy
 #~ msgid "Choose notification "
 #~ msgstr "Benachrichtigung"
+
+#: .. / Src / lib / tools.pm
+msgid "Considered invalid by SYMPA"
+msgstr "von SYMPA als ungültig"
+
+#: .. / Src / lib / tools.pm
+msgid "Contains invalid characters"
+msgstr "enthält ungültige Zeichen"
+
+#: .. / Src / lib / tools.pm
+msgid "Invalid top level domain in address"
+msgstr "Ungültige Top-Level-Domain in der Adresse"
+
+#: .. / Src / lib / tools.pm
+msgid "Fully qualified domain does not exist in address"
+msgstr "Vollständig qualifizierter Domain nicht in der Adresse vorhanden"
+
+#: .. / Src / lib / tools.pm
+msgid "Address domain does not have a valid MX record"
+msgstr "Adresse Domäne nicht über einen gültigen MX-Eintrag"
+
+#: .. / Src / lib / tools.pm
+msgid "Address does not comply with RFC822"
+msgstr "Adresse nicht mit RFC822 entsprechen"
+
+#: .. / Src / lib / tools.pm
+msgid "The local part of the email address is greater then 64 characters"
+msgstr "Der lokale Teil der E-Mail-Adresse ist größer als 64 Zeichen"

@@ -3605,7 +3605,8 @@ sub do_sso_login_succeeded {
 	     my @alternative_conf = split(/,/,$ldap->{'alternative_email_attribute'});
 	     my $attrs = $ldap->{'email_attribute'};
 
-	     if (&tools::valid_email($auth)){
+	     my ($status, $reason) = &tools::valid_email($auth);
+	     if ($status){
 		 $filter = $ldap->{'get_dn_by_email_filter'};
 	     }else{
 		 $filter = $ldap->{'get_dn_by_uid_filter'};
@@ -3775,9 +3776,10 @@ sub sendssopasswd {
 	return 'requestemail';
     }
     
-    unless (&tools::valid_email($email)) {
-	&report::reject_report_web('user','incorrect_email',{'email' => $email},$param->{'action'});
-	&wwslog('info','do_sendssopasswd: incorrect email %s', $email);
+    my ($status, $reason) = &tools::valid_email($email);
+    unless ($status) {
+	&report::reject_report_web('user','incorrect_email',{'email' => $email, 'reason' => $reason},$param->{'action'});
+	&wwslog('info','do_sendssopasswd: incorrect email %s: %s', $email, $reason);
 	&web_db_log({'parameters' => $email,
 		     'target_email' => $email,
 		     'status' => 'error',
@@ -3841,11 +3843,12 @@ sub do_renewpasswd {
 
      my $url_redirect;
      if($in{'email'}){
+	 my ($status, $reason) = &tools::valid_email($in{'email'});
 	 if($url_redirect = &is_ldap_user($in{'email'})){
 	     $param->{'redirect_to'} = $url_redirect
 		 if ($url_redirect && ($url_redirect != 1));
-	 }elsif (! &tools::valid_email($in{'email'})) {
-	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}},$param->{'action'});
+	 }elsif (! $status) {
+	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}, 'reason' => $reason},$param->{'action'});
 	     &wwslog('info','do_renewpasswd: incorrect email \"%s\"', $in{'email'});
 	     &web_db_log({'parameters' => $in{'email'},
 			  'target_email' => $in{'email'},
@@ -4655,9 +4658,10 @@ sub do_pref {
 
      if ($in{'new_email'} && ($in{'email'} ne $in{'new_email'})) {
 
-	 unless ($in{'new_email'} && &tools::valid_email($in{'new_email'})) {
-	     &wwslog('notice', "do_set:incorrect email %s",$in{'new_email'});
-	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'new_email'}},$param->{'action'});
+	 my ($status, $reason) = &tools::valid_email($in{'new_email'});
+	 unless ($in{'new_email'} && $status) {
+	     &wwslog('notice', "do_set:incorrect email %s: %s",$in{'new_email'}, $reason);
+	     &report::reject_report_web('user','incorrect_email',{'email' => $in{'new_email'}, 'reason' => $reason},$param->{'action'});
 	     &web_db_log({'parameters' => "$in{'reception'},$in{'visibility'}",
 			  'status' => 'error',
 			  'error_type' => 'incorrect_email'});		      
@@ -4961,20 +4965,12 @@ sub do_subscribe {
 		$u->{'gecos'} = $param->{'user'}{'gecos'} || $in{'gecos'};
 		$u->{'date'} = $u->{'update_date'} = time;
 		$u->{'password'} = $param->{'user'}{'password'};
-		if (my $reason = &tools::password_validation($u->{'password'})) {
-			&report::reject_report_web('user','passwd_validation',{'reason' => $reason},$param->{'action'});
-			&wwslog('info','do_setpasswd: password validation');
-			&web_db_log({
-				'status' => 'error',
-			  'error_type' => 'bad_parameter'
-			});
-			return undef;
-		 }
 		$u->{'custom_attribute'} = $xml_custom_attribute if (defined $xml_custom_attribute);
 		$u->{'lang'} = $param->{'user'}{'lang'} || $param->{'lang'};
 		
-		unless ($list->add_user($u)) {
-		    &report::reject_report_web('intern','add_subscriber_db_failed',{'sub'=>$param->{'user'}{'email'}},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
+		my ($ct, %invalids) = $list->add_user($u);
+		unless ($ct) {
+		    &report::reject_report_web('intern','add_subscriber_db_failed',{'sub'=>$param->{'user'}{'email'}, 'reason' => $invalids{$u->{'email'}}},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
 		    &wwslog('info', 'do_subscribe: subscribe failed');
 		    &web_db_log({'parameters' => $in{'email'},
 				 'status' => 'error',
@@ -5148,9 +5144,10 @@ sub do_subrequest {
 	    return 1;
 	}
 	## valid email address?
-	unless (&tools::valid_email($in{'email'})) {
-	    &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}},$param->{'action'},$list);
-	    &wwslog('info','do_subrequest: incorrect email %s', $in{'email'});
+	my ($result, $reason) = &tools::valid_email($in{'email'});
+	unless ($result) {
+	    &report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}, 'reason' => $reason},$param->{'action'},$list);
+	    &wwslog('info','do_subrequest: incorrect email %s: %s', $in{'email'}, $reason);
 	    &web_db_log({'target_email' => $in{'email'},
 			 'status' => 'error',
 			 'error_type' => 'incorrect_email'});
@@ -5454,9 +5451,10 @@ sub unsubscribe {
 	 return 1;
      }
      ## valid email address?
-     unless (&tools::valid_email($in{'email'})) {
-	&report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}},$param->{'action'},$list);
-	&wwslog('info','do_sigrequest: incorrect email %s', $in{'email'});
+     my ($result, $reason) = &tools::valid_email($in{'email'});
+     unless ($result) {
+	&report::reject_report_web('user','incorrect_email',{'email' => $in{'email'}, 'reason' => $reason},$param->{'action'},$list);
+	&wwslog('info','do_sigrequest: incorrect email %s: %s', $in{'email'}, $reason);
 	&web_db_log({'target_email' => $in{'email'},
 		    'status' => 'error',
 		    'error_type' => 'incorrect_email'});
@@ -5508,7 +5506,7 @@ sub unsubscribe {
 
 	if (my $reason = &tools::password_validation($in{'newpasswd1'})) {
 		&report::reject_report_web('user','passwd_validation',{'reason' => $reason},$param->{'action'});
-		 &wwslog('info','do_setpasswd: password validation');
+		 &wwslog('info','password validation error: '. $reason);
 		 &web_db_log({'status' => 'error',
 			  'error_type' => 'bad_parameter'});
 		 return undef;
@@ -6359,7 +6357,7 @@ sub do_skinsedit {
 	 return undef;
      }
      
-     my ($total, @new_users, @added_users );
+     my ($total, @new_users, @added_users, %invalids );
      my $comma_emails ;
      foreach my $email (keys %user) {
 	 &wwslog('debug', "do_add subscription \$subscriptions->{$email}{custom_attribute} = $subscriptions->{$email}{'custom_attribute'})" );
@@ -6389,8 +6387,9 @@ sub do_skinsedit {
 	     next;
 	 }
 	 
-	 unless (&tools::valid_email($email)) {
-	     &report::reject_report_web('user','incorrect_email',{'email' => $email},$param->{'action'},$list);
+	 my ($status, $reason) = &tools::valid_email($email);
+	 unless ($status) {
+	     &report::reject_report_web('user','incorrect_email',{'email' => $email, 'reason' => $reason},$param->{'action'},$list);
 	     &wwslog('info','do_add: incorrect email %s', $email);
 	     &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
 			  'status' => 'error',
@@ -6417,14 +6416,6 @@ sub do_skinsedit {
 	 $u->{'gecos'} = $user{$email} || $u2->{'gecos'};
 	 $u->{'date'} = $u->{'update_date'} = time;
 	 $u->{'password'} = $u2->{'password'} || &tools::tmp_passwd($email) ;
-	 if (my $reason = &tools::password_validation($u->{'password'})) {
-		 &report::reject_report_web('user','passwd_validation',{'reason' => $reason},$param->{'action'});
-		 &wwslog('info','do_setpasswd: password validation');
-		 &web_db_log({'status' => 'error',
-			  'error_type' => 'bad_parameter'});
-		 return undef;
-	 }
-
 	 $u->{'lang'} = $u2->{'lang'} || $list->{'admin'}{'lang'};
 	 if ($comma_emails) {
 	     $comma_emails = $comma_emails .','. $email;
@@ -6443,13 +6434,15 @@ sub do_skinsedit {
 	 }
      }
      
-     $total = $list->add_user(@new_users);
+     ($total, %invalids) = $list->add_user(@new_users);
      unless( defined $total) {
-	 &report::reject_report_web('intern','add_subscriber_db_failed',{},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
-	 &wwslog('info','do_add: failed adding');
-	 &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
-		      'status' => 'error',
-		      'error_type' => 'internal'});
+			foreach my $addr (keys %invalids) {
+			 &report::reject_report_web('intern','add_subscriber_db_failed',{'reason'=>$invalids{$addr}},$param->{'action'},$list,$param->{'user'}{'email'},$robot);
+			 &wwslog('info','do_add: failed adding');
+			 &web_db_log({'target_email' => $in{'email'}||$in{'pending_email'},
+							'status' => 'error',
+							'error_type' => 'internal'});
+			}
 	 return undef;
      }
      
@@ -14780,8 +14773,9 @@ sub d_test_existing_and_rights {
      }
 
      # the email must look like an email "somebody@somewhere"
-     unless (&tools::valid_email($in{'content'})) {
-	 &report::reject_report_web('user','incorrect_email',{'email' => $in{'content'}},$param->{'action'},$list);
+     my ($result, $reason) = &tools::valid_email($in{'content'});
+     unless ($result) {
+	 &report::reject_report_web('user','incorrect_email',{'email' => $in{'content'}, 'reason' => $reason},$param->{'action'},$list);
 	 &wwslog('info',"d_set_owner : $in{'content'} : incorrect email");
 	 &web_db_log({'robot' => $robot,'list' => $list->{'name'},'action' => $param->{'action'},'parameters' => "$in{'name_doc'}",'target_email' => "",'msg_id' => '','status' => 'error','error_type' => 'incorrect_email','user_email' => $param->{'user'}{'email'},'client' => $ip,'daemon' => $daemon_name});
 	 return undef;
