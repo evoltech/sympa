@@ -111,5 +111,71 @@ describe "wwsympa" do
 			page.content.must_match /List has been closed/
 		end
 
+		# This is for issue #6404: https://labs.riseup.net/code/issues/6404
+		it "can not add a list with a name that ends in -admin" do
+			listname = @@list +"-admin"
+			page = @browser.post(@url, {
+				:listname => listname,
+				:template => "confidential",
+				:subject => listname,
+				:topics => "arts",
+				:info => listname,
+				:action_create_list => "Submit+your+creation+request",
+			})
+
+			if page.content.match(/Your list is created/)
+				@browser.post(@url, {
+					:list => listname,
+					:action_close_list => "Remove+List",
+				})
+			end
+				
+			page.content.match(/Your list is created/).must_be_nil
+		end
+
+		# This is for issue #6404: https://labs.riseup.net/code/issues/6404
+		it "can not add a list with a name that ends in -owner" do
+			listname = @@list +"-owner"
+			page = @browser.post(@url, {
+				:listname => listname,
+				:template => "confidential",
+				:subject => listname,
+				:topics => "arts",
+				:info => listname,
+				:action_create_list => "Submit+your+creation+request",
+			})
+
+			if page.content.match(/Your list is created/)
+				@browser.post(@url, {
+					:list => listname,
+					:action_close_list => "Remove+List",
+				})
+			end
+				
+			page.content.match(/Your list is created/).must_be_nil
+		end
+
+		# This is for issue #6404: https://labs.riseup.net/code/issues/6404
+		it "can not add a list with a name that ends in -request" do
+			listname = @@list +"-request"
+			page = @browser.post(@url, {
+				:listname => listname,
+				:template => "confidential",
+				:subject => listname,
+				:topics => "arts",
+				:info => listname,
+				:action_create_list => "Submit+your+creation+request",
+			})
+
+			if page.content.match(/Your list is created/)
+				@browser.post(@url, {
+					:list => listname,
+					:action_close_list => "Remove+List",
+				})
+			end
+				
+			page.content.match(/Your list is created/).must_be_nil
+		end
+
 	end
 end
