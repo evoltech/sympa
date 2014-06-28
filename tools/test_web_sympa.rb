@@ -73,6 +73,18 @@ describe "wwsympa" do
 			page.content.must_match /Your list is created/
 		end
 
+		# This is for issue #1187: https://labs.riseup.net/code/issues/1187
+		it "can not add name on the user preferences page" do
+			page = @browser.post(@url, {
+				:gecos => "Mesuir+Burf+lete",
+				:lang => "en_US",
+				:cookie_delay => "0",
+				:action_setpref => "Submit",
+			})
+
+			page.content.match(/setpref: action completed/).must_be_nil
+		end
+
 		it "can add a user to a list" do
 			page = @browser.post(@url, {
 				:list => @@list,
