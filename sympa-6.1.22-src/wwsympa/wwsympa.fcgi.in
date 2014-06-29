@@ -4794,7 +4794,7 @@ sub check_custom_attribute {
      &wwslog('info', 'do_setpref');
      my $changes = {};
 
-     foreach my $p ('gecos','lang','cookie_delay') {
+     foreach my $p ('lang','cookie_delay') {
 	 $changes->{$p} = $in{$p} if (defined($in{$p}));
      }
 
@@ -4808,7 +4808,7 @@ sub check_custom_attribute {
 	 unless (&List::update_user_db($param->{'user'}{'email'}, $changes)) {
 	     &report::reject_report_web('intern','update_user_db_failed',{'user'=>$param->{'user'}{'email'}},$param->{'action'},'',$param->{'user'}{'email'},$robot);
 	     &wwslog('info','do_pref: update failed');
-	     &web_db_log({'parameters' => "$in{'gecos'},$in{'lang'},$in{'cookie_delay'}",
+	     &web_db_log({'parameters' => "$in{'lang'},$in{'cookie_delay'}",
 			  'status' => 'error',
 			  'error_type' => 'internal'});
 	     return undef;
@@ -4818,19 +4818,19 @@ sub check_custom_attribute {
 	 unless (&List::add_user_db($changes)) {
 	     &report::reject_report_web('intern','add_user_db_failed',{'user'=>$param->{'user'}{'email'}},$param->{'action'},'',$param->{'user'}{'email'},$robot);
 	     &wwslog('info','do_pref: add failed');
-	     &web_db_log({'parameters' => "$in{'gecos'},$in{'lang'},$in{'cookie_delay'}",
+	     &web_db_log({'parameters' => "$in{'lang'},$in{'cookie_delay'}",
 			  'status' => 'error',
 			  'error_type' => 'internal'});
 	     return undef;
 	 }
      }
 
-     foreach my $p ('gecos','lang','cookie_delay') {
+     foreach my $p ('lang','cookie_delay') {
 	 $param->{'user'}{$p} = $in{$p};
      }
 
      &report::notice_report_web('performed',{},$param->{'action'});
-     &web_db_log({'parameters' => "$in{'gecos'},$in{'lang'},$in{'cookie_delay'}",
+     &web_db_log({'parameters' => "$in{'lang'},$in{'cookie_delay'}",
 		  'status' => 'success',
 	      });
      if ($in{'previous_action'}) {
