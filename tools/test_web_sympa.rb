@@ -76,13 +76,13 @@ describe "wwsympa" do
 		# This is for issue #1187: https://labs.riseup.net/code/issues/1187
 		it "can not add name on the user preferences page" do
 			page = @browser.post(@url, {
-				:gecos => "Mesuir+Burf+lete",
+				:gecos => "Mesuir Burf Letet",
 				:lang => "en_US",
 				:cookie_delay => "0",
 				:action_setpref => "Submit",
 			})
 
-			page.content.match(/setpref: action completed/).must_be_nil
+			page.content.match(/Mesuir Burf Letet/).must_be_nil
 		end
 
 		it "can add a user to a list" do
@@ -92,7 +92,6 @@ describe "wwsympa" do
 				:email => @user,
 				:action_add => "Add",
 			})
-			page.save "test.html"
 			page.content.must_match /1 subscribers added/
 		end
 
