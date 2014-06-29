@@ -25,10 +25,11 @@ sub new {
 sub init {
    my ($self) = @_;
    return 1 if (defined($self->{init}) && $self->{init} == 1);
+	 my $dsn = 'dbi:mysql:host='. $self->{server} .';dbname='. $self->{database};
 
    $self->{_dbh} = DBI->connect
    (
-      "dbi:mysql:". $self->{database}, 
+			$dsn,
       $self->{username},
       $self->{password},
       {
@@ -80,6 +81,16 @@ sub init {
         'where user_subscriber = ?';
    $self->{updateUserEmailInSubscriberTableSTH}= 
     $self->{_dbh}->prepare ($self->{updateUserEmailInSubscriberTable});
+
+   $self->{selectUsers} = 
+			'SELECT gecos_user,email_user FROM user_table';
+   $self->{selectUsersSTH}= 
+    $self->{_dbh}->prepare ($self->{selectUsers});
+
+   $self->{clearUsersName} = 
+			'UPDATE user_table set gecos_user=NULL where email_user=?';
+   $self->{clearUsersNameSTH}= 
+    $self->{_dbh}->prepare ($self->{clearUsersName});
 
 }
 
@@ -162,6 +173,41 @@ sub rewriteUserEmailDomains {
     $self->{updateUserEmailInSubscriberTableSTH}->execute(
       $new_email, $old_email);
   }
+}
+
+sub getUsers {
+  my ($self) = @_;
+	my $users;
+  init($self);
+
+  eval {
+    $self->{selectUsersSTH}->execute(); 
+  };
+  if ($@) {
+     warn "Could not get a user list from the DB: $!\n";
+     return -1;
+  }
+
+  while (my $user = 
+    $self->{selectUsersSTH}->fetchrow_hashref('NAME_lc')) {
+    push (@$users, {'email' =>  $user->{email_user}, 'name' => $user->{gecos_user}});
+  }
+
+	return $users;
+}
+
+sub clearUserName {
+  my ($self, $email) = @_;
+	
+  eval {
+		$self->{clearUsersNameSTH}->execute($email)
+  };
+  if ($@) {
+     warn 'Could not clear name for user with email '. $email .": $!\n";
+     return -1;
+  }
+
+	return 1;
 }
 
 1;
