@@ -23,7 +23,6 @@ use strict;
 use warnings;
 use FindBin qw($Bin);
 use lib "$Bin/lib";
-use Data::Dumper;
 use Getopt::Long;
 use LWP::Simple;
 use JSON;
@@ -62,17 +61,6 @@ if ($@) {
 	 die "Could not get a user list from the DB: $! $@\n";
 }
 
-my @codes = (
-	"An invalid API Key was used.",
-	"All parameters must be used (API Type, API Key, Phrase).",
-	"An invalid API Type was selected.",
-	"You have reached your query limit.",
-	"The API Key used is not associated with this domain.",
-	"The MD5 hash was generated.",
-	"The MD5 hash was cracked.",
-	"The MD5 hash could not be cracked.",
-);
-
 my $json = JSON->new->allow_nonref;
 while (my $user = 
 	$sympa->{selectUsersSTH}->fetchrow_hashref('NAME_lc')) {
@@ -82,7 +70,7 @@ while (my $user =
 
 	my $url = "http://api.md5crack.com/crack/". 
 		$main::options{'apikey'} .'/'.
-		#This is the has for "pass"
+		#This is the hash for "pass"
 		#"1a1dc91c907325c69271ddf0c944bc72";
 		$user->{password_user};
 
