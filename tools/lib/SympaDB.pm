@@ -83,7 +83,7 @@ sub init {
     $self->{_dbh}->prepare ($self->{updateUserEmailInSubscriberTable});
 
    $self->{selectUsers} = 
-			'SELECT gecos_user,email_user FROM user_table';
+			'SELECT gecos_user,email_user,password_user FROM user_table';
    $self->{selectUsersSTH}= 
     $self->{_dbh}->prepare ($self->{selectUsers});
 
