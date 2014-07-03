@@ -17,6 +17,7 @@
 require 'dbi/dbrc'
 require 'minitest/spec'
 require 'minitest/autorun'
+require 'mini-smtp-server'
 require 'mechanize'
 
 describe "wwsympa" do
@@ -187,6 +188,29 @@ describe "wwsympa" do
 				
 			page.content.match(/Your list is created/).must_be_nil
 		end
+
+
+		# TODO: create a subsection here that stands up a smtp server as 
+		# a dependency: https://github.com/aarongough/mini-smtp-server/blob/master/test/unit/mini_smtp_server_test.rb
+
+		# Testing the email mechanisms:
+		# Anything recieved with $robot in the To: header should get piped to
+		# the sympa queue.  Everything else should get stored in a hash of arrays
+		# indexed by message-id (?)
+		# Can we make starting the smtp server a dependency (so that we do not
+		# run these tests if postfix or something else is already a dependency)
+
+		# To test DMARC all we have to do is subscribe users with known DMARC 
+		# entries like gmail.com, yahoo.com, and aol.com.  The DNS lookup will be
+		# done for thise servers and the DMARC munging should take place.
+
+		def send_mail(message = $example_mail, from_address = "smtp@test.com", to_address = "some1@test.com")
+      Net::SMTP.start('127.0.0.1', 2525) do |smtp|
+        smtp.send_message(message, from_address, to_address)
+        smtp.finish
+        sleep 0.01
+      end
+    end
 
 	end
 end
