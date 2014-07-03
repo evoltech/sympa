@@ -19,7 +19,7 @@ rss requests to active_lists and latest_lists crash wwsympa. disable for now (sh
 04_fix_search_list.patch
 ---------------------------
 patches do_search_list so that it calls get_lists_db directly with SQL conditions to limit the number of lists that get_lists has to loop through.
-TODO: need to file a bug for this.
+https://sourcesup.renater.fr/tracker/index.php?func=detail&aid=9341&group_id=23&atid=167
 
 05_disable_latest_and_active_lists.patch
 -----------------------------------------
