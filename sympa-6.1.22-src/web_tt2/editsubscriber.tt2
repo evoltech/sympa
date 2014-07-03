@@ -9,8 +9,6 @@
 <input type="hidden" name="email" value="[% current_subscriber.escaped_email %]" />
 <label for="new_email">[%|loc%]Email:[%END%]  </label>
   <input type="text" name="new_email" id="new_email" value="[% current_subscriber.escaped_email %]" size="25" /><br />
-<label for="gecos">[%|loc%]Name:[%END%]  </label>
-  <input type="text" name="gecos" id="gecos" value="[% current_subscriber.gecos %]" size="25" /><br />
 [% IF current_subscriber.custom_attribute %]
 [% SET subscriber = current_subscriber ;
 PROCESS edit_attributes.tt2 ;

@@ -28,14 +28,6 @@
   	    [%|loc%]Picture[%END%]
 	    </th>
   	[% END %]
-	[% IF sortby == 'name' %]
-	<th class="sortby">
-	  [%|loc%]Name[%END%]
-	[% ELSE %]
-	<th>
-          <a href="[% path_cgi %]/review/[% list %]/1/[% size %]/name">[%|loc%]Name[%END%]</a>
-	[% END %] 
-	</th>
         [% IF is_listmaster || is_owner || is_editor  %]
           <th>
 	  [%|loc%]Reception[%END%]
@@ -110,11 +102,6 @@
   	      </td>
   	    [% END %]
   	  [% END %]
-	  <td>
-             <span class="smaller">
-	        [% u.gecos %]&nbsp;
-	     </span>
-          </td>
 	  [% IF is_listmaster || is_owner || is_editor  %]
   	    <td>
   	      [%|optdesc('reception')%][% u.reception %][% END %]

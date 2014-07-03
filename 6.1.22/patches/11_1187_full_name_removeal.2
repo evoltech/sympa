@@ -1,0 +1,61 @@
+diff --git a/sympa-6.1.22-src/web_tt2/editsubscriber.tt2 b/sympa-6.1.22-src/web_tt2/editsubscriber.tt2
+index c8d40b6..7cb9040 100644
+--- a/sympa-6.1.22-src/web_tt2/editsubscriber.tt2
++++ b/sympa-6.1.22-src/web_tt2/editsubscriber.tt2
+@@ -9,8 +9,6 @@
+ <input type="hidden" name="email" value="[% current_subscriber.escaped_email %]" />
+ <label for="new_email">[%|loc%]Email:[%END%]  </label>
+   <input type="text" name="new_email" id="new_email" value="[% current_subscriber.escaped_email %]" size="25" /><br />
+-<label for="gecos">[%|loc%]Name:[%END%]  </label>
+-  <input type="text" name="gecos" id="gecos" value="[% current_subscriber.gecos %]" size="25" /><br />
+ [% IF current_subscriber.custom_attribute %]
+ [% SET subscriber = current_subscriber ;
+ PROCESS edit_attributes.tt2 ;
+diff --git a/sympa-6.1.22-src/web_tt2/subscriber_table.tt2 b/sympa-6.1.22-src/web_tt2/subscriber_table.tt2
+index 5f1a4b9..db685e5 100644
+--- a/sympa-6.1.22-src/web_tt2/subscriber_table.tt2
++++ b/sympa-6.1.22-src/web_tt2/subscriber_table.tt2
+@@ -28,14 +28,6 @@
+   	    [%|loc%]Picture[%END%]
+ 	    </th>
+   	[% END %]
+-	[% IF sortby == 'name' %]
+-	<th class="sortby">
+-	  [%|loc%]Name[%END%]
+-	[% ELSE %]
+-	<th>
+-          <a href="[% path_cgi %]/review/[% list %]/1/[% size %]/name">[%|loc%]Name[%END%]</a>
+-	[% END %] 
+-	</th>
+         [% IF is_listmaster || is_owner || is_editor  %]
+           <th>
+ 	  [%|loc%]Reception[%END%]
+@@ -110,11 +102,6 @@
+   	      </td>
+   	    [% END %]
+   	  [% END %]
+-	  <td>
+-             <span class="smaller">
+-	        [% u.gecos %]&nbsp;
+-	     </span>
+-          </td>
+ 	  [% IF is_listmaster || is_owner || is_editor  %]
+   	    <td>
+   	      [%|optdesc('reception')%][% u.reception %][% END %]
+diff --git a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+index 120bf9a..db67bd3 100644
+--- a/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
++++ b/sympa-6.1.22-src/wwsympa/wwsympa.fcgi.in
+@@ -4723,11 +4723,7 @@ sub do_pref {
+ 	 }
+      }
+ 
+-     if ($in{'gecos'}) {
+-	 $update->{'gecos'} = $in{'gecos'};
+-     }else{
+-	 $update->{'gecos'} = undef;
+-     }
++		 $update->{'gecos'} = undef;
+      $update->{'custom_attribute'} = $xml_custom_attribute if $xml_custom_attribute;
+ 
+      unless ( $list->update_user($email, $update) ) {

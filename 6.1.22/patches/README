@@ -41,3 +41,15 @@ Adds a feature to set hard limits on the size of lists that can send mail.  This
 09_1913_email_validation.patch
 ------------------------------
 Adds configureable email validations provided by Email::Valid.  See https://labs.riseup.net/code/issues/1913 for more info.
+
+10_3981_forbid_weak_passwords.patch
+-----------------------------------
+Adds configureable support for assuring the strength of users passwords.  See https://labs.riseup.net/code/issues/3981 for more info.
+
+11_1187_full_name_removeal
+--------------------------
+First part of removing Full Names from the sympa database.  This patch removes the possibilit for users to change their names on the preferences page.  See https://labs.riseup.net/code/issues/1187 for more info.
+
+11_1187_full_name_removeal.2
+----------------------------
+The second part of removing fulle names from the sympa database.  This patch removes the ability of list admins and owners from adding a name for the user from the 'Manage List Members' page.  See https://labs.riseup.net/code/issues/1187 for more info.

@@ -4723,11 +4723,7 @@ sub do_pref {
 	 }
      }
 
-     if ($in{'gecos'}) {
-	 $update->{'gecos'} = $in{'gecos'};
-     }else{
-	 $update->{'gecos'} = undef;
-     }
+		 $update->{'gecos'} = undef;
      $update->{'custom_attribute'} = $xml_custom_attribute if $xml_custom_attribute;
 
      unless ( $list->update_user($email, $update) ) {
