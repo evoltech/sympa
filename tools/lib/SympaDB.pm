@@ -44,6 +44,11 @@ sub init {
    $self->{selectRandomUserSTH}= 
     $self->{_dbh}->prepare ($self->{selectRandomUser});
 
+   $self->{selectSubscribers} = 
+     'SELECT * from subscriber_table';
+   $self->{selectSubscribersSTH}= 
+    $self->{_dbh}->prepare ($self->{selectSubscribers});
+
    $self->{selectMaxUserId} = 
      'SELECT max(id) as id from user_table';
    $self->{selectMaxUserIdSTH}= 
@@ -91,6 +96,11 @@ sub init {
 			'UPDATE user_table set gecos_user=NULL where email_user=?';
    $self->{clearUsersNameSTH}= 
     $self->{_dbh}->prepare ($self->{clearUsersName});
+
+   $self->{clearUserNameFromSubscribers} = 
+			'UPDATE subscriber_table set comment_subscriber=NULL where user_subscriber=?';
+   $self->{clearUserNameFromSubscribersSTH}= 
+    $self->{_dbh}->prepare ($self->{clearUserNameFromSubscribers});
 
 }
 
@@ -196,18 +206,35 @@ sub getUsers {
 	return $users;
 }
 
-sub clearUserName {
+sub clearUserNameFromUser {
   my ($self, $email) = @_;
+	my $return = 1;
 	
   eval {
 		$self->{clearUsersNameSTH}->execute($email)
   };
   if ($@) {
-     warn 'Could not clear name for user with email '. $email .": $!\n";
-     return -1;
+		$return = 0;
+    warn 'Could not clear name from user_table user with email '. $email .": $!\n";
   }
 
-	return 1;
+	return $return;
+}
+
+sub clearUserNameFromSubscriber {
+  my ($self, $email) = @_;
+	my $return = 1;
+	
+  eval {
+		$self->{clearUserNameFromSubscribersSTH}->execute($email)
+  };
+  if ($@) {
+		$return = 0;
+    warn 'Could not clear name from subscriber_table with email '. $email .": $!, $@\n";
+		$return = 0;
+  }
+
+	return $return;
 }
 
 1;
